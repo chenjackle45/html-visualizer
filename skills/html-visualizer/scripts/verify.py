@@ -192,6 +192,27 @@ def check_layout(path):
     return ("bad" if r.returncode == 1 else "ok"), lines
 
 
+def check_runtime(path):
+    """真的把頁面跑起來：抓載入時的 pageerror、按複製鈕看有沒有反應。回傳 (狀態, 輸出行)。
+
+    存在理由：node --check 只證明解析得過。2026-09-09 決策頁砍掉題目地圖那段 HTML，
+    腳本 qmap.remove() 對 null 炸掉，同區塊後面的複製鈕監聽器全沒掛上——
+    語法、版面、拍板機制全綠，使用者按複製鈕沒反應。只有實跑抓得到。
+    """
+    script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runtime-check.mjs")
+    if not shutil.which("node") or not os.path.exists(script):
+        return "skip", ["找不到 node 或 runtime-check.mjs"]
+    try:
+        r = subprocess.run(["node", script, os.path.abspath(path)],
+                           capture_output=True, text=True, timeout=120)
+    except subprocess.TimeoutExpired:
+        return "skip", ["執行逾時"]
+    if r.returncode == 2 or "NO_PLAYWRIGHT" in r.stderr:
+        return "skip", ["找不到 playwright／chromium"]
+    lines = [ln for ln in r.stdout.splitlines() if ln.strip()]
+    return ("bad" if r.returncode == 1 else "ok"), lines
+
+
 class DecisionSelectParser(HTMLParser):
     """依元素巢狀範圍找出使用下拉選單的拍板卡。"""
 
@@ -312,7 +333,19 @@ def main(path):
 
         missing = check_js_dom_refs(h)
         report(OK if not missing else WARN, "JS 參照的元素都存在",
-               "" if not missing else f"HTML 裡找不到 {missing[:4]}（動態產生的可忽略）")
+               "" if not missing else f"HTML 裡找不到 {missing[:4]}（動態產生的可忽略；下方執行期健檢會實跑確認）")
+
+        # 執行期健檢：靜態檢查永遠有下一種漏法，只有「載入→有沒有炸→按下去有沒有變」不會漏
+        if "--no-layout" not in sys.argv:
+            status, lines = check_runtime(path)
+            if status == "skip":
+                report(UNVERIFIED, "執行期健檢", "；".join(lines) + "——沒跑到不等於通過")
+            elif status == "bad":
+                report(BAD, "腳本執行期出錯或按鈕沒反應", "同一個 script 區塊裡炸掉之後的監聽器全沒掛上")
+                for ln in lines:
+                    print("     " + ln)
+            else:
+                report(OK, "執行期健檢", "載入無 pageerror；拍板按鈕按了有反應")
 
     # ── 樣式健檢 ─────────────────────────────────
     styles = inline_styles(h)

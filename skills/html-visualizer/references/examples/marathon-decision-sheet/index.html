@@ -3617,7 +3617,11 @@
       function renderQuestionMap() {
         const decisions = [...document.querySelectorAll("[data-decision]")];
         const qmap = document.getElementById("qmap");
-        if (decisions.length < QMAP_MIN) {
+        // 題目地圖那段 HTML 被砍掉時 qmap 是 null；這裡若直接 .remove() 會炸掉整個區塊、
+        // 後面的複製鈕監聽器全沒掛上（2026-09-09 實踩）
+        if (!qmap) {
+          /* 沒有題目地圖區塊，略過 */
+        } else if (decisions.length < QMAP_MIN) {
           qmap.remove();
         } else {
           qmap.classList.remove("hidden");
