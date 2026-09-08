@@ -1,0 +1,43 @@
+/* ============================================================
+   圖表系統 Design Token —— 統一視覺語言的單一來源。
+   所有圖表（柱/折線/甜甜圈/雙面板）共用這一組。
+   換主題只改這一段；不要在個別圖表硬寫顏色。
+
+   用法：
+   - 獨立 HTML：貼進 <style>，JS 端用 getComputedStyle 讀回顏色。
+   - 專案內 Vue / shadcn-vue：貼進全域 css（如 main.css），
+     @unovis 元件的軸/網格會自動吃 --vis-* 變數；類別色用 --c-* 自行帶入 color prop。
+   ============================================================ */
+:root {
+  /* 類別配色（靛藍主調 + 暖琥珀點綴，6 色循環；要換品牌色改這 6 個） */
+  --c-indigo: #2d4f8e;
+  --c-blue: #5b8dbe;
+  --c-sky: #93b8d8;
+  --c-amber: #c9740a;
+  --c-gold: #e0a858;
+  --c-slate: #8795a8;
+
+  /* 語意色 */
+  --ink: #1f2733; /* 主文字 */
+  --ink-soft: #5a6675; /* 次要文字 */
+  --ink-faint: #97a1ae; /* 軸刻度文字 */
+  --line-faint: #e7e2d9; /* 卡片邊 / 分隔 */
+  --grid: #ece8e0; /* 圖表水平網格 */
+  --page-bg: #f6f3ee; /* 暖米底（要冷色系改 #F4F5F7） */
+  --card-bg: #ffffff;
+
+  /* @unovis 軸樣式變數 —— 統一所有圖表的軸外觀（最關鍵的「一次設定、全圖一致」） */
+  --vis-font-family: "Noto Sans TC", system-ui, sans-serif;
+  --vis-axis-tick-label-color: var(--ink-faint);
+  --vis-axis-tick-label-font-size: 12px;
+  --vis-axis-grid-color: var(--grid);
+  --vis-axis-tick-color: transparent; /* 不畫刻度小短線 */
+  --vis-axis-domain-color: transparent; /* 不畫軸線本身 */
+  --vis-axis-label-color: var(--ink-soft);
+
+  /* @unovis tooltip */
+  --vis-tooltip-background-color: rgba(31, 39, 51, 0.94);
+  --vis-tooltip-border-color: transparent;
+  --vis-tooltip-text-color: #fff;
+  --vis-tooltip-padding: 8px 10px;
+}

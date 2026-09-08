@@ -1,0 +1,4360 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Brewly 客服對話自動歸檔 · 收尾追認</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        /* Anthropic palette */
+        --ivory: #faf9f5;
+        --paper: #ffffff;
+        --slate: #141413;
+        --clay: #d97757;
+        --clay-d: #b85c3e;
+        --clay-soft: #fbe9df;
+        --oat: #e3dacc;
+        --olive: #788c5d;
+        --olive-soft: #eff1e8;
+        --olive-border: #c8d2b8;
+        --g100: #f0eee6;
+        --g200: #e6e3da;
+        --g300: #d1cfc5;
+        --g500: #87867f;
+        --g700: #3d3d3a;
+        /* Warm semantic */
+        --green: #788c5d; /* = olive */
+        --green-soft: #eff1e8;
+        --green-border: #c8d2b8;
+        --red: #b85c3e; /* = clay-d */
+        --red-soft: #faebe3;
+        --red-border: #e8c4af;
+        --yellow: #c49845;
+        --yellow-soft: #f8efd9;
+        --yellow-border: #e8d4a0;
+        /* Compat aliases */
+        --bg: var(--ivory);
+        --bg-card: var(--paper);
+        --bg-soft: var(--g100);
+        --bg-soft-2: var(--g200);
+        --border: var(--g300);
+        --border-strong: var(--g500);
+        --text: var(--slate);
+        --text-muted: var(--g700);
+        --text-soft: var(--g500);
+        --accent: var(--clay);
+        --accent-soft: var(--clay-soft);
+        --accent-strong: var(--clay-d);
+        /* Type stacks */
+        --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+        --sans:
+          system-ui, -apple-system, "Segoe UI", "PingFang TC", "Noto Sans TC",
+          Roboto, Helvetica, Arial, sans-serif;
+        --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--serif);
+        font-weight: 500;
+        color: var(--slate);
+        letter-spacing: -0.012em;
+        margin: 0;
+      }
+      h1 em,
+      h2 em {
+        font-style: italic;
+        color: var(--clay);
+      }
+
+      /* eyebrow */
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 11.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--g500);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 24px;
+        height: 1.5px;
+        background: var(--clay);
+        flex-shrink: 0;
+      }
+
+      /* card primitives */
+      .card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+      }
+      .card-soft {
+        background: var(--bg-soft);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+      }
+
+      /* badges */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 999px;
+        letter-spacing: 0.04em;
+        border: 1px solid;
+        white-space: nowrap;
+      }
+      .badge-green {
+        background: var(--green-soft);
+        color: var(--green);
+        border-color: var(--green-border);
+      }
+      .badge-red {
+        background: var(--red-soft);
+        color: var(--red);
+        border-color: var(--red-border);
+      }
+      .badge-yellow {
+        background: var(--yellow-soft);
+        color: var(--yellow);
+        border-color: var(--yellow-border);
+      }
+      .badge-clay {
+        background: var(--clay-soft);
+        color: var(--clay-d);
+        border-color: #e8c4af;
+      }
+      .badge-neutral {
+        background: var(--bg-soft);
+        color: var(--g700);
+        border-color: var(--border);
+      }
+
+      /* radio pill */
+      .choice-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      @media (min-width: 768px) {
+        .choice-row.cols-2 {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (min-width: 768px) {
+        .choice-row.cols-3 {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+
+      .choice {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.18s;
+        background: var(--bg-card);
+        font-size: 14px;
+      }
+      .choice:hover {
+        border-color: var(--slate);
+        transform: translateY(-1px);
+      }
+      .choice input[type="radio"] {
+        display: none;
+      }
+      .choice .choice-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border-strong);
+        background: var(--bg-card);
+        flex-shrink: 0;
+        transition: all 0.18s;
+      }
+      .choice input:checked ~ .choice-dot {
+        border-color: var(--clay);
+        background: var(--clay);
+        box-shadow: inset 0 0 0 3px var(--bg-card);
+      }
+      .choice:has(input:checked) {
+        border-color: var(--clay);
+        background: var(--clay-soft);
+      }
+      .choice.choice-warning:has(input:checked) {
+        border-color: var(--red);
+        background: var(--red-soft);
+      }
+      .choice.choice-warning input:checked ~ .choice-dot {
+        border-color: var(--red);
+        background: var(--red);
+      }
+
+      /* select */
+      select.pick {
+        width: 100%;
+        padding: 10px 12px;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-family: var(--sans);
+        font-size: 14px;
+        color: var(--slate);
+        cursor: pointer;
+      }
+      select.pick:hover {
+        border-color: var(--slate);
+      }
+
+      /* textarea */
+      textarea.note {
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-family: var(--sans);
+        font-size: 14px;
+        color: var(--slate);
+        resize: vertical;
+      }
+      textarea.note:focus {
+        outline: 2px solid var(--clay-soft);
+        border-color: var(--clay);
+      }
+
+      /* flow stage */
+      .flow-stage {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 12px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+      .flow-stage.highlight {
+        border-color: var(--clay);
+        background: var(--clay-soft);
+      }
+      .flow-stage.problem {
+        border-color: var(--red);
+        background: var(--red-soft);
+      }
+      .flow-stage.improved {
+        border-color: var(--green);
+        background: var(--green-soft);
+      }
+      .flow-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: var(--text-soft);
+      }
+      .flow-arrow-down {
+        width: 8px;
+        height: 28px;
+        background: linear-gradient(var(--border-strong), var(--border-strong)) center / 1px 100% no-repeat;
+        margin: 0 auto;
+        position: relative;
+      }
+      .flow-arrow-down::after {
+        content: "";
+        border: 4px solid transparent;
+        border-top-color: var(--border-strong);
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--border-strong);
+        font-size: 10px;
+      }
+
+      /* before / after */
+      .ba-row {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 0;
+        align-items: stretch;
+      }
+      .ba-col {
+        padding: 22px;
+        border-radius: 14px;
+      }
+      .ba-col-before {
+        background: linear-gradient(
+          180deg,
+          var(--red-soft) 0%,
+          var(--paper) 100%
+        );
+        border: 1.5px solid var(--red-border);
+      }
+      .ba-col-after {
+        background: linear-gradient(
+          180deg,
+          var(--green-soft) 0%,
+          var(--paper) 100%
+        );
+        border: 1.5px solid var(--green-border);
+      }
+      .ba-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        font-size: 22px;
+        color: var(--text-soft);
+      }
+      @media (max-width: 900px) {
+        .ba-row {
+          grid-template-columns: 1fr;
+        }
+        .ba-arrow {
+          transform: rotate(90deg);
+          padding: 12px 0;
+          width: 100%;
+        }
+      }
+
+      /* ADR table */
+      .adr-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13.5px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1.5px solid var(--border);
+      }
+      .adr-table th,
+      .adr-table td {
+        padding: 11px 14px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      .adr-table thead {
+        background: var(--bg-soft);
+      }
+      .adr-table th {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+      .adr-table tr:last-child td {
+        border-bottom: none;
+      }
+      .adr-table tr.chosen {
+        background: var(--green-soft);
+      }
+      .adr-table tr.chosen td:first-child {
+        font-weight: 700;
+        color: var(--green);
+      }
+      .adr-table tr.chosen td:first-child::before {
+        content: "✓ ";
+        font-weight: 900;
+      }
+
+      /* failure tree */
+      .tree {
+        font-size: 13.5px;
+        line-height: 1.5;
+      }
+      .tree-node {
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+      }
+      .tree-node.start {
+        border-color: var(--clay);
+        background: var(--clay-soft);
+        color: var(--clay-d);
+      }
+      .tree-node.success {
+        border-color: var(--green);
+        background: var(--green-soft);
+        color: #2d4a1c;
+      }
+      .tree-node.degraded {
+        border-color: var(--yellow);
+        background: var(--yellow-soft);
+        color: #6b4d10;
+      }
+      .tree-node.hard-fail {
+        border-color: var(--red);
+        background: var(--red-soft);
+        color: var(--red);
+      }
+      .tree-branch {
+        margin-left: 18px;
+        padding-left: 24px;
+        border-left: 1.5px solid var(--border-strong);
+        padding-top: 14px;
+        padding-bottom: 4px;
+        position: relative;
+      }
+      .tree-branch::before {
+        content: "";
+        position: absolute;
+        left: -1.5px;
+        top: 0;
+        width: 14px;
+        height: 1.5px;
+        background: var(--border-strong);
+      }
+      .tree-leaf {
+        margin-top: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: var(--bg-soft);
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.55;
+      }
+      .tree-leaf strong {
+        color: var(--text);
+        display: block;
+        margin-bottom: 2px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      /* metric cards */
+      .metric-card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 18px;
+      }
+      .metric-row {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .metric-side {
+        text-align: center;
+        padding: 12px;
+        border-radius: 8px;
+      }
+      .metric-side.before {
+        background: var(--red-soft);
+        color: var(--red);
+      }
+      .metric-side.after {
+        background: var(--green-soft);
+        color: var(--green);
+      }
+      .metric-side .num {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 28px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+      .metric-side .label {
+        font-family: var(--mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        margin-top: 4px;
+      }
+      .metric-arrow {
+        color: var(--text-soft);
+        font-size: 16px;
+      }
+      .metric-delta {
+        margin-top: 10px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--green);
+      }
+
+      /* timeline (review history) */
+      .phase-timeline {
+        position: relative;
+        padding-left: 30px;
+      }
+      .phase-timeline::before {
+        content: "";
+        position: absolute;
+        left: 9px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--border);
+      }
+      .phase-item {
+        position: relative;
+        margin-bottom: 14px;
+      }
+      .phase-item::before {
+        content: "";
+        position: absolute;
+        left: -25px;
+        top: 8px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--clay);
+        border: 2.5px solid var(--bg);
+        box-shadow: 0 0 0 1.5px var(--clay);
+      }
+      .phase-item-title {
+        font-family: var(--serif);
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .phase-item-detail {
+        font-size: 12.5px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      /* timeline bars (B-1) */
+      .timeline-row {
+        display: grid;
+        grid-template-columns: 90px 1fr 60px;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+      main { min-width: 0; }
+      .timeline-bar {
+        height: 22px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        color: white;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .timeline-bar-1 {
+        background: var(--clay);
+      }
+      .timeline-bar-2 {
+        background: var(--olive);
+      }
+
+      /* token bars (B-2) */
+      .token-bar-row {
+        display: grid;
+        grid-template-columns: 110px 1fr 90px;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 10px;
+        font-size: 13px;
+      }
+      .token-bar {
+        height: 28px;
+        background: linear-gradient(90deg, #e8b788 0%, var(--clay) 100%);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        color: #4a2310;
+        font-weight: 600;
+        font-size: 12.5px;
+      }
+      @media (max-width: 600px) {
+        body > div > .grid { column-gap: 0; }
+        .timeline-row, .token-bar-row { grid-template-columns: 1fr; }
+        /* 七格流程鏈在手機寬度每欄只剩約 45px，字塞不下。改成橫向捲動、每格給足最小寬 */
+        .grid.grid-cols-7 {
+          display: flex;
+          overflow-x: auto;
+          gap: 8px;
+          -webkit-overflow-scrolling: touch;
+        }
+        .grid.grid-cols-7 > .flow-stage { flex: 0 0 96px; }
+        .grid.grid-cols-7 > .flow-arrow { flex: 0 0 auto; }
+        /* 中文夾半形內容時尾端可能差一兩個 px 斷不掉；手機收窄內距換行長 */
+        ul.text-xs li { overflow-wrap: anywhere; }
+        ul.text-xs, ul.text-xs li { font-size: 11px; }
+      }
+      .token-bar.cool {
+        background: linear-gradient(90deg, #b8c99b 0%, var(--olive) 100%);
+        color: #2d3d1c;
+      }
+
+      /* QA step */
+      .qa-step {
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 14px;
+        padding: 14px;
+        border-radius: 10px;
+        background: var(--bg-soft);
+      }
+      .qa-step-num {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--clay);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--mono);
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      /* commit boxes */
+      .commit-box {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        position: relative;
+      }
+      .commit-box::before {
+        content: "";
+        position: absolute;
+        left: -10px;
+        top: 22px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--clay);
+      }
+      .commit-box::after {
+        content: "";
+        position: absolute;
+        left: -7px;
+        top: 30px;
+        width: 1.5px;
+        height: calc(100% - 14px);
+        background: var(--border);
+      }
+      .commit-box:last-child::after {
+        display: none;
+      }
+
+      /* highlight box */
+      .highlight-box {
+        background: var(--clay-soft);
+        border-left: 3px solid var(--clay);
+        padding: 12px 16px;
+        border-radius: 6px;
+        font-size: 13.5px;
+        color: var(--text);
+      }
+      .highlight-box.green {
+        background: var(--green-soft);
+        border-left-color: var(--green);
+      }
+
+      /* pain card */
+      .pain-card {
+        background: linear-gradient(
+          135deg,
+          var(--red-soft) 0%,
+          var(--clay-soft) 100%
+        );
+        border: 1.5px solid var(--red-border);
+        border-radius: 14px;
+        padding: 26px 30px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 26px;
+        align-items: center;
+      }
+      .pain-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 4px 14px rgba(184, 92, 62, 0.18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+      }
+      .pain-stat {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 44px;
+        font-weight: 500;
+        color: var(--red);
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+
+      /* stat cards (hero) */
+      .stat-card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+      }
+      .stat-label {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+      }
+      .stat-value {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 32px;
+        font-weight: 500;
+        margin-top: 4px;
+        letter-spacing: -0.02em;
+        color: var(--clay);
+        line-height: 1.1;
+      }
+      .stat-sub {
+        font-size: 12.5px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+
+      /* section index */
+      .section-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--mono);
+        width: 36px;
+        height: 36px;
+        border: 1.5px solid var(--clay);
+        background: var(--clay-soft);
+        color: var(--clay-d);
+        font-weight: 600;
+        font-size: 13px;
+        border-radius: 8px;
+        margin-right: 14px;
+        flex-shrink: 0;
+      }
+      .section-num.idx-letter {
+        border-color: var(--g300);
+        background: var(--bg-card);
+        color: var(--slate);
+      }
+
+      /* sidebar nav */
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 13.5px;
+        transition: all 0.15s;
+      }
+      .nav-link:hover {
+        background: var(--bg-soft);
+        color: var(--text);
+      }
+      .nav-link.active {
+        background: var(--clay-soft);
+        color: var(--clay-d);
+        font-weight: 500;
+      }
+      .nav-link-num {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        background: var(--bg-soft-2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--mono);
+        font-size: 10.5px;
+        font-weight: 600;
+        color: var(--g700);
+      }
+      .nav-link.active .nav-link-num {
+        background: var(--clay);
+        color: white;
+      }
+
+      /* sticky bottom bar */
+      .sticky-bar {
+        position: sticky;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(12px);
+        border-top: 1.5px solid var(--clay);
+        box-shadow: 0 -8px 24px -10px rgba(20, 20, 19, 0.1);
+        z-index: 30;
+      }
+
+      pre.preview {
+        font-family: var(--mono);
+        font-size: 12px;
+        background: var(--bg-soft);
+        padding: 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        white-space: pre-wrap;
+        max-height: 380px;
+        overflow-y: auto;
+        line-height: 1.55;
+      }
+
+      /* btn */
+      .btn-primary {
+        background: var(--clay);
+        color: white;
+        border: 1.5px solid var(--clay);
+        padding: 10px 22px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+      .btn-primary:hover {
+        background: var(--clay-d);
+        border-color: var(--clay-d);
+      }
+      .btn-secondary {
+        background: var(--bg-card);
+        color: var(--slate);
+        border: 1.5px solid var(--border);
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+      .btn-secondary:hover {
+        border-color: var(--slate);
+        background: var(--oat);
+      }
+
+      /* footer K-mark */
+      footer.k-mark {
+        margin-top: 32px;
+        padding: 36px 0;
+        text-align: center;
+        border-top: 1.5px solid var(--border);
+      }
+      footer.k-mark .glyph {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 28px;
+        color: var(--clay);
+      }
+      footer.k-mark .meta {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--g500);
+        margin-top: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      /* 就地拍板 — 決策與它的說明同一張卡 */
+      .inline-decide {
+        margin-top: 22px;
+        padding-top: 20px;
+        border-top: 1.5px dashed var(--border);
+      }
+      .inline-decide-head {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--clay-d);
+        background: var(--clay-soft);
+        border: 1px solid #e8c4af;
+        border-radius: 4px;
+        padding: 3px 9px;
+        display: inline-block;
+        margin-bottom: 14px;
+      }
+
+      /* 程序快答分隔 */
+      .quick-divider {
+        border-top: 1.5px solid var(--border);
+        padding-top: 26px;
+      }
+
+      /* 題目地圖 */
+      .qmap-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1.5px solid var(--border);
+        border-radius: 9px;
+        margin-bottom: 7px;
+        background: var(--bg-card);
+        text-decoration: none;
+        color: var(--text);
+        font-size: 13.5px;
+        transition: all 0.15s;
+      }
+      .qmap-row:hover {
+        border-color: var(--slate);
+        transform: translateY(-1px);
+      }
+      .qmap-row .q-idx {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--text-soft);
+        width: 20px;
+        flex-shrink: 0;
+      }
+      .qmap-row .q-title {
+        flex: 1;
+      }
+      .qmap-row .q-sec {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text-soft);
+      }
+      .qmap-state {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 3px;
+        white-space: nowrap;
+      }
+      .qmap-state.done {
+        background: var(--green-soft);
+        color: var(--green);
+      }
+      .qmap-state.todo {
+        background: var(--yellow-soft);
+        color: var(--yellow);
+      }
+
+      /* 側欄議題題數 */
+      .nav-count {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 600;
+        padding: 1px 6px;
+        border-radius: 3px;
+        background: var(--bg-soft-2);
+        color: var(--text-muted);
+      }
+      .nav-count.done {
+        background: var(--green-soft);
+        color: var(--green);
+      }
+      .nav-count:empty {
+        display: none;
+      }
+    
+      /* ── 手機修正（放在最後，避免被同權重的基準規則蓋掉）── */
+      @media (max-width: 600px) {
+        .qmap-row { flex-wrap: wrap; }
+        .qmap-row .q-title { flex: 1 1 calc(100% - 34px); }
+      }
+
+      /* 多欄表在手機每欄只剩幾十 px，中文會被壓成直排：整表放進橫向捲動容器 */
+      .tbl-scroll { overflow-x: auto; }
+      @media (max-width: 600px) {
+        .tbl-scroll > table { min-width: 520px; }
+        .items-baseline { flex-wrap: wrap; }
+        strong { overflow-wrap: anywhere; }
+      }
+</style>
+  </head>
+  <body>
+    <!-- ════════ Top Header ════════ -->
+    <header
+      class="sticky top-0 z-20"
+      style="
+        background: rgba(250, 249, 245, 0.94);
+        backdrop-filter: blur(10px);
+        border-bottom: 1.5px solid var(--border);
+      "
+    >
+      <div
+        class="max-w-[1760px] w-[94vw] mx-auto px-8 py-4 flex items-center justify-between gap-6"
+      >
+        <div>
+          <div class="eyebrow">2026-09-08 · MARATHON 收尾追認</div>
+          <h1 style="font-size: 19px; margin-top: 4px">Brewly 客服對話自動歸檔</h1>
+        </div>
+        <div
+          class="text-sm flex items-center gap-2"
+          style="color: var(--text-muted)"
+        >
+          <span
+            id="progress-summary"
+            style="
+              font-family: var(--mono);
+              font-weight: 600;
+              color: var(--clay);
+            "
+            >0 / 0</span
+          >
+          <span>已選</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-[1760px] w-[94vw] mx-auto px-8 py-10">
+      <div class="grid grid-cols-12 gap-8">
+        <!-- ════════ Sidebar Nav ════════ -->
+        <aside class="col-span-2 hidden lg:block">
+          <div class="sticky top-24 space-y-1">
+            <div
+              class="text-[10px] uppercase tracking-widest font-semibold mb-3 px-3"
+              style="color: var(--g500); font-family: var(--mono)"
+            >
+              議題
+            </div>
+            <a href="#hero" class="nav-link"
+              ><span class="nav-link-num">01</span>概況<span
+                class="nav-count"
+                data-count-for="hero"
+              ></span
+            ></a>
+            <a href="#qmap" class="nav-link"
+              ><span class="nav-link-num">◎</span>題目地圖</a
+            >
+            <a href="#background" class="nav-link"
+              ><span class="nav-link-num">02</span>前情提要<span
+                class="nav-count"
+                data-count-for="background"
+              ></span
+            ></a>
+            <a href="#architecture" class="nav-link"
+              ><span class="nav-link-num">03</span>架構變化<span
+                class="nav-count"
+                data-count-for="architecture"
+              ></span
+            ></a>
+            <a href="#design" class="nav-link"
+              ><span class="nav-link-num">04</span>設計決策<span
+                class="nav-count"
+                data-count-for="design"
+              ></span
+            ></a>
+            <a href="#failure" class="nav-link"
+              ><span class="nav-link-num">05</span>失敗處理<span
+                class="nav-count"
+                data-count-for="failure"
+              ></span
+            ></a>
+            <a href="#evidence" class="nav-link"
+              ><span class="nav-link-num">06</span>數據佐證<span
+                class="nav-count"
+                data-count-for="evidence"
+              ></span
+            ></a>
+            <div
+              class="text-[10px] uppercase tracking-widest font-semibold mb-3 mt-6 px-3"
+              style="color: var(--g500); font-family: var(--mono)"
+            >
+              程序快答
+            </div>
+            <a href="#section-a" class="nav-link"
+              ><span class="nav-link-num">A</span>其他追認<span
+                class="nav-count"
+                data-count-for="section-a"
+              ></span
+            ></a>
+            <a href="#section-b" class="nav-link"
+              ><span class="nav-link-num">B</span>流程微調<span
+                class="nav-count"
+                data-count-for="section-b"
+              ></span
+            ></a>
+            <a href="#section-c" class="nav-link"
+              ><span class="nav-link-num">C</span>延後項目<span
+                class="nav-count"
+                data-count-for="section-c"
+              ></span
+            ></a>
+            <a href="#section-d" class="nav-link"
+              ><span class="nav-link-num">D</span>經驗寫入<span
+                class="nav-count"
+                data-count-for="section-d"
+              ></span
+            ></a>
+            <a href="#section-e" class="nav-link"
+              ><span class="nav-link-num">E</span>實機驗證<span
+                class="nav-count"
+                data-count-for="section-e"
+              ></span
+            ></a>
+            <a href="#section-f" class="nav-link"
+              ><span class="nav-link-num">F</span>Commit<span
+                class="nav-count"
+                data-count-for="section-f"
+              ></span
+            ></a>
+            <a href="#section-g" class="nav-link"
+              ><span class="nav-link-num">G</span>補充</a
+            >
+          </div>
+        </aside>
+
+        <!-- ════════ Main Content ════════ -->
+        <main class="col-span-12 lg:col-span-10 space-y-12">
+          <!-- ════════ HERO ════════ -->
+          <section id="hero">
+            <div class="card p-8">
+              <div class="eyebrow mb-4">Marathon 收尾簡報</div>
+              <h1
+                style="font-size: 42px; line-height: 1.1; margin-bottom: 14px"
+              >
+                Brewly 客服知識整理，從 <em>常常空白</em> 改為可追蹤的歸檔
+              </h1>
+              <p
+                style="
+                  font-size: 17px;
+                  color: var(--text-muted);
+                  max-width: 760px;
+                  margin-bottom: 22px;
+                "
+              >
+                這是 Brewly 內部 AI 助理的虛構收尾示例：客服對話結束後，自動整理摘要、主題與解答草稿，交由客服主管確認後收入知識庫。所有進度、數據與審查紀錄均為示範。
+              </p>
+
+              <div class="flex items-center gap-2 flex-wrap mb-6">
+                <span class="badge badge-green">✓ Marathon 完成</span>
+                <span class="badge badge-clay">5 / 5 階段</span>
+                <span class="badge badge-neutral">~8 SP 示範工時</span>
+                <span class="badge badge-neutral">12 檔變更 · 0 commit</span>
+              </div>
+
+              <!-- Pain card -->
+              <div class="pain-card">
+                <div class="pain-icon">⚠️</div>
+                <div>
+                  <div class="eyebrow" style="color: var(--red); opacity: 0.85">
+                    為什麼做這個
+                  </div>
+                  <div class="flex items-baseline gap-3 mt-2">
+                    <span class="pain-stat">20%</span>
+                    <span style="font-size: 15px; color: #6e2e18"
+                      >的示範對話，沒有產出可用的主題與解答草稿</span
+                    >
+                  </div>
+                  <p
+                    style="
+                      font-size: 14px;
+                      margin-top: 10px;
+                      color: #6e2e18;
+                      line-height: 1.55;
+                    "
+                  >
+                    示例中的問題來自輸出格式不一致：
+                    <strong>AI 沒有依約定欄位回覆</strong
+                    >，整份整理結果無法歸檔。<br />
+                    結果：客服主管仍得回頭重讀對話，知識庫更新跟不上每月配送的常見提問。
+                  </p>
+                </div>
+              </div>
+
+              <!-- 4 stat cards -->
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-7">
+                <div class="stat-card">
+                  <div class="stat-label">改動範圍</div>
+                  <div class="stat-value">12</div>
+                  <div class="stat-sub">檔（後端 / 文件 / 測試）</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">測試覆蓋</div>
+                  <div class="stat-value">8</div>
+                  <div class="stat-sub">項示範案例、待實機驗證</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">對抗審查</div>
+                  <div class="stat-value">2</div>
+                  <div class="stat-sub">輪示範審查、4 項問題已修</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">型別檢查</div>
+                  <div class="stat-value" style="color: var(--green)">✓</div>
+                  <div class="stat-sub">示範檢查無新增錯誤</div>
+                </div>
+              </div>
+
+              <div class="highlight-box mt-7">
+                <strong>怎麼用這份簡報：</strong
+                >設計題就放在背景旁，程序題集中在後段。可從題目地圖跳轉，完成 19 題後用底部「複製決策摘要」交回工程師。
+              </div>
+            </div>
+          </section>
+          <!-- ════════ 題目地圖（題數 ≥ 5 自動顯示）════════ -->
+          <section id="qmap" class="hidden">
+            <div class="card p-7">
+              <div class="flex items-baseline justify-between gap-4 flex-wrap">
+                <div>
+                  <div class="eyebrow">本次要你拍板</div>
+                  <h2 style="font-size: 22px; margin-top: 10px">
+                    共 <em id="qmap-count">0</em> 題 · 想快就在這裡拍完
+                  </h2>
+                </div>
+                <div style="font-size: 12.5px; color: var(--text-soft)">
+                  點題目跳到它的說明段落
+                </div>
+              </div>
+              <div id="qmap-list" class="mt-5"></div>
+            </div>
+          </section>
+          <!-- ════════ 02 · 前情提要 ════════ -->
+          <section id="background">
+            <div class="mb-5 flex items-center">
+              <span class="section-num">02</span>
+              <div>
+                <h2 style="font-size: 26px">前情提要 — 這個系統原本怎麼運作</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  不熟前後脈絡的話、先看這段
+                </p>
+              </div>
+            </div>
+
+            <div class="card p-7 space-y-5">
+              <div>
+                <h3 style="font-size: 18px; margin-bottom: 8px">
+                  客服對話自動歸檔的整體流程
+                </h3>
+                <p
+                  style="
+                    font-size: 14.5px;
+                    color: var(--text-muted);
+                    line-height: 1.65;
+                  "
+                >
+                  Brewly 官網的客服對話結束後，系統先整理對話文字，再由 AI 產出摘要、問題主題與解答草稿。客服主管確認內容，才把可重用的回答收入知識庫。
+                </p>
+              </div>
+
+              <div class="grid grid-cols-7 gap-2 items-center">
+                <div class="flow-stage">💬<br />客服對話結束</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-stage">📝<br />對話文字</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-stage highlight">
+                  🤖<br />AI 分析<br /><span
+                    style="
+                      font-size: 10px;
+                      color: var(--clay-d);
+                      margin-top: 4px;
+                      display: block;
+                    "
+                    >↑ 本次改動</span
+                  >
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-stage">✏️<br />客服主管確認</div>
+              </div>
+
+              <div class="card-soft p-5 mt-2">
+                <div class="eyebrow mb-3" style="color: var(--g700)">
+                  本次只動「AI 分析」這格
+                </div>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    line-height: 1.65;
+                  "
+                >
+                  官網對話接收與客服主管確認流程維持原樣。本輪聚焦中間的自動整理：讓摘要可獨立保存，主題與解答草稿能清楚標示成功或待補。
+                </p>
+              </div>
+
+              <div>
+                <h3
+                  style="font-size: 18px; margin-top: 8px; margin-bottom: 8px"
+                >
+                  「AI 分析」原本怎麼跑
+                </h3>
+                <p
+                  style="
+                    font-size: 14.5px;
+                    color: var(--text-muted);
+                    line-height: 1.65;
+                  "
+                >
+                  示例原先分兩項工作、依序完成：<br />
+                  <strong style="color: var(--slate)">階段一</strong
+                  >：寫對話標題與摘要（供客服主管快速閱讀）<br />
+                  <strong style="color: var(--slate)">階段二</strong
+                  >：整理問題主題與解答草稿（供知識庫歸檔）
+                </p>
+                <p
+                  style="
+                    font-size: 14.5px;
+                    color: var(--text-muted);
+                    line-height: 1.65;
+                    margin-top: 12px;
+                  "
+                >
+                  示例原先把回答拆在
+                  <code
+                    style="
+                      font-family: var(--mono);
+                      background: var(--bg-soft);
+                      padding: 1px 6px;
+                      border-radius: 4px;
+                      color: var(--clay-d);
+                      font-size: 0.88em;
+                    "
+                    >「問題主題」</code
+                  >
+                  跟
+                  <code
+                    style="
+                      font-family: var(--mono);
+                      background: var(--bg-soft);
+                      padding: 1px 6px;
+                      border-radius: 4px;
+                      color: var(--clay-d);
+                      font-size: 0.88em;
+                    "
+                    >「解答草稿」</code
+                  >
+                  兩個文字標題下。若漏了其中一段，就無法辨認該保存哪些內容，客服主管只能重新整理。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ════════ 03 · 架構變化 ════════ -->
+          <section id="architecture">
+            <div class="mb-5 flex items-center">
+              <span class="section-num">03</span>
+              <div>
+                <h2 style="font-size: 26px">架構變化 — 改了什麼</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  看圖就懂、不用看程式碼
+                </p>
+              </div>
+            </div>
+
+            <div class="card p-7">
+              <div class="eyebrow mb-5" style="color: var(--g700)">
+                「AI 分析」內部 — 改動細節
+              </div>
+
+              <div class="ba-row">
+                <!-- BEFORE -->
+                <div class="ba-col ba-col-before">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="badge badge-red">改動前</span>
+                  </div>
+                  <h3 style="font-size: 17px; margin-bottom: 12px">
+                    依序整理 + 自由格式
+                  </h3>
+
+                  <div class="space-y-2">
+                    <div class="flow-stage problem">
+                      <div
+                        style="
+                          font-family: var(--mono);
+                          font-size: 11px;
+                          font-weight: 600;
+                          margin-bottom: 4px;
+                          opacity: 0.7;
+                        "
+                      >
+                        階段一
+                      </div>
+                      <div>標題 / 摘要</div>
+                      <div
+                        style="font-size: 11px; margin-top: 4px; opacity: 0.75"
+                      >
+                        串流文字輸出
+                      </div>
+                    </div>
+                    <div class="flow-arrow-down"></div>
+                    <div class="flow-stage problem">
+                      <div
+                        style="
+                          font-family: var(--mono);
+                          font-size: 11px;
+                          font-weight: 600;
+                          margin-bottom: 4px;
+                          opacity: 0.7;
+                        "
+                      >
+                        階段二
+                      </div>
+                      <div>主題 + 解答草稿</div>
+                      <div
+                        style="font-size: 11px; margin-top: 4px; opacity: 0.75"
+                      >
+                        依文字標題辨認內容
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    class="mt-4 p-3.5 rounded-lg bg-white"
+                    style="border: 1.5px solid var(--red-border)"
+                  >
+                    <div
+                      style="
+                        font-family: var(--mono);
+                        font-size: 11px;
+                        font-weight: 600;
+                        color: var(--red);
+                        margin-bottom: 6px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.06em;
+                      "
+                    >
+                      脆弱點
+                    </div>
+                    <ul
+                      class="text-xs space-y-1.5"
+                      style="color: #6e2e18; line-height: 1.55"
+                    >
+                      <li>• 漏了必要段落 → 無法歸檔</li>
+                      <li>• 格式不完整 → 需人工重整</li>
+                      <li>• 階段二必須等階段一完成</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="ba-arrow">→</div>
+
+                <!-- AFTER -->
+                <div class="ba-col ba-col-after">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="badge badge-green">改動後</span>
+                  </div>
+                  <h3 style="font-size: 17px; margin-bottom: 12px">
+                    同時整理 + 固定欄位
+                  </h3>
+
+                  <div class="grid grid-cols-2 gap-2">
+                    <div class="flow-stage improved">
+                      <div
+                        style="
+                          font-family: var(--mono);
+                          font-size: 11px;
+                          font-weight: 600;
+                          margin-bottom: 4px;
+                          opacity: 0.7;
+                        "
+                      >
+                        階段一
+                      </div>
+                      <div>標題 / 摘要</div>
+                      <div
+                        style="font-size: 11px; margin-top: 4px; opacity: 0.75"
+                      >
+                        串流文字（同舊）
+                      </div>
+                    </div>
+                    <div class="flow-stage improved">
+                      <div
+                        style="
+                          font-family: var(--mono);
+                          font-size: 11px;
+                          font-weight: 600;
+                          margin-bottom: 4px;
+                          opacity: 0.7;
+                        "
+                      >
+                        階段二
+                      </div>
+                      <div>主題 + 解答草稿</div>
+                      <div
+                        style="font-size: 11px; margin-top: 4px; opacity: 0.75"
+                      >
+                        固定欄位回傳 + 完整性檢查
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    class="text-center my-2"
+                    style="
+                      font-size: 12px;
+                      color: var(--green);
+                      font-weight: 600;
+                    "
+                  >
+                    ↕ 並行（同時送出）
+                  </div>
+
+                  <div
+                    class="mt-3 p-3.5 rounded-lg bg-white"
+                    style="border: 1.5px solid var(--green-border)"
+                  >
+                    <div
+                      style="
+                        font-family: var(--mono);
+                        font-size: 11px;
+                        font-weight: 600;
+                        color: var(--green);
+                        margin-bottom: 6px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.06em;
+                      "
+                    >
+                      改進點
+                    </div>
+                    <ul
+                      class="text-xs space-y-1.5"
+                      style="color: #2d4a1c; line-height: 1.55"
+                    >
+                      <li>• 主題與解答分欄回傳，缺項可辨認</li>
+                      <li>• 示例耗時由 50 秒縮到 30 秒</li>
+                      <li>• 失敗類型可分類處理（見 05）</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 介面契約 -->
+              <div class="grid md:grid-cols-2 gap-4 mt-6">
+                <div class="card-soft p-5">
+                  <div class="eyebrow mb-3" style="color: var(--g700)">
+                    階段二吃什麼進去
+                  </div>
+                  <ul style="font-size: 14px; line-height: 1.7">
+                    <li>
+                      📃 <strong>對話文字</strong>（上限 12K 字，超出部分待人工補讀）
+                    </li>
+                    <li>📚 <strong>豆款用語表</strong>（已確認的豆款名稱）</li>
+                    <li>👥 <strong>訂閱方案說明</strong></li>
+                    <li>📇 <strong>配送常見問答</strong></li>
+                  </ul>
+                </div>
+                <div class="card-soft p-5">
+                  <div class="eyebrow mb-3" style="color: var(--g700)">
+                    階段二回什麼出來
+                  </div>
+                  <ul style="font-size: 14px; line-height: 1.7">
+                    <li>
+                      🔤 <strong>問題主題清單</strong>（問題 / 分類 / 對話段落）
+                    </li>
+                    <li>📄 <strong>解答草稿</strong>（回答 / 引用段落）</li>
+                    <li>
+                      📐 <strong>嚴格驗證</strong>：必填欄位 / 分類 / 上限 20 筆
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="highlight-box mt-6">
+                <strong>共存策略：</strong
+                >示例採固定欄位格式；舊版自由格式結果保留供查閱，新對話統一走新流程。
+              </div>
+            </div>
+          </section>
+          <!-- ════════ 04 · 設計決策 ════════ -->
+          <section id="design">
+            <div class="mb-5 flex items-center">
+              <span class="section-num">04</span>
+              <div>
+                <h2 style="font-size: 26px">設計決策 — 為什麼這樣選</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  考慮過哪些方案、什麼時候要回來重新評估
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-5">
+              <!-- ADR-1 -->
+              <div class="card p-7" data-decision data-id="d-229">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="badge badge-clay">決策 1</span>
+                  <span class="badge badge-green">採納</span>
+                </div>
+                <h3 style="font-size: 19px">主題與解答採固定欄位回傳</h3>
+                <p
+                  style="
+                    font-size: 14px;
+                    margin-top: 8px;
+                    margin-bottom: 16px;
+                    color: var(--text-muted);
+                    line-height: 1.65;
+                  "
+                >
+                  <strong style="color: var(--slate)">問題：</strong>怎麼讓 AI 的整理結果能被辨認與歸檔。
+                </p>
+
+                <div class="tbl-scroll"><table class="adr-table mb-4">
+                  <thead>
+                    <tr>
+                      <th style="width: 26%">方案</th>
+                      <th>機制</th>
+                      <th style="width: 18%">穩定性</th>
+                      <th style="width: 20%">代價</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>A · 自由段落</td>
+                      <td>依文字標題辨認段落</td>
+                      <td>
+                        <span style="color: var(--red)">低</span> · 缺段需重整
+                      </td>
+                      <td>低</td>
+                    </tr>
+                    <tr>
+                      <td>B · 全部人工重整</td>
+                      <td>客服主管逐段重新分類</td>
+                      <td>高</td>
+                      <td>
+                        <span style="color: var(--red)"
+                          >每則對話都需人工處理</span
+                        >
+                      </td>
+                    </tr>
+                    <tr class="chosen">
+                      <td>C · 固定欄位回傳</td>
+                      <td>依約定欄位接收主題與解答</td>
+                      <td>
+                        <span style="color: var(--green)">高</span> · 可檢查缺項
+                      </td>
+                      <td>低 · 使用既有整理流程</td>
+                    </tr>
+                  </tbody>
+                </table></div>
+
+                <div class="grid md:grid-cols-2 gap-3">
+                  <div class="card-soft p-4">
+                    <div class="eyebrow mb-2" style="color: var(--g700)">
+                      為什麼選 C
+                    </div>
+                    <p style="font-size: 13px; line-height: 1.6">
+                      Brewly 的示範助理已支援固定欄位回覆，沿用現有能力即可。客服主管仍會確認內容，格式完整不代表答案必然正確。
+                    </p>
+                  </div>
+                  <div class="card-soft p-4">
+                    <div class="eyebrow mb-2" style="color: var(--g700)">
+                      什麼時候要重新評估
+                    </div>
+                    <p style="font-size: 13px; line-height: 1.6">
+                      若客服主題分類頻繁改動，或人工確認時間沒有下降，就重新評估欄位是否過多。
+                    </p>
+                  </div>
+                </div>
+                <div class="inline-decide">
+                  <div class="inline-decide-head">↳ 這個決策要你追認</div>
+                  <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                      <div class="flex items-center gap-2 mb-2">
+                        <span class="badge badge-clay">決策 1</span>
+                        <span class="badge badge-green">示例已採納</span>
+                      </div>
+                      <h3 style="font-size: 17px">固定欄位適合歸檔需求</h3>
+                      <p
+                        style="
+                          font-size: 13.5px;
+                          margin-top: 8px;
+                          color: var(--text-muted);
+                          line-height: 1.6;
+                        "
+                      >
+                        示例已用換豆款、暫停配送、補收差額三類對話確認欄位能表達需求。
+                      </p>
+                      <div class="highlight-box mt-3">
+                        <strong>推翻代價：</strong>改回自由文字後，缺段時仍需人工重整；也可另試更精簡的欄位。
+                      </div>
+                    </div>
+                    <div>
+                      <div class="eyebrow mb-3" style="color: var(--g700)">
+                        你的選擇
+                      </div>
+                      <div class="choice-row">
+                        <label class="choice"
+                          ><input
+                            type="radio"
+                            name="d-229"
+                            value="認可"
+                            checked
+                          /><span class="choice-dot"></span
+                          ><span><strong>認可</strong> · 維持</span></label
+                        >
+                        <label class="choice choice-warning"
+                          ><input type="radio" name="d-229" value="推翻" /><span
+                            class="choice-dot"
+                          ></span
+                          ><span><strong>推翻</strong> · 換別的</span></label
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <textarea
+                    class="note mt-3"
+                    rows="2"
+                    data-comment-for="d-229"
+                    placeholder="補充：不同意的理由 / 想加的條件…"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- ADR-2 -->
+              <div class="card p-7" data-decision data-id="b-1">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="badge badge-clay">決策 2</span>
+                  <span class="badge badge-green">採納</span>
+                </div>
+                <h3 style="font-size: 19px">摘要與主題整理同時開始</h3>
+                <p
+                  style="
+                    font-size: 14px;
+                    margin-top: 8px;
+                    margin-bottom: 16px;
+                    color: var(--text-muted);
+                    line-height: 1.65;
+                  "
+                >
+                  <strong style="color: var(--slate)">問題：</strong
+                  >兩階段能不能同時跑、省時間。
+                </p>
+
+                <div class="tbl-scroll"><table class="adr-table mb-4">
+                  <thead>
+                    <tr>
+                      <th style="width: 26%">方案</th>
+                      <th>順序</th>
+                      <th style="width: 18%">時間</th>
+                      <th style="width: 22%">風險</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>A · 串行</td>
+                      <td>階段一完成 → 階段二</td>
+                      <td><span style="color: var(--red)">~50s</span></td>
+                      <td>低</td>
+                    </tr>
+                    <tr class="chosen">
+                      <td>B · 並行</td>
+                      <td>兩階段同時送</td>
+                      <td><span style="color: var(--green)">~30s</span></td>
+                      <td>摘要失敗時，主題整理的費用仍已產生</td>
+                    </tr>
+                    <tr>
+                      <td>C · 顛倒</td>
+                      <td>階段二先 → 階段一基於結果</td>
+                      <td>~50s</td>
+                      <td>
+                        <span style="color: var(--red)"
+                          >階段二抽錯時放大進階段一</span
+                        >
+                      </td>
+                    </tr>
+                  </tbody>
+                </table></div>
+
+                <div class="grid md:grid-cols-2 gap-3">
+                  <div class="card-soft p-4">
+                    <div class="eyebrow mb-2" style="color: var(--g700)">
+                      為什麼選 B
+                    </div>
+                    <p style="font-size: 13px; line-height: 1.6">
+                      固定欄位整理直接讀原始對話，不需要先看摘要。兩項工作可同時開始；成功時總輸入量相同，摘要失敗時則可能多花一次整理費用。
+                    </p>
+                  </div>
+                  <div class="card-soft p-4">
+                    <div class="eyebrow mb-2" style="color: var(--g700)">
+                      什麼時候要重新評估
+                    </div>
+                    <p style="font-size: 13px; line-height: 1.6">
+                      若主題整理開始依賴摘要結果，或摘要失敗比例升高，就重新比較費用與時間。
+                    </p>
+                  </div>
+                </div>
+                <div class="inline-decide">
+                  <div class="inline-decide-head">↳ 這個決策要你追認</div>
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="badge badge-green">✓ 已做</span>
+                    <span class="badge badge-clay">高影響</span>
+                  </div>
+                  <h3 style="font-size: 18px">兩階段改並行跑</h3>
+                  <p
+                    style="
+                      font-size: 13.5px;
+                      margin-top: 8px;
+                      color: var(--text-muted);
+                      line-height: 1.6;
+                    "
+                  >
+                    因為新路徑切斷了「後一步要看前一步結果」的依賴、兩階段可以同時跑、不用等。
+                  </p>
+
+                  <div class="card-soft p-5 mt-4 mb-4">
+                    <div class="eyebrow mb-3" style="color: var(--g700)">
+                      時間對比
+                    </div>
+                    <div class="timeline-row">
+                      <div style="font-size: 12.5px; font-weight: 500">
+                        舊（串行）
+                      </div>
+                      <div class="flex gap-1">
+                        <div
+                          class="timeline-bar timeline-bar-1"
+                          style="width: 50%"
+                        >
+                          標題摘要
+                        </div>
+                        <div
+                          class="timeline-bar timeline-bar-2"
+                          style="width: 35%"
+                        >
+                          問題主題
+                        </div>
+                      </div>
+                      <div
+                        style="
+                          text-align: right;
+                          font-size: 12.5px;
+                          font-weight: 600;
+                          color: var(--red);
+                        "
+                      >
+                        ~50s
+                      </div>
+                    </div>
+                    <div class="timeline-row">
+                      <div style="font-size: 12.5px; font-weight: 500">
+                        新（並行）
+                      </div>
+                      <div style="position: relative; height: 52px">
+                        <div
+                          class="timeline-bar timeline-bar-1"
+                          style="
+                            width: 50%;
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                          "
+                        >
+                          標題摘要
+                        </div>
+                        <div
+                          class="timeline-bar timeline-bar-2"
+                          style="
+                            width: 35%;
+                            position: absolute;
+                            top: 28px;
+                            left: 0;
+                          "
+                        >
+                          問題主題
+                        </div>
+                      </div>
+                      <div
+                        style="
+                          text-align: right;
+                          font-size: 12.5px;
+                          font-weight: 600;
+                          color: var(--green);
+                        "
+                      >
+                        ~30s
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        font-size: 12.5px;
+                        font-weight: 600;
+                        color: var(--green);
+                        margin-top: 8px;
+                      "
+                    >
+                      省 20 秒
+                    </div>
+                  </div>
+
+                  <div class="grid md:grid-cols-2 gap-3">
+                    <label class="choice"
+                      ><input
+                        type="radio"
+                        name="b-1"
+                        value="保留"
+                        checked
+                      /><span class="choice-dot"></span
+                      ><span><strong>保留</strong> · 維持並行</span></label
+                    >
+                    <label class="choice choice-warning"
+                      ><input type="radio" name="b-1" value="推翻" /><span
+                        class="choice-dot"
+                      ></span
+                      ><span><strong>推翻</strong> · 改回串行</span></label
+                    >
+                  </div>
+                  <textarea
+                    class="note mt-3"
+                    rows="2"
+                    data-comment-for="b-1"
+                    placeholder="補充：不同意的理由 / 想加的條件…"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- ADR-3 -->
+              <div class="card p-7" data-decision data-id="b-2">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="badge badge-clay">決策 3</span>
+                  <span class="badge badge-green">採納</span>
+                </div>
+                <h3 style="font-size: 19px">主題整理的對話文字上限設為 12K 字</h3>
+                <p
+                  style="
+                    font-size: 14px;
+                    margin-top: 8px;
+                    margin-bottom: 16px;
+                    color: var(--text-muted);
+                    line-height: 1.65;
+                  "
+                >
+                  <strong style="color: var(--slate)">問題：</strong
+                  >摘要與主題整理各自讀取對話，長對話會重複計入輸入成本，需要決定主題整理的範圍。
+                </p>
+
+                <div class="tbl-scroll"><table class="adr-table mb-4">
+                  <thead>
+                    <tr>
+                      <th style="width: 26%">方案</th>
+                      <th>截短長度</th>
+                      <th style="width: 18%">Token 成本</th>
+                      <th style="width: 22%">覆蓋率</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>A · 不截短</td>
+                      <td>完整對話（示例 24K 字）</td>
+                      <td><span style="color: var(--red)">100%</span></td>
+                      <td>100%</td>
+                    </tr>
+                    <tr>
+                      <td>B · 6K 字</td>
+                      <td>示例涵蓋 80% 對話</td>
+                      <td><span style="color: var(--green)">25%</span></td>
+                      <td><span style="color: var(--yellow)">80%</span></td>
+                    </tr>
+                    <tr class="chosen">
+                      <td>C · 12K 字</td>
+                      <td>示例涵蓋 96% 對話</td>
+                      <td><span style="color: var(--green)">50%</span></td>
+                      <td>96%</td>
+                    </tr>
+                    <tr>
+                      <td>D · 18K 字</td>
+                      <td>示例涵蓋 98% 對話</td>
+                      <td>75%</td>
+                      <td>98%</td>
+                    </tr>
+                  </tbody>
+                </table></div>
+
+                <div class="grid md:grid-cols-2 gap-3">
+                  <div class="card-soft p-4">
+                    <div class="eyebrow mb-2" style="color: var(--g700)">
+                      為什麼選 12K
+                    </div>
+                    <p style="font-size: 13px; line-height: 1.6">
+                      示例中 96% 對話不超過 12K 字；對 24K 字長對話，這項工作的輸入減半。摘要仍讀完整對話，超出範圍的主題需人工補讀。
+                    </p>
+                  </div>
+                  <div class="card-soft p-4">
+                    <div class="eyebrow mb-2" style="color: var(--g700)">
+                      什麼時候要重新評估
+                    </div>
+                    <p style="font-size: 13px; line-height: 1.6">
+                      若超過 12K 字的對話變多，或客服主管常需補主題，就調高上限或改用分段整理。
+                    </p>
+                  </div>
+                </div>
+                <div class="inline-decide">
+                  <div class="inline-decide-head">↳ 這個決策要你追認</div>
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="badge badge-green">✓ 已做</span>
+                    <span class="badge badge-clay">中高影響</span>
+                  </div>
+                  <h3 style="font-size: 18px">
+                    主題整理的對話文字截短到 12K 字
+                  </h3>
+                  <p
+                    style="
+                      font-size: 13.5px;
+                      margin-top: 8px;
+                      color: var(--text-muted);
+                      line-height: 1.6;
+                    "
+                  >
+                    示例主題整理先取前 12K 字，摘要仍讀全文。超出範圍的主題與回答，由客服主管補讀；不以空草稿判定沒有問題。
+                  </p>
+
+                  <div class="card-soft p-5 mt-4 mb-4">
+                    <div class="eyebrow mb-3" style="color: var(--g700)">
+                      每則 24K 字長對話的主題整理輸入對比
+                    </div>
+                    <div class="token-bar-row">
+                      <div style="font-size: 12.5px; font-weight: 500">
+                        不截短
+                      </div>
+                      <div class="token-bar" style="width: 100%">
+                        8K tokens
+                      </div>
+                      <div
+                        style="
+                          text-align: right;
+                          font-size: 12.5px;
+                          color: var(--text-muted);
+                        "
+                      >
+                        100%
+                      </div>
+                    </div>
+                    <div class="token-bar-row">
+                      <div style="font-size: 12.5px; font-weight: 500">
+                        12K 截短
+                      </div>
+                      <div class="token-bar cool" style="width: 50%">
+                        4K tokens
+                      </div>
+                      <div
+                        style="
+                          text-align: right;
+                          font-size: 12.5px;
+                          font-weight: 600;
+                          color: var(--green);
+                        "
+                      >
+                        省 50%
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        font-size: 12px;
+                        margin-top: 12px;
+                        color: var(--text-muted);
+                        line-height: 1.55;
+                      "
+                    >
+                      ⚠️ 取捨：只讀前 12K 字可能漏掉後段問題；長對話須由客服主管補讀，不能把空結果當成沒有問題。
+                    </div>
+                  </div>
+
+                  <div class="grid md:grid-cols-3 gap-3">
+                    <label class="choice"
+                      ><input
+                        type="radio"
+                        name="b-2"
+                        value="保留 12K"
+                        checked
+                      /><span class="choice-dot"></span
+                      ><span><strong>保留 12K</strong></span></label
+                    >
+                    <label class="choice"
+                      ><input type="radio" name="b-2" value="調整上限" /><span
+                        class="choice-dot"
+                      ></span
+                      ><span><strong>調整上限</strong></span></label
+                    >
+                    <label class="choice choice-warning"
+                      ><input type="radio" name="b-2" value="推翻" /><span
+                        class="choice-dot"
+                      ></span
+                      ><span><strong>推翻</strong> · 不截短</span></label
+                    >
+                  </div>
+                  <textarea
+                    data-comment-for="b-2"
+                    class="note mt-3"
+                    placeholder="建議上限（例：6K / 18K）/ 推翻原因..."
+                    rows="2"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- ════════ 05 · 失敗處理 ════════ -->
+          <section id="failure">
+            <div class="mb-5 flex items-center">
+              <span class="section-num">05</span>
+              <div>
+                <h2 style="font-size: 26px">失敗處理 — 出包了怎麼辦</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  每個失敗類型怎麼偵測、怎麼處理、怎麼觀察
+                </p>
+              </div>
+            </div>
+
+            <div class="card p-7">
+              <!-- Legend -->
+              <div
+                class="flex flex-wrap items-center gap-3 mb-5 pb-4"
+                style="border-bottom: 1.5px solid var(--border)"
+              >
+                <div class="eyebrow" style="color: var(--g700)">圖例</div>
+                <span
+                  class="tree-node start"
+                  style="padding: 4px 10px; font-size: 11px"
+                  >起點</span
+                >
+                <span
+                  class="tree-node success"
+                  style="padding: 4px 10px; font-size: 11px"
+                  >✓ 成功</span
+                >
+                <span
+                  class="tree-node degraded"
+                  style="padding: 4px 10px; font-size: 11px"
+                  >⚠ 降級</span
+                >
+                <span
+                  class="tree-node hard-fail"
+                  style="padding: 4px 10px; font-size: 11px"
+                  >✗ 硬失敗</span
+                >
+              </div>
+
+              <div class="tree">
+                <div class="tree-node start">🎬 AI 分析開始</div>
+
+                <div class="tree-branch">
+                  <div
+                    class="text-xs font-semibold mb-3"
+                    style="
+                      color: var(--text-muted);
+                      font-family: var(--mono);
+                      text-transform: uppercase;
+                      letter-spacing: 0.06em;
+                    "
+                  >
+                    並行送出兩階段
+                  </div>
+
+                  <div class="tree-node">📝 階段一 · 標題 + 摘要</div>
+                  <div class="tree-branch">
+                    <div class="tree-node success">✓ 成功 · 寫入結果</div>
+                  </div>
+                  <div class="tree-branch">
+                    <div class="tree-node">最多 2 次嘗試</div>
+                    <div class="tree-branch">
+                      <div class="tree-node hard-fail">
+                        ✗ 全失敗 · 歸檔標為待處理
+                      </div>
+                      <div class="tree-leaf">
+                        <strong>偵測：</strong>2 次嘗試都無法產出有效摘要<br />
+                        <strong>處理：</strong>停止自動歸檔，交客服主管確認<br />
+                        <strong>觀察：</strong>留下「摘要整理失敗」與對話編號
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="tree-node mt-5">🔤 階段二 · 主題 + 解答草稿</div>
+
+                  <div class="tree-branch">
+                    <div class="tree-node success">
+                      ✓ 工具回傳合法資料 · 寫入結果
+                    </div>
+                  </div>
+
+                  <div class="tree-branch">
+                    <div class="tree-node degraded">
+                      ⚠ 欄位不完整 · 歸檔前檢查失敗
+                    </div>
+                    <div class="tree-leaf">
+                      <strong>偵測：</strong>主題、回答或引用段落不完整<br />
+                      <strong>處理：</strong>保留摘要，將缺項交客服主管補齊<br />
+                      <strong>觀察：</strong>記錄缺少的欄位與對話編號，供工程師查閱
+                    </div>
+                  </div>
+
+                  <div class="tree-branch">
+                    <div class="tree-node degraded">⚠ 連線失敗 · 暫時無法取得回覆</div>
+                    <div class="tree-leaf">
+                      <strong>偵測：</strong>連線中斷或等待時間超過示範上限<br />
+                      <strong>處理：</strong>重試 1 次（共 2 次嘗試）→
+                      仍失敗保留階段一<br />
+                      <strong>觀察：</strong>記錄連線失敗次數，供工程師追蹤
+                    </div>
+                  </div>
+
+                  <div class="tree-branch">
+                    <div class="tree-node degraded">
+                      ⚠ 無法整理 · 未產出可用草稿
+                    </div>
+                    <div class="tree-leaf">
+                      <strong>偵測：</strong>回覆拒絕處理，或沒有主題與解答<br />
+                      <strong>處理：</strong>重試 1 次 → 仍失敗保留階段一<br />
+                      <strong>觀察：</strong>記錄「無可用草稿」，由客服主管判斷後續
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="highlight-box green mt-6">
+                <strong>降級一致性：</strong>三類主題整理失敗都保留已完成的摘要，並標示待補原因。客服主管可接續處理；只有確認過的完整內容才收入知識庫。
+              </div>
+            </div>
+          </section>
+          <!-- ════════ 06 · 數據佐證 ════════ -->
+          <section id="evidence">
+            <div class="mb-5 flex items-center">
+              <span class="section-num">06</span>
+              <div>
+                <h2 style="font-size: 26px">數據佐證 — 真的有解嗎</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  虛構樣本、示範目標與審查紀錄，不代表正式上線結果
+                </p>
+              </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-5">
+              <!-- 改前 / 改後 dashboard -->
+              <div class="lg:col-span-2 card p-7">
+                <div class="eyebrow mb-5" style="color: var(--g700)">
+                  改前 / 改後綜合指標
+                </div>
+
+                <div class="space-y-4">
+                  <!-- 失敗率 -->
+                  <div class="metric-card">
+                    <div class="flex items-center justify-between">
+                      <h4
+                        style="
+                          font-size: 15px;
+                          font-family: var(--serif);
+                          font-weight: 500;
+                        "
+                      >
+                        階段二失敗率
+                      </h4>
+                      <span class="badge badge-green">主要 KPI</span>
+                    </div>
+                    <div class="metric-row">
+                      <div class="metric-side before">
+                        <div class="num">20%</div>
+                        <div class="label">改前（虛構樣本）</div>
+                      </div>
+                      <div class="metric-arrow">→</div>
+                      <div class="metric-side after">
+                        <div class="num">4%</div>
+                        <div class="label">改後（示範目標）</div>
+                      </div>
+                    </div>
+                    <div class="metric-delta">
+                      目標由 20% 降至 4%，相對降低 80%；待實機驗證
+                    </div>
+                  </div>
+
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div class="metric-card">
+                      <h4
+                        style="
+                          font-size: 15px;
+                          font-family: var(--serif);
+                          font-weight: 500;
+                        "
+                      >
+                        整理耗時
+                      </h4>
+                      <div class="metric-row">
+                        <div class="metric-side before">
+                          <div class="num">~50s</div>
+                          <div class="label">串行</div>
+                        </div>
+                        <div class="metric-arrow">→</div>
+                        <div class="metric-side after">
+                          <div class="num">~30s</div>
+                          <div class="label">並行</div>
+                        </div>
+                      </div>
+                      <div class="metric-delta">省 20 秒</div>
+                    </div>
+
+                    <div class="metric-card">
+                      <h4
+                        style="
+                          font-size: 15px;
+                          font-family: var(--serif);
+                          font-weight: 500;
+                        "
+                      >
+                        階段二 Token 成本
+                      </h4>
+                      <div class="metric-row">
+                        <div class="metric-side before">
+                          <div class="num">100%</div>
+                          <div class="label">不截短</div>
+                        </div>
+                        <div class="metric-arrow">→</div>
+                        <div class="metric-side after">
+                          <div class="num">50%</div>
+                          <div class="label">12K 截短</div>
+                        </div>
+                      </div>
+                      <div class="metric-delta">省 50%（24K 字長對話的主題整理輸入）</div>
+                    </div>
+                  </div>
+
+                  <div class="card-soft p-4">
+                    <div class="eyebrow mb-2" style="color: var(--g700)">
+                      改前數據來源
+                    </div>
+                    <p style="font-size: 12.5px; line-height: 1.6">
+                      本頁使用人工編製的虛構對話樣本 <strong>N=50</strong>（示例期間 9/1–9/7）。
+                      10/50（20%）缺少可用草稿，其中<strong
+                        >10 則都缺少必要段落</strong
+                      >（示例刻意聚焦格式問題）。
+                      目標為同樣 50 則中最多 2 則失敗（4%）；這些是展示用數字，需用正式驗證判斷實際效果。
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Review timeline -->
+              <div class="card p-7">
+                <div class="eyebrow mb-5" style="color: var(--g700)">
+                  示範審查紀錄
+                </div>
+
+                <div class="phase-timeline">
+                  <div class="phase-item">
+                    <div class="phase-item-title">階段 1 · 盤點</div>
+                    <div class="phase-item-detail">
+                      檢視 50 則虛構對話與歸檔缺項
+                    </div>
+                  </div>
+                  <div class="phase-item">
+                    <div class="phase-item-title">階段 2 · 規格</div>
+                    <div class="phase-item-detail">
+                      8 條示範驗收條件 + 範圍確認
+                    </div>
+                  </div>
+                  <div class="phase-item">
+                    <div class="phase-item-title">階段 3 · 實作</div>
+                    <div class="phase-item-detail">
+                      整理規則 / 草稿產出 / 歸檔檢查
+                    </div>
+                  </div>
+                  <div class="phase-item">
+                    <div class="phase-item-title">階段 4 · 審查</div>
+                    <div class="phase-item-detail">流程精簡檢視</div>
+                    <div class="phase-item-detail">
+                      檢查重複步驟與人工處理時間
+                    </div>
+                    <div class="phase-item-detail">示範審查第一輪</div>
+                    <div class="phase-item-detail">發現 1 項主要 + 1 項一般問題 → 已修</div>
+                    <div class="phase-item-detail">示範審查第二輪</div>
+                    <div class="phase-item-detail">發現 2 項一般問題 → 已修</div>
+                  </div>
+                  <div class="phase-item">
+                    <div class="phase-item-title">階段 5 · 待驗證</div>
+                    <div class="phase-item-detail">回顧摘要 + 待負責人追認</div>
+                  </div>
+                </div>
+
+                <div
+                  class="mt-5 pt-4"
+                  style="border-top: 1.5px solid var(--border)"
+                >
+                  <div class="eyebrow mb-3" style="color: var(--g700)">
+                    示範問題統計
+                  </div>
+                  <div style="font-size: 13.5px">
+                    <div class="flex justify-between py-1.5">
+                      <span>示範審查發現</span>
+                      <span><strong>4</strong> 項（1 主要 + 3 一般）</span>
+                    </div>
+                    <div class="flex justify-between py-1.5">
+                      <span>修法落地</span>
+                      <span style="color: var(--green)"
+                        ><strong>4 / 4</strong> ✓</span
+                      >
+                    </div>
+                    <div class="flex justify-between py-1.5">
+                      <span>嚴重問題 / 殘留</span>
+                      <span><strong>0</strong></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- ════════ 程序快答分隔 ════════ -->
+          <div class="quick-divider">
+            <div class="eyebrow">程序快答</div>
+            <p
+              style="
+                font-size: 13.5px;
+                color: var(--text-muted);
+                margin-top: 8px;
+              "
+            >
+              以下的題目不需要前面的背景就能拍——延後項目、要不要寫進專案筆記、怎麼驗、怎麼提交。
+            </p>
+          </div>
+          <!-- ════════ A · 其他示範決策追認 ════════ -->
+          <section id="section-a">
+            <div class="mb-5 flex items-center">
+              <span class="section-num idx-letter">A</span>
+              <div>
+                <h2 style="font-size: 24px">其他示範決策追認</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  沒有對應說明段、不需要背景就能拍的追認題
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <div class="card p-6" data-decision data-id="d-230">
+                <div class="grid md:grid-cols-3 gap-6">
+                  <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="badge badge-clay">程序 A1</span>
+                      <span class="badge badge-green">示例已採納</span>
+                    </div>
+                    <h3 style="font-size: 17px">排程歸檔驗證延後</h3>
+                    <p
+                      style="
+                        font-size: 13.5px;
+                        margin-top: 8px;
+                        color: var(--text-muted);
+                        line-height: 1.6;
+                      "
+                    >
+                      本示例先驗證單則對話整理。每晚批次歸檔另需準備多則對話與排程資料，估 2 SP，列為後續驗證。
+                    </p>
+                  </div>
+                  <div>
+                    <div class="eyebrow mb-3" style="color: var(--g700)">
+                      你的選擇
+                    </div>
+                    <div class="choice-row">
+                      <label class="choice"
+                        ><input
+                          type="radio"
+                          name="d-230"
+                          value="認可"
+                          checked
+                        /><span class="choice-dot"></span
+                        ><span><strong>認可</strong> · 延後排程驗證</span></label
+                      >
+                      <label class="choice choice-warning"
+                        ><input type="radio" name="d-230" value="現在做" /><span
+                          class="choice-dot"
+                        ></span
+                        ><span><strong>現在就做</strong></span></label
+                      >
+                    </div>
+                  </div>
+                </div>
+                <textarea class="note mt-3" rows="2" data-comment-for="d-230" placeholder="補充：條件 / 但書 / 不同意的理由…"></textarea>
+              </div>
+
+              <div class="card p-6" data-decision data-id="d-231">
+                <div class="grid md:grid-cols-3 gap-6">
+                  <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="badge badge-clay">程序 A2</span>
+                      <span class="badge badge-green">示例已採納</span>
+                    </div>
+                    <h3 style="font-size: 17px">助理只在對話結束後整理</h3>
+                    <p
+                      style="
+                        font-size: 13.5px;
+                        margin-top: 8px;
+                        color: var(--text-muted);
+                        line-height: 1.6;
+                      "
+                    >
+                      客服對話結束才觸發整理，避免交談途中產生片段草稿。若要中途摘要，先補足情境與觸發時點再評估。
+                    </p>
+                  </div>
+                  <div>
+                    <div class="eyebrow mb-3" style="color: var(--g700)">
+                      你的選擇
+                    </div>
+                    <div class="choice-row">
+                      <label class="choice"
+                        ><input
+                          type="radio"
+                          name="d-231"
+                          value="認可"
+                          checked
+                        /><span class="choice-dot"></span
+                        ><span><strong>認可</strong> · 維持結束後</span></label
+                      >
+                      <label class="choice choice-warning"
+                        ><input type="radio" name="d-231" value="補中途情境" /><span
+                          class="choice-dot"
+                        ></span
+                        ><span><strong>補中途情境</strong></span></label
+                      >
+                    </div>
+                  </div>
+                </div>
+                <textarea class="note mt-3" rows="2" data-comment-for="d-231" placeholder="補充：條件 / 但書 / 不同意的理由…"></textarea>
+              </div>
+            </div>
+          </section>
+          <!-- ════════ 快答 B · 流程微調 ════════ -->
+          <section id="section-b">
+            <div class="mb-5 flex items-center">
+              <span class="section-num idx-letter">B</span>
+              <div>
+                <h2 style="font-size: 24px">流程微調</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  你說「可以的話」延伸做、我選做了 / 沒做的清單
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-5">
+              <!-- B-1 -->
+              <div class="card p-6" data-decision data-id="b-3">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="badge badge-red">✗ 沒做</span>
+                </div>
+                <h3 style="font-size: 18px">
+                  摘要維持容易閱讀的文字
+                </h3>
+                <p
+                  style="
+                    font-size: 13.5px;
+                    margin-top: 8px;
+                    color: var(--text-muted);
+                    line-height: 1.6;
+                  "
+                >
+                  客服主管需要快速讀懂前因後果，摘要先維持短段落。主題與解答草稿另用固定欄位，不必要求所有輸出長得相同。
+                </p>
+                <div class="grid md:grid-cols-2 gap-3 mt-4">
+                  <label class="choice"
+                    ><input
+                      type="radio"
+                      name="b-3"
+                      value="維持不做"
+                      checked
+                    /><span class="choice-dot"></span
+                    ><span><strong>維持不做</strong></span></label
+                  >
+                  <label class="choice choice-warning"
+                    ><input type="radio" name="b-3" value="做試驗" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span><strong>做試驗</strong> · 小規模確認</span></label
+                  >
+                </div>
+                <textarea class="note mt-3" rows="2" data-comment-for="b-3" placeholder="補充：條件 / 但書 / 不同意的理由…"></textarea>
+              </div>
+
+              <!-- B-4 -->
+              <div class="card p-6" data-decision data-id="b-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="badge badge-red">✗ 沒做</span>
+                </div>
+                <h3 style="font-size: 18px">
+                  先分類問題、再寫摘要（順序顛倒）
+                </h3>
+                <p
+                  style="
+                    font-size: 13.5px;
+                    margin-top: 8px;
+                    color: var(--text-muted);
+                    line-height: 1.6;
+                  "
+                >
+                  若先分類錯誤，後面的摘要可能跟著忽略其他問題。示例讓兩項工作各讀原文，先觀察準確度，再決定是否需要依序處理。
+                </p>
+                <div class="grid md:grid-cols-2 gap-3 mt-4">
+                  <label class="choice"
+                    ><input
+                      type="radio"
+                      name="b-4"
+                      value="維持不做"
+                      checked
+                    /><span class="choice-dot"></span
+                    ><span><strong>維持不做</strong></span></label
+                  >
+                  <label class="choice choice-warning"
+                    ><input type="radio" name="b-4" value="做試驗" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span><strong>做試驗</strong> · 對照 10 則對話</span></label
+                  >
+                </div>
+                <textarea class="note mt-3" rows="2" data-comment-for="b-4" placeholder="補充：條件 / 但書 / 不同意的理由…"></textarea>
+              </div>
+            </div>
+          </section>
+          <!-- ════════ C · 延後項目 ════════ -->
+          <section id="section-c">
+            <div class="mb-5 flex items-center">
+              <span class="section-num idx-letter">C</span>
+              <div>
+                <h2 style="font-size: 24px">延後項目（後續改善）</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  審查發現但不在本次範圍。每項可選現在做 / 延後 / 不做
+                </p>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="card p-5" data-decision data-id="c-1">
+                <div class="flex items-start gap-3 mb-3">
+                  <div style="font-size: 26px">🔄</div>
+                  <div>
+                    <h4
+                      style="
+                        font-size: 15px;
+                        font-family: var(--serif);
+                        font-weight: 500;
+                      "
+                    >
+                      歸檔分類表自動同步
+                    </h4>
+                    <p
+                      style="
+                        font-size: 12.5px;
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                        line-height: 1.55;
+                      "
+                    >
+                      方案變更與配送問答分類目前人工更新
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="choice-row"
+                  role="radiogroup"
+                  aria-label="C-1 處理時機"
+                >
+                  <label class="choice"
+                    ><input
+                      type="radio"
+                      name="c-1"
+                      value="延後（預設）"
+                      checked
+                    /><span class="choice-dot"></span
+                    ><span>⏳ <strong>延後（預設）</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-1" value="立刻做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>⚡ <strong>立刻做</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-1" value="不做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>✗ <strong>不做</strong></span></label
+                  >
+                </div>
+                <textarea
+                  data-comment-for="c-1"
+                  class="note mt-3"
+                  placeholder="補充想法（可空）..."
+                  rows="2"
+                ></textarea>
+              </div>
+
+              <div class="card p-5" data-decision data-id="c-2">
+                <div class="flex items-start gap-3 mb-3">
+                  <div style="font-size: 26px">📌</div>
+                  <div>
+                    <h4
+                      style="
+                        font-size: 15px;
+                        font-family: var(--serif);
+                        font-weight: 500;
+                      "
+                    >
+                      待補原因統一用語
+                    </h4>
+                    <p
+                      style="
+                        font-size: 12.5px;
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                        line-height: 1.55;
+                      "
+                    >
+                      相同缺項使用相同說明，方便客服主管辨認
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="choice-row"
+                  role="radiogroup"
+                  aria-label="C-2 處理時機"
+                >
+                  <label class="choice"
+                    ><input
+                      type="radio"
+                      name="c-2"
+                      value="延後（預設）"
+                      checked
+                    /><span class="choice-dot"></span
+                    ><span>⏳ <strong>延後（預設）</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-2" value="立刻做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>⚡ <strong>立刻做</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-2" value="不做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>✗ <strong>不做</strong></span></label
+                  >
+                </div>
+                <textarea
+                  data-comment-for="c-2"
+                  class="note mt-3"
+                  placeholder="補充想法（可空）..."
+                  rows="2"
+                ></textarea>
+              </div>
+
+              <div class="card p-5" data-decision data-id="c-3">
+                <div class="flex items-start gap-3 mb-3">
+                  <div style="font-size: 26px">🔗</div>
+                  <div>
+                    <h4
+                      style="
+                        font-size: 15px;
+                        font-family: var(--serif);
+                        font-weight: 500;
+                      "
+                    >
+                      官網與 App 對話整理共用規則
+                    </h4>
+                    <p
+                      style="
+                        font-size: 12.5px;
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                        line-height: 1.55;
+                      "
+                    >
+                      對話形式不同，先確認是否適合共用
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="choice-row"
+                  role="radiogroup"
+                  aria-label="C-3 處理時機"
+                >
+                  <label class="choice"
+                    ><input
+                      type="radio"
+                      name="c-3"
+                      value="延後（預設）"
+                      checked
+                    /><span class="choice-dot"></span
+                    ><span>⏳ <strong>延後（預設）</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-3" value="立刻做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>⚡ <strong>立刻做</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-3" value="不做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>✗ <strong>不做</strong></span></label
+                  >
+                </div>
+                <textarea
+                  data-comment-for="c-3"
+                  class="note mt-3"
+                  placeholder="補充想法（可空）..."
+                  rows="2"
+                ></textarea>
+              </div>
+
+              <div class="card p-5" data-decision data-id="c-4">
+                <div class="flex items-start gap-3 mb-3">
+                  <div style="font-size: 26px">⏱️</div>
+                  <div>
+                    <h4
+                      style="
+                        font-size: 15px;
+                        font-family: var(--serif);
+                        font-weight: 500;
+                      "
+                    >
+                      對話段落引用統一格式
+                    </h4>
+                    <p
+                      style="
+                        font-size: 12.5px;
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                        line-height: 1.55;
+                      "
+                    >
+                      先確認兩個來源的段落編號是否一致
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="choice-row"
+                  role="radiogroup"
+                  aria-label="C-4 處理時機"
+                >
+                  <label class="choice"
+                    ><input
+                      type="radio"
+                      name="c-4"
+                      value="延後（預設）"
+                      checked
+                    /><span class="choice-dot"></span
+                    ><span>⏳ <strong>延後（預設）</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-4" value="立刻做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>⚡ <strong>立刻做</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-4" value="不做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>✗ <strong>不做</strong></span></label
+                  >
+                </div>
+                <textarea
+                  data-comment-for="c-4"
+                  class="note mt-3"
+                  placeholder="補充想法（可空）..."
+                  rows="2"
+                ></textarea>
+              </div>
+
+              <div class="card p-5" data-decision data-id="c-5">
+                <div class="flex items-start gap-3 mb-3">
+                  <div style="font-size: 26px">✂️</div>
+                  <div>
+                    <h4
+                      style="
+                        font-size: 15px;
+                        font-family: var(--serif);
+                        font-weight: 500;
+                      "
+                    >
+                      長對話整理範圍統一
+                    </h4>
+                    <p
+                      style="
+                        font-size: 12.5px;
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                        line-height: 1.55;
+                      "
+                    >
+                      涉及多種對話來源，本輪先聚焦官網
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="choice-row"
+                  role="radiogroup"
+                  aria-label="C-5 處理時機"
+                >
+                  <label class="choice"
+                    ><input
+                      type="radio"
+                      name="c-5"
+                      value="延後（預設）"
+                      checked
+                    /><span class="choice-dot"></span
+                    ><span>⏳ <strong>延後（預設）</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-5" value="立刻做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>⚡ <strong>立刻做</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-5" value="不做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>✗ <strong>不做</strong></span></label
+                  >
+                </div>
+                <textarea
+                  data-comment-for="c-5"
+                  class="note mt-3"
+                  placeholder="補充想法（可空）..."
+                  rows="2"
+                ></textarea>
+              </div>
+
+              <div class="card p-5" data-decision data-id="c-6">
+                <div class="flex items-start gap-3 mb-3">
+                  <div style="font-size: 26px">📝</div>
+                  <div>
+                    <h4
+                      style="
+                        font-size: 15px;
+                        font-family: var(--serif);
+                        font-weight: 500;
+                      "
+                    >
+                      舊版示範說明清理
+                    </h4>
+                    <p
+                      style="
+                        font-size: 12.5px;
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                        line-height: 1.55;
+                      "
+                    >
+                      先保留前後對照，示例驗收後再整理
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="choice-row"
+                  role="radiogroup"
+                  aria-label="C-6 處理時機"
+                >
+                  <label class="choice"
+                    ><input
+                      type="radio"
+                      name="c-6"
+                      value="延後（預設）"
+                      checked
+                    /><span class="choice-dot"></span
+                    ><span>⏳ <strong>延後（預設）</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-6" value="立刻做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>⚡ <strong>立刻做</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input type="radio" name="c-6" value="不做" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span>✗ <strong>不做</strong></span></label
+                  >
+                </div>
+                <textarea
+                  data-comment-for="c-6"
+                  class="note mt-3"
+                  placeholder="補充想法（可空）..."
+                  rows="2"
+                ></textarea>
+              </div>
+            </div>
+          </section>
+          <!-- ════════ D · 專案筆記 ════════ -->
+          <section id="section-d">
+            <div class="mb-5 flex items-center">
+              <span class="section-num idx-letter">D</span>
+              <div>
+                <h2 style="font-size: 24px">經驗寫入 專案筆記 候選</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  這次學到的三條規則、你說寫我才寫
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <div class="card p-6" data-decision data-id="memory-1">
+                <div class="grid md:grid-cols-3 gap-5">
+                  <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span style="font-size: 22px">⏱️</span>
+                      <h4
+                        style="
+                          font-size: 16px;
+                          font-family: var(--serif);
+                          font-weight: 500;
+                        "
+                      >
+                        整理等待時間要說清楚
+                      </h4>
+                    </div>
+                    <p
+                      style="
+                        font-size: 13px;
+                        color: var(--text-muted);
+                        line-height: 1.6;
+                      "
+                    >
+                      示例中整理預期需 30 秒，但等待提示只顯示 10 秒，客服主管誤以為失敗。<br />
+                      <strong style="color: var(--slate)">規則：</strong>等待提示應依整理時間設計，逾時後提供可辨認的待處理狀態。
+                    </p>
+                  </div>
+                  <div class="choice-row">
+                    <label class="choice"
+                      ><input
+                        type="radio"
+                        name="memory-1"
+                        value="寫入"
+                        checked
+                      /><span class="choice-dot"></span
+                      ><span>寫入 專案筆記</span></label
+                    >
+                    <label class="choice choice-warning"
+                      ><input type="radio" name="memory-1" value="不寫" /><span
+                        class="choice-dot"
+                      ></span
+                      ><span>不寫</span></label
+                    >
+                  </div>
+                </div>
+                <textarea class="note mt-3" rows="2" data-comment-for="memory-1" placeholder="補充：條件 / 但書 / 不同意的理由…"></textarea>
+              </div>
+
+              <div class="card p-6" data-decision data-id="memory-2">
+                <div class="grid md:grid-cols-3 gap-5">
+                  <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span style="font-size: 22px">📡</span>
+                      <h4
+                        style="
+                          font-size: 16px;
+                          font-family: var(--serif);
+                          font-weight: 500;
+                        "
+                      >
+                        待補原因要能直接分流
+                      </h4>
+                    </div>
+                    <p
+                      style="
+                        font-size: 13px;
+                        color: var(--text-muted);
+                        line-height: 1.6;
+                      "
+                    >
+                      示例中所有失敗都顯示「整理失敗」，客服主管無法分辨是缺資料還是連線問題。<br />
+                      <strong style="color: var(--slate)">規則：</strong>缺項交客服主管，連線問題交工程師；記錄原因時要能區分兩者。
+                    </p>
+                  </div>
+                  <div class="choice-row">
+                    <label class="choice"
+                      ><input
+                        type="radio"
+                        name="memory-2"
+                        value="寫入"
+                        checked
+                      /><span class="choice-dot"></span
+                      ><span>寫入 專案筆記</span></label
+                    >
+                    <label class="choice choice-warning"
+                      ><input type="radio" name="memory-2" value="不寫" /><span
+                        class="choice-dot"
+                      ></span
+                      ><span>不寫</span></label
+                    >
+                  </div>
+                </div>
+                <textarea class="note mt-3" rows="2" data-comment-for="memory-2" placeholder="補充：條件 / 但書 / 不同意的理由…"></textarea>
+              </div>
+
+              <div class="card p-6" data-decision data-id="memory-3">
+                <div class="grid md:grid-cols-3 gap-5">
+                  <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span style="font-size: 22px">🔍</span>
+                      <h4
+                        style="
+                          font-size: 16px;
+                          font-family: var(--serif);
+                          font-weight: 500;
+                        "
+                      >
+                        整理前要備妥參考資料
+                      </h4>
+                    </div>
+                    <p
+                      style="
+                        font-size: 13px;
+                        color: var(--text-muted);
+                        line-height: 1.6;
+                      "
+                    >
+                      示例要求助理參考豆款與配送說明，卻漏了附上最新方案，草稿因而不完整。<br />
+                      <strong style="color: var(--slate)">規則：</strong>要求助理參考的豆款與方案說明，必須真的隨對話提供，並由客服主管確認適用版本。
+                    </p>
+                  </div>
+                  <div class="choice-row">
+                    <label class="choice"
+                      ><input
+                        type="radio"
+                        name="memory-3"
+                        value="寫入"
+                        checked
+                      /><span class="choice-dot"></span
+                      ><span>寫入 專案筆記</span></label
+                    >
+                    <label class="choice choice-warning"
+                      ><input type="radio" name="memory-3" value="不寫" /><span
+                        class="choice-dot"
+                      ></span
+                      ><span>不寫</span></label
+                    >
+                  </div>
+                </div>
+                <textarea class="note mt-3" rows="2" data-comment-for="memory-3" placeholder="補充：條件 / 但書 / 不同意的理由…"></textarea>
+              </div>
+            </div>
+          </section>
+          <!-- ════════ E · 實機驗證 ════════ -->
+          <section id="section-e">
+            <div class="mb-5 flex items-center">
+              <span class="section-num idx-letter">E</span>
+              <div>
+                <h2 style="font-size: 24px">實機驗證（正式採用前必跑）</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  本頁只是虛構收尾樣張；下列步驟示範如何安排正式驗證
+                </p>
+              </div>
+            </div>
+
+            <div class="card p-7">
+              <div class="space-y-3 mb-6">
+                <div class="qa-step">
+                  <div class="qa-step-num">1</div>
+                  <div>
+                    <div style="font-size: 14.5px; font-weight: 600">
+                      工程師準備示範對話
+                    </div>
+                    <div
+                      style="
+                        font-size: 12.5px;
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                      "
+                    >
+                      準備換豆款、暫停一期與配送查詢資料
+                    </div>
+                  </div>
+                </div>
+                <div class="qa-step">
+                  <div class="qa-step-num">2</div>
+                  <div>
+                    <div style="font-size: 14.5px; font-weight: 600">
+                      客服主管走一次完整歸檔
+                    </div>
+                    <div
+                      style="
+                        font-size: 12.5px;
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                      "
+                    >
+                      整理 → 確認 → 歸檔，再檢查缺項時能否接續處理
+                    </div>
+                  </div>
+                </div>
+                <div class="qa-step">
+                  <div class="qa-step-num">3</div>
+                  <div>
+                    <div style="font-size: 14.5px; font-weight: 600">
+                      工程師核對驗收案例
+                    </div>
+                    <div
+                      style="
+                        font-size: 12.5px;
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                      "
+                    >
+                      8 項示範案例，逐一核對成功與待處理結果
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div data-decision data-id="e-mode">
+                <div class="eyebrow mb-3" style="color: var(--g700)">
+                  驗證模式
+                </div>
+                <div class="grid md:grid-cols-3 gap-3">
+                  <label class="choice"
+                    ><input type="radio" name="e-mode" value="自己跑" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span><strong>我自己跑</strong></span></label
+                  >
+                  <label class="choice"
+                    ><input
+                      type="radio"
+                      name="e-mode"
+                      value="工程師帶我跑"
+                    /><span class="choice-dot"></span
+                    ><span
+                      ><strong>工程師帶我跑</strong> · 用瀏覽器逐步確認</span
+                    ></label
+                  >
+                  <label class="choice choice-warning"
+                    ><input type="radio" name="e-mode" value="跳過" /><span
+                      class="choice-dot"
+                    ></span
+                    ><span><strong>跳過</strong> · 風險自負</span></label
+                  >
+                </div>
+                <textarea class="note mt-3" rows="2" data-comment-for="e-mode" placeholder="補充：條件 / 但書 / 不同意的理由…"></textarea>
+              </div>
+            </div>
+          </section>
+          <!-- ════════ F · Commit ════════ -->
+          <section id="section-f">
+            <div class="mb-5 flex items-center">
+              <span class="section-num idx-letter">F</span>
+              <div>
+                <h2 style="font-size: 24px">Commit 拆法</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  示例共 12 檔未提交，建議拆成 3 個 commit
+                </p>
+              </div>
+            </div>
+
+            <div class="card p-7">
+              <div class="space-y-3 mb-6 pl-3">
+                <div class="commit-box">
+                  <div class="flex items-center gap-2">
+                    <span class="badge badge-clay">Commit 1</span>
+                    <strong style="font-size: 14px"
+                      >整理規則與分類設定</strong
+                    >
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      margin-top: 6px;
+                      color: var(--text-muted);
+                    "
+                  >
+                    示範分類與方案資料、2 檔
+                  </div>
+                </div>
+                <div class="commit-box">
+                  <div class="flex items-center gap-2">
+                    <span class="badge badge-clay">Commit 2</span>
+                    <strong style="font-size: 14px"
+                      >自動整理與歸檔檢查</strong
+                    >
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      margin-top: 6px;
+                      color: var(--text-muted);
+                    "
+                  >
+                    示例核心流程、6 檔（含 8 項驗收案例）
+                  </div>
+                </div>
+                <div class="commit-box">
+                  <div class="flex items-center gap-2">
+                    <span class="badge badge-clay">Commit 3</span>
+                    <strong style="font-size: 14px"
+                      >文件對齊 + 規格 + 紀錄</strong
+                    >
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      margin-top: 6px;
+                      color: var(--text-muted);
+                    "
+                  >
+                    操作說明 / 示範規格 / 回顧紀錄、4 檔
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-5">
+                <div data-decision data-id="f-mode">
+                  <div class="eyebrow mb-3" style="color: var(--g700)">
+                    拆法
+                  </div>
+                  <div class="grid md:grid-cols-2 gap-3">
+                    <label class="choice"
+                      ><input
+                        type="radio"
+                        name="f-mode"
+                        value="3 commit"
+                        checked
+                      /><span class="choice-dot"></span
+                      ><span><strong>3 commit</strong> · 如上拆</span></label
+                    >
+                    <label class="choice"
+                      ><input
+                        type="radio"
+                        name="f-mode"
+                        value="2 commit"
+                      /><span class="choice-dot"></span
+                      ><span
+                        ><strong>2 commit</strong> · 合併實作 + 文件</span
+                      ></label
+                    >
+                    <label class="choice"
+                      ><input
+                        type="radio"
+                        name="f-mode"
+                        value="1 commit"
+                      /><span class="choice-dot"></span
+                      ><span
+                        ><strong>1 commit</strong> · 全包成一個</span
+                      ></label
+                    >
+                    <label class="choice"
+                      ><input type="radio" name="f-mode" value="自訂" /><span
+                        class="choice-dot"
+                      ></span
+                      ><span><strong>自訂</strong>（補充說明）</span></label
+                    >
+                  </div>
+                  <textarea
+                    data-comment-for="f-mode"
+                    class="note mt-3"
+                    placeholder="自訂拆法..."
+                    rows="2"
+                  ></textarea>
+                </div>
+
+                <div data-decision data-id="f-push">
+                  <div class="eyebrow mb-3" style="color: var(--g700)">
+                    commit 完是否 push 到 main？
+                  </div>
+                  <div class="grid md:grid-cols-3 gap-3">
+                    <label class="choice"
+                      ><input
+                        type="radio"
+                        name="f-push"
+                        value="commit + push"
+                        checked
+                      /><span class="choice-dot"></span
+                      ><span><strong>commit + push</strong></span></label
+                    >
+                    <label class="choice"
+                      ><input
+                        type="radio"
+                        name="f-push"
+                        value="只 commit"
+                      /><span class="choice-dot"></span
+                      ><span
+                        ><strong>只 commit</strong> · push 我手動</span
+                      ></label
+                    >
+                    <label class="choice choice-warning"
+                      ><input
+                        type="radio"
+                        name="f-push"
+                        value="先不 commit"
+                      /><span class="choice-dot"></span
+                      ><span
+                        ><strong>先不 commit</strong> · 我要再 review</span
+                      ></label
+                    >
+                  </div>
+                  <textarea class="note mt-3" rows="2" data-comment-for="f-push" placeholder="補充：條件 / 但書 / 不同意的理由…"></textarea>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- ════════ G · 補充 ════════ -->
+          <section id="section-g">
+            <div class="mb-5 flex items-center">
+              <span class="section-num idx-letter">G</span>
+              <div>
+                <h2 style="font-size: 24px">額外補充</h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                  "
+                >
+                  想調整的歸檔規則、想補的情境、其他問題
+                </p>
+              </div>
+            </div>
+
+            <div class="card p-7">
+              <textarea
+                id="extra-notes"
+                class="note"
+                placeholder="例：想看某段實作、想推翻某個 phase 的設計、有其他疑問..."
+                rows="5"
+              ></textarea>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- ════════ Sticky bottom bar ════════ -->
+    <footer class="sticky-bar">
+      <div class="max-w-[1760px] w-[94vw] mx-auto px-8 py-5">
+        <div class="flex items-center justify-between gap-6 flex-wrap">
+          <div>
+            <div class="eyebrow" style="color: var(--g700)">產出決策摘要</div>
+            <div style="font-size: 14px; margin-top: 6px">
+              完成所有選擇 → 點按鈕複製 → 交回工程師
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="preview-btn" class="btn-secondary">預覽摘要</button>
+            <button id="copy-btn" class="btn-primary">📋 複製決策摘要</button>
+          </div>
+        </div>
+        <div id="preview-area" class="hidden mt-4">
+          <pre id="preview-content" class="preview"></pre>
+        </div>
+      </div>
+    </footer>
+
+    <footer class="k-mark">
+      <div class="glyph">∾</div>
+      <div class="meta">2026-09-08 · MARATHON 收尾追認 · Brewly 客服對話自動歸檔</div>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 共用複製工具 — file:// 下瀏覽器停用 navigator.clipboard，   -->
+    <!-- 一定會落到 execCommand 備援；備援也可能失敗，必須誠實回報   -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <script>
+      // 三段式：clipboard API → execCommand 備援 → 都失敗回 false（不假報成功）
+      window.vtCopyText = async function (text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(text);
+            return true;
+          } catch (err) {
+            // 落到 execCommand 備援
+          }
+        }
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.top = "-9999px";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        try {
+          ta.select();
+          ta.setSelectionRange(0, ta.value.length);
+          return document.execCommand("copy") === true;
+        } catch (err) {
+          return false;
+        } finally {
+          ta.remove();
+        }
+      };
+
+      // 複製失敗時的出路：把文字放進可選取區域並全選，使用者按一次 Cmd+C 即可
+      // target 有給就用頁面既有的預覽區（wrap 為它的外層、會自動展開）；
+      // 沒有預覽區就建一個臨時可選取區（雙擊可關閉）。
+      window.vtSelectForManualCopy = function (text, target, wrap) {
+        let node = target;
+        if (node) {
+          node.textContent = text;
+          if (wrap) wrap.classList.remove("hidden");
+        } else {
+          node = document.getElementById("vt-manual-copy-box");
+          if (!node) {
+            node = document.createElement("pre");
+            node.id = "vt-manual-copy-box";
+            node.title = "雙擊關閉";
+            node.style.cssText =
+              "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;" +
+              "max-width:min(720px,92vw);max-height:40vh;overflow:auto;white-space:pre-wrap;" +
+              "background:#fff;color:#111;border:1.5px solid #999;border-radius:10px;" +
+              "padding:14px 16px;font-size:12.5px;line-height:1.6;" +
+              "box-shadow:0 12px 40px rgba(0,0,0,.28)";
+            node.addEventListener("dblclick", function () {
+              node.remove();
+            });
+            document.body.appendChild(node);
+          }
+          node.textContent = text;
+        }
+        node.scrollIntoView({ block: "nearest" });
+        const sel = window.getSelection();
+        if (sel) {
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+        return node;
+      };
+    </script>
+
+    <script>
+      // Textarea 永遠可見、不條件 toggle hidden
+      // （user UX 偏好：補充欄位永遠在、不依 radio value 切換）
+
+      // 題目地圖（題數 ≥ 5 自動顯示）＋ 側欄逐段題數
+      const QMAP_MIN = 5;
+      function renderQuestionMap() {
+        const decisions = [...document.querySelectorAll("[data-decision]")];
+        const qmap = document.getElementById("qmap");
+        if (decisions.length < QMAP_MIN) {
+          qmap.remove();
+        } else {
+          qmap.classList.remove("hidden");
+          document.getElementById("qmap-count").textContent = decisions.length;
+          document.getElementById("qmap-list").innerHTML = decisions
+            .map((d, n) => {
+              const id = d.dataset.id.toLowerCase();
+              const done = !!d.querySelector(
+                `input[type="radio"][name="${id}"]:checked`,
+              );
+              const sec = d.closest("section[id]");
+              const label = sec
+                ? (sec.querySelector("h2")?.textContent || "")
+                    .split("—")[0]
+                    .trim()
+                : "";
+              // 題名 fallback 鏈：h3 / h4 題名 → 卡內 eyebrow → data-id
+              const title = (
+                d.querySelector("h3, h4")?.textContent ||
+                d.querySelector(".eyebrow")?.textContent ||
+                d.dataset.id
+              ).trim();
+              return `<a class="qmap-row" href="#${sec ? sec.id : ""}"><span class="q-idx">${String(n + 1).padStart(2, "0")}</span><span class="q-title">${title}</span><span class="q-sec">${label}</span><span class="qmap-state ${done ? "done" : "todo"}">${done ? "已選" : "未選"}</span></a>`;
+            })
+            .join("");
+        }
+        document.querySelectorAll("[data-count-for]").forEach((el) => {
+          const sec = document.getElementById(el.dataset.countFor);
+          if (!sec) return (el.textContent = "");
+          const qs = [...sec.querySelectorAll("[data-decision]")];
+          if (!qs.length) return (el.textContent = "");
+          const done = qs.filter((d) =>
+            d.querySelector(
+              `input[type="radio"][name="${d.dataset.id.toLowerCase()}"]:checked`,
+            ),
+          ).length;
+          el.textContent = `${done}/${qs.length}`;
+          el.classList.toggle("done", done === qs.length);
+        });
+      }
+
+      // Progress counter
+      function updateProgress() {
+        const decisions = document.querySelectorAll("[data-decision]");
+        let answered = 0;
+        decisions.forEach((d) => {
+          const id = d.dataset.id.toLowerCase();
+          const radio = d.querySelector(
+            `input[type="radio"][name="${id}"]:checked`,
+          );
+          if (radio) answered++;
+        });
+        document.getElementById("progress-summary").textContent =
+          `${answered} / ${decisions.length}`;
+        renderQuestionMap();
+      }
+      document
+        .querySelectorAll('input[type="radio"]')
+        .forEach((el) => el.addEventListener("change", updateProgress));
+      updateProgress();
+
+      // Sidebar nav highlight
+      const navLinks = document.querySelectorAll(".nav-link");
+      const sections = document.querySelectorAll("section[id]");
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((l) =>
+                l.classList.toggle(
+                  "active",
+                  l.getAttribute("href") === `#${entry.target.id}`,
+                ),
+              );
+            }
+          });
+        },
+        { rootMargin: "-30% 0px -60% 0px" },
+      );
+      sections.forEach((s) => observer.observe(s));
+
+      // Build summary
+      function buildSummary() {
+        const lines = [];
+        lines.push("# Marathon Brewly 客服對話自動歸檔 · 決策追認");
+        lines.push(`時間：${new Date().toLocaleString("zh-TW")}`);
+        lines.push("");
+
+        function getValue(name) {
+          const radio = document.querySelector(
+            `input[type="radio"][name="${name}"]:checked`,
+          );
+          return radio ? radio.value : "(未選)";
+        }
+        function getComment(id) {
+          const ta = document.querySelector(`[data-comment-for="${id}"]`);
+          return ta && ta.value.trim() ? ` — ${ta.value.trim()}` : "";
+        }
+
+        lines.push("## 設計決策 · 就地追認");
+        lines.push(
+          `- 決策 1 主題與解答採固定欄位：${getValue("d-229")}${getComment("d-229")}`,
+        );
+        lines.push(
+          `- 決策 2 兩階段改並行：${getValue("b-1")}${getComment("b-1")}`,
+        );
+        lines.push(
+          `- 決策 3 對話文字截短到 12K：${getValue("b-2")}${getComment("b-2")}`,
+        );
+        lines.push("");
+
+        lines.push("## 快答 A · 其他示範決策追認");
+        lines.push(`- 排程歸檔驗證延後：${getValue("d-230")}${getComment("d-230")}`);
+        lines.push(`- 助理只在對話結束後整理：${getValue("d-231")}${getComment("d-231")}`);
+        lines.push("");
+
+        lines.push("## 快答 B · 流程微調");
+        lines.push(`- 摘要維持文字：${getValue("b-3")}${getComment("b-3")}`);
+        lines.push(`- 順序顛倒：${getValue("b-4")}${getComment("b-4")}`);
+        lines.push("");
+
+        lines.push("## C · 延後項目");
+        lines.push(
+          `- C-1 歸檔分類表自動同步：${getValue("c-1")}${getComment("c-1")}`,
+        );
+        lines.push(
+          `- C-2 待補原因統一用語：${getValue("c-2")}${getComment("c-2")}`,
+        );
+        lines.push(
+          `- C-3 官網與 App 共用整理規則：${getValue("c-3")}${getComment("c-3")}`,
+        );
+        lines.push(
+          `- C-4 對話段落引用統一格式：${getValue("c-4")}${getComment("c-4")}`,
+        );
+        lines.push(
+          `- C-5 長對話整理範圍統一：${getValue("c-5")}${getComment("c-5")}`,
+        );
+        lines.push(
+          `- C-6 舊版示範說明清理：${getValue("c-6")}${getComment("c-6")}`,
+        );
+        lines.push("");
+
+        lines.push("## D · 專案筆記 寫入");
+        lines.push(`- 整理等待時間說明：${getValue("memory-1")}${getComment("memory-1")}`);
+        lines.push(`- 待補原因分流：${getValue("memory-2")}${getComment("memory-2")}`);
+        lines.push(`- 整理參考資料備妥：${getValue("memory-3")}${getComment("memory-3")}`);
+        lines.push("");
+
+        lines.push("## E · 實機驗證");
+        lines.push(`- 模式：${getValue("e-mode")}${getComment("e-mode")}`);
+        lines.push("");
+
+        lines.push("## F · Commit");
+        lines.push(`- 拆法：${getValue("f-mode")}${getComment("f-mode")}`);
+        lines.push(`- Push：${getValue("f-push")}${getComment("f-push")}`);
+        lines.push("");
+
+        const extra = document.getElementById("extra-notes").value.trim();
+        if (extra) {
+          lines.push("## G · 補充");
+          lines.push(extra);
+        }
+
+        return lines.join("\n") + (window.vtCollectComments?.() || "");
+      }
+
+      // 告知全頁評論 snippet：已有既有複製機制、隱藏其 fallback 複製按鈕
+      window.vtBuildDecisionExport = buildSummary;
+
+      document.getElementById("preview-btn").addEventListener("click", () => {
+        const area = document.getElementById("preview-area");
+        const content = document.getElementById("preview-content");
+        content.textContent = buildSummary();
+        area.classList.toggle("hidden");
+      });
+
+      const copyBtn = document.getElementById("copy-btn");
+      copyBtn.addEventListener("click", async () => {
+        const text = buildSummary();
+        const orig = copyBtn.innerHTML;
+        const ok = await window.vtCopyText(text);
+        if (ok) {
+          copyBtn.innerHTML = "✅ 已複製！";
+        } else {
+          // 複製不到就不假報成功：展開預覽區、全選摘要，使用者按 Cmd+C 即可
+          window.vtSelectForManualCopy(
+            text,
+            document.getElementById("preview-content"),
+            document.getElementById("preview-area"),
+          );
+          copyBtn.innerHTML = "已選取 → 請按 Cmd+C 複製";
+        }
+        setTimeout(
+          () => {
+            copyBtn.innerHTML = orig;
+          },
+          ok ? 2000 : 6000,
+        );
+      });
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 全頁評論系統 — 預設內建、可手動移除                       -->
+    <!-- 完整 snippet 見 references/interaction-patterns.md       -->
+    <!-- 整合：buildSummary 末尾已拼接 vtCollectComments、         -->
+    <!-- window.vtBuildDecisionExport 已註冊、fallback 複製按鈕自動隱藏 -->
+    <!-- pill 因頁面有 sticky bar、bottom 改 70px / list 改 114px  -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <style>
+      .vt-comment-trigger {
+        position: fixed;
+        z-index: 9998;
+        background: var(--paper);
+        border: 1.5px solid var(--clay);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+        color: var(--clay);
+        font-family: var(--mono);
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(20, 20, 19, 0.12);
+        display: none;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
+      }
+      .vt-comment-trigger:hover {
+        background: var(--clay);
+        color: var(--paper);
+      }
+      .vt-comment-popup {
+        position: fixed;
+        z-index: 9999;
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(20, 20, 19, 0.15);
+        padding: 14px 16px;
+        width: 340px;
+        display: none;
+      }
+      .vt-comment-popup .quote {
+        background: var(--g100);
+        border-left: 3px solid var(--clay);
+        padding: 8px 10px;
+        font-size: 12.5px;
+        color: var(--g700);
+        line-height: 1.45;
+        margin-bottom: 10px;
+        max-height: 80px;
+        overflow-y: auto;
+      }
+      .vt-comment-popup textarea {
+        width: 100%;
+        border: 1.5px solid var(--g300);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        font-family: var(--sans);
+        resize: vertical;
+        min-height: 60px;
+        color: var(--slate);
+        box-sizing: border-box;
+      }
+      .vt-comment-popup textarea:focus {
+        outline: none;
+        border-color: var(--clay);
+      }
+      .vt-comment-popup .actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        font-size: 11.5px;
+      }
+      .vt-comment-popup .hint {
+        color: var(--g500);
+        font-family: var(--mono);
+      }
+      .vt-comment-popup button.send {
+        background: var(--clay);
+        color: var(--paper);
+        border: none;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .vt-comment-popup button.send:hover {
+        background: var(--clay-d);
+      }
+      .vt-comment-popup button.cancel {
+        background: transparent;
+        border: 1px solid var(--g300);
+        color: var(--g500);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12.5px;
+        cursor: pointer;
+        margin-right: 8px;
+      }
+      mark.vt-comment-mark {
+        background: var(--oat);
+        padding: 0 2px;
+        border-radius: 2px;
+        cursor: pointer;
+      }
+      mark.vt-comment-mark:hover {
+        background: #d5c4a8;
+      }
+      .vt-comment-pill {
+        position: fixed;
+        right: 16px;
+        bottom: 70px;
+        z-index: 9992;
+        background: var(--paper);
+        border: 1.5px solid var(--clay);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--clay);
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(20, 20, 19, 0.1);
+        display: none;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
+      }
+      .vt-comment-pill.is-active {
+        display: inline-flex;
+      }
+      .vt-comment-pill:hover {
+        background: var(--clay);
+        color: var(--paper);
+      }
+      .vt-comment-pill strong {
+        font-weight: 600;
+      }
+      .vt-comment-list {
+        position: fixed;
+        right: 16px;
+        bottom: 114px;
+        width: 360px;
+        max-height: 60vh;
+        z-index: 9993;
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-radius: 14px;
+        box-shadow: 0 12px 32px rgba(20, 20, 19, 0.15);
+        display: none;
+        flex-direction: column;
+      }
+      .vt-comment-list.is-open {
+        display: flex;
+      }
+      .vt-comment-list-header {
+        background: var(--paper);
+        border-bottom: 1.5px solid var(--g200);
+        padding: 12px 16px;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--g500);
+        font-weight: 600;
+        border-radius: 14px 14px 0 0;
+      }
+      .vt-comment-list-items {
+        overflow-y: auto;
+        flex: 1;
+      }
+      .vt-comment-item {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--g200);
+      }
+      .vt-comment-item:last-child {
+        border-bottom: none;
+      }
+      .vt-comment-item .item-quote {
+        font-size: 11.5px;
+        color: var(--g500);
+        font-style: italic;
+        border-left: 2px solid var(--oat);
+        padding-left: 8px;
+        line-height: 1.4;
+        margin-bottom: 6px;
+      }
+      .vt-comment-item .item-body {
+        font-size: 13px;
+        color: var(--slate);
+        line-height: 1.5;
+      }
+      .vt-comment-item .item-del {
+        font-size: 11px;
+        color: var(--g500);
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin-top: 4px;
+        padding: 0;
+        font-family: inherit;
+      }
+      .vt-comment-item .item-del:hover {
+        color: var(--red);
+      }
+      .vt-comment-list-footer {
+        border-top: 1.5px solid var(--g200);
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        border-radius: 0 0 14px 14px;
+        background: var(--g100);
+      }
+      .vt-comment-list-footer button {
+        background: transparent;
+        border: 1.5px solid var(--g300);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        color: var(--g700);
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .vt-comment-list-footer button:hover {
+        border-color: var(--slate);
+        color: var(--slate);
+      }
+      .vt-comment-list-footer button.copy {
+        background: var(--clay);
+        color: var(--paper);
+        border-color: var(--clay);
+      }
+      .vt-comment-list-footer button.copy:hover {
+        background: var(--clay-d);
+      }
+      body.vt-has-existing-export .vt-comment-list-footer button.copy {
+        display: none;
+      }
+    </style>
+    <button class="vt-comment-trigger" id="vt-comment-trigger">💬 評論</button>
+    <div class="vt-comment-popup" id="vt-comment-popup">
+      <div class="quote" id="vt-popup-quote"></div>
+      <textarea
+        id="vt-popup-textarea"
+        placeholder="對這段文字的評論 / 疑問 / 補充..."
+      ></textarea>
+      <div class="actions">
+        <span class="hint">⌘ + Enter 送出 · Esc 取消</span>
+        <div>
+          <button class="cancel" id="vt-popup-cancel">取消</button
+          ><button class="send" id="vt-popup-send">送出</button>
+        </div>
+      </div>
+    </div>
+    <button class="vt-comment-pill" id="vt-comment-pill">
+      💬 <strong id="vt-count">0</strong>
+    </button>
+    <div class="vt-comment-list" id="vt-comment-list">
+      <div class="vt-comment-list-header">— 我的評論</div>
+      <div class="vt-comment-list-items" id="vt-comment-list-items"></div>
+      <div class="vt-comment-list-footer">
+        <button id="vt-clear-all">全部清除</button>
+        <button class="copy" id="vt-copy-fallback">📋 複製評論</button>
+      </div>
+    </div>
+    <script>
+      (function () {
+        const S = "vt-comments-" + location.pathname,
+          L = 80;
+        let c = JSON.parse(localStorage.getItem(S) || "[]"),
+          sel = null;
+        const $ = (i) => document.getElementById(i),
+          tr = $("vt-comment-trigger"),
+          p = $("vt-comment-popup"),
+          pq = $("vt-popup-quote"),
+          pt = $("vt-popup-textarea"),
+          pi = $("vt-comment-pill"),
+          ce = $("vt-count"),
+          le = $("vt-comment-list"),
+          li = $("vt-comment-list-items");
+        window.vtCollectComments = function () {
+          if (!c.length) return "";
+          return (
+            "\n\n---\n\n" +
+            c
+              .map((x) => {
+                const q =
+                  x.quote.length > L ? x.quote.slice(0, L) + "…" : x.quote;
+                return `@評論「${q}」\n  → ${x.body}`;
+              })
+              .join("\n\n")
+          );
+        };
+        function hs(e) {
+          if (
+            e.target.closest(
+              ".vt-comment-popup,.vt-comment-trigger,.vt-comment-pill,.vt-comment-list,button,input,select,textarea",
+            )
+          )
+            return;
+          setTimeout(() => {
+            const s = getSelection(),
+              t = s.toString().trim();
+            if (!t || t.length < 2) {
+              tr.style.display = "none";
+              return;
+            }
+            const r = s.getRangeAt(0),
+              b = r.getBoundingClientRect();
+            sel = { text: t, range: r.cloneRange() };
+            tr.style.display = "inline-flex";
+            tr.style.top = Math.max(8, b.top - 38) + "px";
+            tr.style.left = Math.max(8, b.left + b.width / 2 - 40) + "px";
+          }, 10);
+        }
+        document.addEventListener("mouseup", hs);
+        document.addEventListener("touchend", hs);
+        tr.addEventListener("click", op);
+        function op() {
+          if (!sel) return;
+          const q = sel.text.length > L ? sel.text.slice(0, L) + "…" : sel.text;
+          pq.textContent = q;
+          pt.value = "";
+          const t = tr.getBoundingClientRect();
+          let l = t.left;
+          if (l + 340 > innerWidth - 16) l = innerWidth - 356;
+          let to = t.bottom + 6;
+          if (to + 220 > innerHeight) to = t.top - 230;
+          p.style.left = Math.max(8, l) + "px";
+          p.style.top = Math.max(8, to) + "px";
+          tr.style.display = "none";
+          p.style.display = "block";
+          setTimeout(() => pt.focus(), 50);
+        }
+        $("vt-popup-cancel").addEventListener("click", cp);
+        $("vt-popup-send").addEventListener("click", sc);
+        pt.addEventListener("keydown", (e) => {
+          if (e.isComposing || e.keyCode === 229) return;
+          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            e.stopPropagation();
+            sc();
+          }
+          if (e.key === "Escape") cp();
+        });
+        function cp() {
+          p.style.display = "none";
+          sel = null;
+        }
+        function sc() {
+          const b = pt.value.trim();
+          if (!b || !sel) return cp();
+          const id = "c-" + Date.now(),
+            q = sel.text;
+          try {
+            const m = document.createElement("mark");
+            m.className = "vt-comment-mark";
+            m.dataset.commentId = id;
+            sel.range.surroundContents(m);
+          } catch (e) {}
+          c.push({ id, quote: q, body: b, ts: Date.now() });
+          ps();
+          rn();
+          cp();
+          getSelection().removeAllRanges();
+        }
+        function ps() {
+          localStorage.setItem(S, JSON.stringify(c));
+        }
+        function rn() {
+          ce.textContent = c.length;
+          pi.classList.toggle("is-active", c.length > 0);
+          if (!c.length) le.classList.remove("is-open");
+          li.innerHTML = c
+            .map((x) => {
+              const q =
+                x.quote.length > 60 ? x.quote.slice(0, 60) + "…" : x.quote;
+              return `<div class="vt-comment-item" data-id="${x.id}"><div class="item-quote">「${eh(q)}」</div><div class="item-body">${eh(x.body)}</div><button class="item-del" data-del="${x.id}">刪除</button></div>`;
+            })
+            .join("");
+          li.querySelectorAll("[data-del]").forEach((b) =>
+            b.addEventListener("click", () => dc(b.dataset.del)),
+          );
+        }
+        function dc(id) {
+          c = c.filter((x) => x.id !== id);
+          document
+            .querySelectorAll(`mark.vt-comment-mark[data-comment-id="${id}"]`)
+            .forEach((m) => {
+              const pr = m.parentNode;
+              while (m.firstChild) pr.insertBefore(m.firstChild, m);
+              pr.removeChild(m);
+              pr.normalize();
+            });
+          ps();
+          rn();
+        }
+        function eh(s) {
+          return String(s).replace(
+            /[&<>"']/g,
+            (ch) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              })[ch],
+          );
+        }
+        pi.addEventListener("click", () => le.classList.toggle("is-open"));
+        $("vt-clear-all").addEventListener("click", () => {
+          if (!c.length) return;
+          if (!confirm("確定清除全部 " + c.length + " 條評論？")) return;
+          document.querySelectorAll("mark.vt-comment-mark").forEach((m) => {
+            const pr = m.parentNode;
+            while (m.firstChild) pr.insertBefore(m.firstChild, m);
+            pr.removeChild(m);
+            pr.normalize();
+          });
+          c = [];
+          ps();
+          rn();
+        });
+        $("vt-copy-fallback").addEventListener("click", async (e) => {
+          if (!c.length) return;
+          const t = window.vtCollectComments().replace(/^\n\n---\n\n/, ""),
+            b = e.currentTarget,
+            o = b.textContent;
+          const ok = await window.vtCopyText(t);
+          if (ok) {
+            b.textContent = "✅ 已複製";
+          } else {
+            // 複製不到就不假報成功：把評論放進臨時區域並全選
+            window.vtSelectForManualCopy(t);
+            b.textContent = "已選取 → 請按 Cmd+C";
+          }
+          setTimeout(() => (b.textContent = o), ok ? 2000 : 6000);
+        });
+        setTimeout(() => {
+          if (typeof window.vtBuildDecisionExport === "function")
+            document.body.classList.add("vt-has-existing-export");
+        }, 100);
+        document.addEventListener("click", (e) => {
+          if (
+            p.style.display === "block" &&
+            !e.target.closest(".vt-comment-popup,.vt-comment-trigger")
+          )
+            cp();
+        });
+        rn();
+      })();
+    </script>
+  
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- Session 識別 — 多視窗並行時分辨這份是哪個 session 產的     -->
+    <!-- 產出時把 scripts/session-label.sh 的結果填進下面兩個值      -->
+    <!-- 留空 = 整段停用（範本原檔即此狀態）                        -->
+    <!-- 完整說明見 references/session-identity.md                 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <script>
+      window.VT_SESSION = { label: "", id: "", project: "" };
+    </script>
+    <style>
+      .vt-session-badge {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 5px 16px;
+        background: var(--vt-session-color, #666);
+        color: #fff;
+        font-family: var(--mono, ui-monospace, monospace);
+        font-size: 11.5px;
+        letter-spacing: 0.06em;
+      }
+      .vt-session-badge .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #fff;
+        opacity: 0.85;
+        flex-shrink: 0;
+      }
+      .vt-session-badge .lb {
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .vt-session-badge .id {
+        margin-left: auto;
+        opacity: 0.75;
+      }
+    </style>
+    <script>
+      (function () {
+        const s = window.VT_SESSION || {};
+        if (!s.label) return;
+        const seed = s.id || s.label;
+        let hue = 7;
+        for (const c of seed) hue = (hue * 31 + c.charCodeAt(0)) % 360;
+        const col = `hsl(${hue} 58% 42%)`;
+        document.title = `${s.label} · ${document.title}`;
+        try {
+          const cv = document.createElement("canvas");
+          cv.width = cv.height = 64;
+          const g = cv.getContext("2d");
+          g.fillStyle = col;
+          if (g.roundRect) {
+            g.beginPath();
+            g.roundRect(2, 2, 60, 60, 14);
+            g.fill();
+          } else {
+            g.fillRect(2, 2, 60, 60);
+          }
+          g.fillStyle = "#fff";
+          g.font = '700 38px ui-sans-serif, system-ui, "PingFang TC"';
+          g.textAlign = "center";
+          g.textBaseline = "middle";
+          const ch = (s.label.match(/[A-Za-z0-9\u4e00-\u9fff]/) || ["?"])[0];
+          g.fillText(ch.toUpperCase(), 32, 36);
+          const link = document.createElement("link");
+          link.rel = "icon";
+          link.href = cv.toDataURL();
+          document.head.appendChild(link);
+        } catch (e) {}
+        const b = document.createElement("div");
+        b.className = "vt-session-badge";
+        b.style.setProperty("--vt-session-color", col);
+        b.innerHTML =
+          '<span class="dot"></span><span class="lb"></span><span class="id"></span>';
+        b.querySelector(".lb").textContent = s.label;
+        b.querySelector(".id").textContent = s.id || "";
+        const host = document.querySelector("header") || document.body;
+        host.insertBefore(b, host.firstChild);
+      })();
+    </script>
+  </body>
+</html>

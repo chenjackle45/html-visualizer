@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "chenjackle45",
+  "description": "Jackle Chen's Claude Code plugins",
+  "owner": {
+    "name": "Jackle Chen",
+    "url": "https://jackle.pro/"
+  },
+  "plugins": [
+    {
+      "name": "html-visualizer",
+      "description": "Render long-form documents, reports, specs, decision sheets and diagrams as polished HTML for humans. Bundles html-visualizer, chart and diagram-design skills.",
+      "author": {
+        "name": "Jackle Chen",
+        "url": "https://jackle.pro/"
+      },
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/chenjackle45/html-visualizer"
+    }
+  ]
+}

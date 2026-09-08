@@ -1,0 +1,9 @@
+<!doctype html><html><head><title>測試頁</title></head>
+<body>
+<section id="s1"><table><tr><td>有視覺元件</td></tr></table></section>
+<script>
+  window.VT_SESSION = { label: "測試", id: "t1" };
+  const el = document.getElementById("definitely-missing-id");
+  el.textContent = "x";
+</script>
+</body></html>

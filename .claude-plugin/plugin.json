@@ -1,0 +1,20 @@
+{
+  "name": "html-visualizer",
+  "description": "Render long-form documents, reports, specs, decision sheets and diagrams as polished HTML for humans (AI reads Markdown, humans read HTML). Bundles three skills: html-visualizer, chart, diagram-design.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Jackle Chen",
+    "url": "https://jackle.pro/"
+  },
+  "homepage": "https://github.com/chenjackle45/html-visualizer",
+  "repository": "https://github.com/chenjackle45/html-visualizer",
+  "license": "MIT",
+  "keywords": [
+    "html",
+    "visualization",
+    "reports",
+    "diagrams",
+    "charts",
+    "decision-sheet"
+  ]
+}

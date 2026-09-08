@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Brewly 圖表系統 · @unovis demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ============================================================
+       設計 Token —— 整個圖表系統的「視覺語言」集中在這裡。
+       所有圖表共用同一組顏色 / 字體 / 軸樣式 / 圓角 / 間距。
+       要換主題只改這一段。
+       ============================================================ */
+      :root {
+        /* 類別配色（靛藍主調 + 暖琥珀點綴，6 色循環） */
+        --c-indigo: #2d4f8e;
+        --c-blue: #5b8dbe;
+        --c-sky: #93b8d8;
+        --c-amber: #c9740a;
+        --c-gold: #e0a858;
+        --c-slate: #8795a8;
+
+        /* 語意色 */
+        --ink: #1f2733; /* 主文字 */
+        --ink-soft: #5a6675; /* 次要文字 */
+        --ink-faint: #97a1ae; /* 軸刻度文字 */
+        --line-faint: #e7e2d9; /* 卡片邊 / 分隔 */
+        --grid: #ece8e0; /* 圖表水平網格 */
+        --page-bg: #f6f3ee; /* 暖米底 */
+        --card-bg: #ffffff;
+
+        /* @unovis 軸樣式變數（統一所有圖表的軸） */
+        --vis-font-family: "Noto Sans TC", system-ui, sans-serif;
+        --vis-axis-tick-label-color: var(--ink-faint);
+        --vis-axis-tick-label-font-size: 12px;
+        --vis-axis-grid-color: var(--grid);
+        --vis-axis-tick-color: transparent; /* 不畫刻度小短線 */
+        --vis-axis-domain-color: transparent; /* 不畫軸線本身 */
+        --vis-axis-label-color: var(--ink-soft);
+
+        /* @unovis tooltip */
+        --vis-tooltip-background-color: rgba(31, 39, 51, 0.94);
+        --vis-tooltip-border-color: transparent;
+        --vis-tooltip-text-color: #fff;
+        --vis-tooltip-padding: 8px 10px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        font-family: "Noto Sans TC", system-ui, sans-serif;
+        color: var(--ink);
+        background: var(--page-bg);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 40px 24px 80px;
+      }
+
+      header.page {
+        margin-bottom: 28px;
+      }
+      header.page .eyebrow {
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        font-weight: 700;
+        color: var(--c-indigo);
+        text-transform: uppercase;
+      }
+      header.page h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 8px 0 6px;
+      }
+      header.page p {
+        font-size: 15px;
+        color: var(--ink-soft);
+        margin: 0;
+        line-height: 1.7;
+        max-width: 720px;
+      }
+
+      /* 色票列 */
+      .tokens {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin: 22px 0 36px;
+        padding: 16px 18px;
+        background: var(--card-bg);
+        border: 1px solid var(--line-faint);
+        border-radius: 14px;
+      }
+      .token {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--ink-soft);
+      }
+      .token .sw {
+        width: 16px;
+        height: 16px;
+        border-radius: 5px;
+      }
+
+      /* 圖表卡 grid */
+      .grid {
+        display: grid;
+        gap: 22px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .grid .span-2 {
+        grid-column: 1 / -1;
+      }
+      @media (max-width: 760px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--line-faint);
+        border-radius: 16px;
+        padding: 20px 20px 14px;
+        box-shadow:
+          0 1px 2px rgba(31, 39, 51, 0.04),
+          0 8px 24px rgba(31, 39, 51, 0.04);
+      }
+      .card .head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 4px;
+      }
+      .card h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .card .sub {
+        font-size: 12.5px;
+        color: var(--ink-soft);
+        margin: 2px 0 14px;
+        line-height: 1.6;
+      }
+      .badge {
+        font-size: 11.5px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+      .badge.ok {
+        color: #1f6b3b;
+        background: #e6f2ea;
+      }
+      .badge.warn {
+        color: #9a5800;
+        background: #fbeedd;
+      }
+
+      /* 圖例 */
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin: 0 0 10px;
+      }
+      .legend .item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12.5px;
+        color: var(--ink-soft);
+      }
+      .legend .dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 3px;
+      }
+      .legend .ln {
+        width: 16px;
+        height: 0;
+        border-top: 2.5px solid;
+      }
+      .legend .ln.dash {
+        border-top-style: dashed;
+      }
+
+      .chart {
+        width: 100%;
+      }
+      .chart.h-tall {
+        height: 280px;
+      }
+      .chart.h-mid {
+        height: 240px;
+      }
+
+      /* donut 中央數字 */
+      .donut-wrap {
+        position: relative;
+      }
+      .donut-center {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+      .donut-center .big {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .donut-center .cap {
+        font-size: 12px;
+        color: var(--ink-soft);
+        margin-top: 2px;
+      }
+
+      footer.note {
+        margin-top: 36px;
+        padding: 18px 20px;
+        border-radius: 14px;
+        background: #fbf9f5;
+        border: 1px solid var(--line-faint);
+        font-size: 13px;
+        color: var(--ink-soft);
+        line-height: 1.8;
+      }
+      footer.note b {
+        color: var(--ink);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="page">
+        <div class="eyebrow">Chart System · @unovis</div>
+        <h1>Brewly 圖表系統</h1>
+        <p>
+          Brewly 咖啡豆訂閱服務的虛構通路資料，所有數字僅供展示。配色、字體、軸樣式、圓角、網格共用一份 design token。
+          統一的是<b>外殼與視覺語言</b>，不是把所有資料塞進同一種圖；柱、折線、甜甜圈各司其職但長得像一家人。
+        </p>
+      </header>
+
+      <div class="tokens" id="tokenRow"></div>
+
+      <div class="grid">
+        <!-- 1. 單系列柱 -->
+        <section class="card">
+          <div class="head"><h3>① 單系列柱狀圖</h3></div>
+          <div class="sub">
+            最基本款。比較各期間的單一數值。每月訂閱數（份）。
+          </div>
+          <div id="c1" class="chart h-mid"></div>
+        </section>
+
+        <!-- 2. 多折線 -->
+        <section class="card">
+          <div class="head"><h3>② 多系列折線圖</h3></div>
+          <div class="sub">看趨勢與同期對比。今年 vs 去年同期訂閱數（份）。</div>
+          <div class="legend">
+            <span class="item"
+              ><span class="ln" style="border-color: var(--c-indigo)"></span
+              >今年</span
+            >
+            <span class="item"
+              ><span class="ln dash" style="border-color: var(--c-slate)"></span
+              >去年同期</span
+            >
+          </div>
+          <div id="c2" class="chart h-mid"></div>
+        </section>
+
+        <!-- 3. 分組柱 -->
+        <section class="card">
+          <div class="head"><h3>③ 分組柱狀圖</h3></div>
+          <div class="sub">同一期間內多項並排比較。目標 vs 實際訂閱數（份）。</div>
+          <div class="legend">
+            <span class="item"
+              ><span class="dot" style="background: var(--c-indigo)"></span
+              >實際</span
+            >
+            <span class="item"
+              ><span class="dot" style="background: var(--c-gold)"></span
+              >目標</span
+            >
+          </div>
+          <div id="c3" class="chart h-mid"></div>
+        </section>
+
+        <!-- 4. 堆疊柱 -->
+        <section class="card">
+          <div class="head"><h3>④ 堆疊柱狀圖</h3></div>
+          <div class="sub">看總量也看組成。各通路訂閱數堆疊（份）。</div>
+          <div class="legend">
+            <span class="item"
+              ><span class="dot" style="background: var(--c-indigo)"></span
+              >官網</span
+            >
+            <span class="item"
+              ><span class="dot" style="background: var(--c-blue)"></span>App</span
+            >
+            <span class="item"
+              ><span class="dot" style="background: var(--c-sky)"></span>門市</span
+            >
+            <span class="item"
+              ><span class="dot" style="background: var(--c-amber)"></span
+              >企業訂閱</span
+            >
+          </div>
+          <div id="c4" class="chart h-mid"></div>
+        </section>
+
+        <!-- 5. 柱+折線 combo（同單位）-->
+        <section class="card">
+          <div class="head">
+            <h3>⑤ 柱 + 折線 組合圖</h3>
+            <span class="badge ok">✓ 同單位才疊</span>
+          </div>
+          <div class="sub">
+            實際（柱）與目標（線）都是「份」，共用同一條 Y 軸 ——
+            這是正當的組合。
+          </div>
+          <div class="legend">
+            <span class="item"
+              ><span class="dot" style="background: var(--c-indigo)"></span
+              >實際訂閱數</span
+            >
+            <span class="item"
+              ><span class="ln dash" style="border-color: var(--c-amber)"></span
+              >目標訂閱數</span
+            >
+          </div>
+          <div id="c5" class="chart h-mid"></div>
+        </section>
+
+        <!-- 6. 甜甜圈 -->
+        <section class="card">
+          <div class="head"><h3>⑥ 甜甜圈圖</h3></div>
+          <div class="sub">占比結構。七個月各通路訂閱總數占比。</div>
+          <div class="legend" id="c6legend"></div>
+          <div class="donut-wrap">
+            <div id="c6" class="chart h-mid"></div>
+            <div class="donut-center">
+              <span class="big">1400</span
+              ><span class="cap">訂閱總數（份）</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. 雙面板（不同單位）-->
+        <section class="card span-2">
+          <div class="head">
+            <h3>⑦ 雙面板（不同單位 → 不疊軸）</h3>
+            <span class="badge warn">✗ 不同單位不共軸</span>
+          </div>
+          <div class="sub">
+            訂閱數（份）與續訂率（%）單位不同。<b>不</b>硬塞兩條 Y
+            軸（雙軸的刻度可被任意拉伸 = 會誤導）， 改成上下兩個面板共用同一條 X
+            軸 —— 各自誠實、又能對齊時間看關聯。
+          </div>
+          <div id="c7a" class="chart h-mid" style="height: 170px"></div>
+          <div style="height: 6px"></div>
+          <div id="c7b" class="chart" style="height: 150px"></div>
+        </section>
+      </div>
+
+      <footer class="note">
+        <b>這份 demo 沉澱的鐵則：</b>
+        ① 統一「外殼 + 視覺語言」，不統一圖型 —— 柱/折線/甜甜圈共用 token
+        但各司其職。 ② 不同單位永遠不共用一條 Y
+        軸（雙軸陷阱）；要對照就用雙面板共用 X 軸。 ③ 同單位的「目標 vs
+        實際」柱+折線疊圖是正當的，不算雙軸。 ④ 圖好不好看，七成看資料適配性 ——
+        極端量級差、太稀疏的資料，任何圖都會醜，先處理資料再選圖。 ⑤ 缺值用
+        <code>undefined</code> 讓折線斷開，不要用
+        <code>0</code>（會讓線砸到地板）。
+      </footer>
+    </div>
+
+    <script type="module">
+      import {
+        XYContainer,
+        GroupedBar,
+        StackedBar,
+        Line,
+        Axis,
+        SingleContainer,
+        Donut,
+        CurveType,
+      } from "https://cdn.jsdelivr.net/npm/@unovis/ts/+esm";
+
+      // ---- design token 讀取（給 JS 用同一組顏色，不重複定義）----
+      const css = getComputedStyle(document.documentElement);
+      const T = (n) => css.getPropertyValue(n).trim();
+      const COLORS = {
+        indigo: T("--c-indigo"),
+        blue: T("--c-blue"),
+        sky: T("--c-sky"),
+        amber: T("--c-amber"),
+        gold: T("--c-gold"),
+        slate: T("--c-slate"),
+      };
+      const PALETTE = [
+        COLORS.indigo,
+        COLORS.blue,
+        COLORS.sky,
+        COLORS.amber,
+        COLORS.slate,
+      ];
+
+      // ---- 色票列渲染 ----
+      const tokenRow = document.getElementById("tokenRow");
+      Object.entries({
+        "靛藍 indigo": COLORS.indigo,
+        "藍 blue": COLORS.blue,
+        "天藍 sky": COLORS.sky,
+        "琥珀 amber": COLORS.amber,
+        "金 gold": COLORS.gold,
+        "石板 slate": COLORS.slate,
+      }).forEach(([name, c]) => {
+        const el = document.createElement("div");
+        el.className = "token";
+        el.innerHTML = `<span class="sw" style="background:${c}"></span>${name} · ${c}`;
+        tokenRow.appendChild(el);
+      });
+
+      // ---- 共用資料（飽滿、代表性，非稀疏真實資料）----
+      const months = ["3月", "4月", "5月", "6月", "7月", "8月", "9月"];
+      const subscriptions = [100, 150, 200, 250, 200, 250, 250]; // 份，虛構示範值
+      const target = [150, 150, 200, 200, 250, 250, 300]; // 份，虛構示範值
+      const lastYear = [50, 100, 100, 150, 150, 200, 200]; // 份，虛構示範值
+      const renewalRate = [70, 72, 74, 76, 78, 80, 82]; // 百分比，虛構示範值
+
+      // 各通路（堆疊用）
+      const ch = months.map((m, i) => ({
+        site: Math.round(subscriptions[i] * 0.5),
+        app: Math.round(subscriptions[i] * 0.2),
+        store: Math.round(subscriptions[i] * 0.2),
+        corporate: Math.round(subscriptions[i] * 0.1),
+      }));
+
+      // 通路占比（甜甜圈用，七個月加總）
+      const donutData = [
+        {
+          name: "官網",
+          value: ch.reduce((s, d) => s + d.site, 0),
+          color: COLORS.indigo,
+        },
+        {
+          name: "App",
+          value: ch.reduce((s, d) => s + d.app, 0),
+          color: COLORS.blue,
+        },
+        {
+          name: "門市",
+          value: ch.reduce((s, d) => s + d.store, 0),
+          color: COLORS.sky,
+        },
+        {
+          name: "企業訂閱",
+          value: ch.reduce((s, d) => s + d.corporate, 0),
+          color: COLORS.amber,
+        },
+      ];
+
+      // ---- 共用 axis 工廠 ----
+      const xAxis = (extra = {}) =>
+        new Axis({
+          type: "x",
+          tickFormat: (i) => months[i] ?? "",
+          numTicks: months.length,
+          gridLine: false,
+          tickLine: false,
+          domainLine: false,
+          ...extra,
+        });
+      const yAxis = (fmt = (v) => v, extra = {}) =>
+        new Axis({
+          type: "y",
+          tickFormat: fmt,
+          gridLine: true,
+          tickLine: false,
+          domainLine: false,
+          ...extra,
+        });
+
+      const x = (_d, i) => i;
+      const wan = (v) => `${v}`;
+
+      // ① 單系列柱
+      new XYContainer(
+        document.getElementById("c1"),
+        {
+          height: 240,
+          components: [
+            new StackedBar({
+              x,
+              y: (d) => d,
+              color: COLORS.indigo,
+              roundedCorners: 4,
+              barPadding: 0.32,
+            }),
+          ],
+          xAxis: xAxis(),
+          yAxis: yAxis(wan),
+        },
+        subscriptions,
+      );
+
+      // ② 多折線
+      new XYContainer(
+        document.getElementById("c2"),
+        {
+          height: 240,
+          components: [
+            new Line({
+              x,
+              y: (d) => d.cur,
+              color: COLORS.indigo,
+              lineWidth: 2.5,
+              curveType: CurveType.MonotoneX,
+            }),
+            new Line({
+              x,
+              y: (d) => d.prev,
+              color: COLORS.slate,
+              lineWidth: 2,
+              lineDashArray: [6, 4],
+              curveType: CurveType.MonotoneX,
+            }),
+          ],
+          xAxis: xAxis(),
+          yAxis: yAxis(wan),
+        },
+        months.map((_, i) => ({ cur: subscriptions[i], prev: lastYear[i] })),
+      );
+
+      // ③ 分組柱
+      new XYContainer(
+        document.getElementById("c3"),
+        {
+          height: 240,
+          components: [
+            new GroupedBar({
+              x,
+              y: [(d) => d.actual, (d) => d.target],
+              color: (d, i) => [COLORS.indigo, COLORS.gold][i],
+              roundedCorners: 4,
+              barPadding: 0.18,
+              groupPadding: 0.28,
+            }),
+          ],
+          xAxis: xAxis(),
+          yAxis: yAxis(wan),
+        },
+        months.map((_, i) => ({ actual: subscriptions[i], target: target[i] })),
+      );
+
+      // ④ 堆疊柱
+      new XYContainer(
+        document.getElementById("c4"),
+        {
+          height: 240,
+          components: [
+            new StackedBar({
+              x,
+              y: [(d) => d.site, (d) => d.app, (d) => d.store, (d) => d.corporate],
+              color: (d, i) =>
+                [COLORS.indigo, COLORS.blue, COLORS.sky, COLORS.amber][i],
+              roundedCorners: 3,
+              barPadding: 0.32,
+            }),
+          ],
+          xAxis: xAxis(),
+          yAxis: yAxis(wan),
+        },
+        ch,
+      );
+
+      // ⑤ 柱+折線 combo（同單位、共用 Y 軸）
+      new XYContainer(
+        document.getElementById("c5"),
+        {
+          height: 240,
+          components: [
+            new StackedBar({
+              x,
+              y: (d) => d.actual,
+              color: COLORS.indigo,
+              roundedCorners: 4,
+              barPadding: 0.34,
+            }),
+            new Line({
+              x,
+              y: (d) => d.target,
+              color: COLORS.amber,
+              lineWidth: 2.5,
+              lineDashArray: [6, 4],
+              curveType: CurveType.MonotoneX,
+            }),
+          ],
+          xAxis: xAxis(),
+          yAxis: yAxis(wan),
+        },
+        months.map((_, i) => ({ actual: subscriptions[i], target: target[i] })),
+      );
+
+      // ⑥ 甜甜圈
+      new SingleContainer(
+        document.getElementById("c6"),
+        {
+          height: 240,
+          component: new Donut({
+            value: (d) => d.value,
+            color: (d) => d.color,
+            arcWidth: 42,
+            cornerRadius: 4,
+            padAngle: 0.02,
+          }),
+        },
+        donutData,
+      );
+      // 甜甜圈圖例
+      const c6legend = document.getElementById("c6legend");
+      const donutTotal = donutData.reduce((s, d) => s + d.value, 0);
+      donutData.forEach((d) => {
+        const el = document.createElement("span");
+        el.className = "item";
+        el.innerHTML = `<span class="dot" style="background:${d.color}"></span>${d.name} ${Math.round((d.value / donutTotal) * 100)}%`;
+        c6legend.appendChild(el);
+      });
+
+      // ⑦ 雙面板：上 = 訂閱數（份），下 = 續訂率（%）— 共用 X、各自 Y
+      new XYContainer(
+        document.getElementById("c7a"),
+        {
+          height: 170,
+          components: [
+            new StackedBar({
+              x,
+              y: (d) => d,
+              color: COLORS.indigo,
+              roundedCorners: 4,
+              barPadding: 0.34,
+            }),
+          ],
+          xAxis: xAxis({ tickFormat: () => "" }), // 上面板隱藏 X 文字，避免重複
+          yAxis: yAxis((v) => `${v}`, { label: "訂閱數（份）" }),
+        },
+        subscriptions,
+      );
+
+      new XYContainer(
+        document.getElementById("c7b"),
+        {
+          height: 150,
+          components: [
+            new Line({
+              x,
+              y: (d) => d,
+              color: COLORS.amber,
+              lineWidth: 2.5,
+              curveType: CurveType.MonotoneX,
+            }),
+          ],
+          xAxis: xAxis(),
+          yAxis: yAxis((v) => `${v}%`, { label: "續訂率（%）" }),
+        },
+        renewalRate,
+      );
+
+      window.__chartsReady = true;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1780 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Brewly · HTTP 快取的 ETag 與 304 怎麼運作</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --ivory: #faf9f5;
+        --paper: #ffffff;
+        --slate: #141413;
+        --clay: #d97757;
+        --clay-d: #b85c3e;
+        --clay-soft: #fbe9df;
+        --oat: #e3dacc;
+        --olive: #788c5d;
+        --olive-soft: #eff1e8;
+        --olive-border: #c8d2b8;
+        --g100: #f0eee6;
+        --g200: #e6e3da;
+        --g300: #d1cfc5;
+        --g500: #87867f;
+        --g700: #3d3d3a;
+        --green: #788c5d;
+        --green-soft: #eff1e8;
+        --green-border: #c8d2b8;
+        --red: #b85c3e;
+        --red-soft: #faebe3;
+        --red-border: #e8c4af;
+        --yellow: #c49845;
+        --yellow-soft: #f8efd9;
+        --yellow-border: #e8d4a0;
+        --bg: var(--ivory);
+        --bg-card: var(--paper);
+        --bg-soft: var(--g100);
+        --bg-soft-2: var(--g200);
+        --border: var(--g300);
+        --border-strong: var(--g500);
+        --text: var(--slate);
+        --text-muted: var(--g700);
+        --text-soft: var(--g500);
+        --accent: var(--clay);
+        --accent-soft: var(--clay-soft);
+        --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+        --sans:
+          system-ui, -apple-system, "Segoe UI", "PingFang TC", "Noto Sans TC",
+          Roboto, Helvetica, Arial, sans-serif;
+        --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--serif);
+        font-weight: 500;
+        color: var(--slate);
+        letter-spacing: -0.012em;
+        margin: 0;
+      }
+      h1 em,
+      h2 em {
+        font-style: italic;
+        color: var(--clay);
+      }
+      p {
+        max-width: 72ch;
+      }
+      .wrap {
+        width: min(94vw, 1760px);
+        margin: 0 auto;
+        padding: 0 32px;
+      }
+
+      /* ── Anthropic signature ── */
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 11.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--g500);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 24px;
+        height: 1.5px;
+        background: var(--clay);
+        flex-shrink: 0;
+      }
+      .card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+      }
+      .card-soft {
+        background: var(--bg-soft);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+      }
+      .sec-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+      .sec-idx {
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--clay-d);
+        background: var(--clay-soft);
+        border: 1.5px solid var(--clay);
+        border-radius: 8px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .sec-sub {
+        font-size: 13.5px;
+        color: var(--text-soft);
+        margin-top: 3px;
+      }
+      .toc {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 26px;
+      }
+      .toc a {
+        font-size: 13px;
+        padding: 6px 15px;
+        border: 1.5px solid var(--border);
+        border-radius: 999px;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: all 0.15s;
+        background: var(--paper);
+      }
+      .toc a:hover {
+        border-color: var(--slate);
+        color: var(--slate);
+      }
+      .toc a .n {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--text-soft);
+        margin-right: 6px;
+      }
+      .highlight-box {
+        background: var(--clay-soft);
+        border-left: 3px solid var(--clay);
+        padding: 13px 17px;
+        border-radius: 6px;
+        font-size: 13.5px;
+      }
+      .highlight-box.green {
+        background: var(--green-soft);
+        border-left-color: var(--green);
+      }
+      .stat-card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+      }
+      .stat-label {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+      }
+      .stat-value {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 30px;
+        color: var(--clay);
+        margin-top: 4px;
+        line-height: 1.1;
+      }
+      .stat-sub {
+        font-size: 12.5px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+      footer.k-mark {
+        margin-top: 40px;
+        padding: 36px 0;
+        text-align: center;
+        border-top: 1.5px solid var(--border);
+      }
+      footer.k-mark .glyph {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 28px;
+        color: var(--clay);
+      }
+      footer.k-mark .meta {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--g500);
+        margin-top: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      /* ── 解釋類元件：定義卡 ── */
+      .def-card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-left: 3px solid var(--clay);
+        border-radius: 10px;
+        padding: 16px 20px;
+      }
+      .def-term {
+        font-family: var(--serif);
+        font-size: 17px;
+        font-weight: 500;
+        color: var(--slate);
+      }
+      .def-term .orig {
+        font-family: var(--mono);
+        font-size: 11.5px;
+        color: var(--text-soft);
+        margin-left: 8px;
+      }
+      .def-oneliner {
+        font-size: 15px;
+        color: var(--slate);
+        margin-top: 6px;
+        line-height: 1.6;
+      }
+      .def-oneliner em {
+        font-style: italic;
+        color: var(--clay-d);
+      }
+      .def-detail {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed var(--border);
+        line-height: 1.6;
+      }
+
+      /* ── 解釋類元件：類比橋 ── */
+      .analogy {
+        background: var(--olive-soft);
+        border: 1.5px solid var(--olive-border);
+        border-radius: 12px;
+        padding: 18px 22px;
+      }
+      .analogy-head {
+        font-family: var(--serif);
+        font-size: 16px;
+        color: #46552f;
+        margin-bottom: 14px;
+      }
+      .analogy-head em {
+        font-style: italic;
+        font-weight: 500;
+      }
+      .analogy-row {
+        display: grid;
+        grid-template-columns: 1fr 34px 1fr;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 0;
+        border-top: 1px solid var(--olive-border);
+        font-size: 13.5px;
+      }
+      .analogy-row .known {
+        color: var(--text-muted);
+      }
+      .analogy-row .arrow {
+        text-align: center;
+        color: var(--olive);
+        font-size: 12px;
+      }
+      .analogy-row .target {
+        font-weight: 600;
+        color: var(--slate);
+      }
+      .analogy-limit {
+        margin-top: 14px;
+        padding: 10px 13px;
+        background: var(--yellow-soft);
+        border: 1px solid var(--yellow-border);
+        border-radius: 8px;
+        font-size: 12.5px;
+        color: #6b4d10;
+        line-height: 1.55;
+      }
+
+      /* ── 解釋類元件：分層剖面 ── */
+      .layers {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .layer {
+        display: grid;
+        grid-template-columns: 160px 1fr auto;
+        align-items: center;
+        gap: 14px;
+        padding: 13px 18px;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        font-size: 13.5px;
+      }
+      .layer:first-child {
+        border-radius: 10px 10px 4px 4px;
+      }
+      .layer:last-child {
+        border-radius: 4px 4px 10px 10px;
+      }
+      .layer .name {
+        font-weight: 600;
+        color: var(--slate);
+      }
+      .layer .role {
+        color: var(--text-muted);
+      }
+      .layer .tag {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--text-soft);
+      }
+      .layer.emph {
+        border-color: var(--clay);
+        background: var(--clay-soft);
+      }
+      .layer.emph .tag {
+        color: var(--clay-d);
+        font-weight: 600;
+      }
+      .layer.dim {
+        opacity: 0.55;
+      }
+
+      /* ── 解釋類元件：時序圖 ── */
+      .seq {
+        --lanes: 3;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 18px 20px;
+      }
+      .seq-actors {
+        display: grid;
+        grid-template-columns: repeat(var(--lanes), 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .seq-actor {
+        text-align: center;
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 7px 6px;
+        background: var(--bg-soft);
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+      }
+      .seq-body {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(var(--lanes), 1fr);
+        row-gap: 9px;
+      }
+      .seq-lane {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 1.5px;
+        background: repeating-linear-gradient(
+          180deg,
+          var(--border) 0 5px,
+          transparent 5px 11px
+        );
+        left: calc((var(--i) + 0.5) * 100% / var(--lanes));
+      }
+      .seq-msg {
+        position: relative;
+        z-index: 1;
+        font-size: 12.5px;
+        padding: 7px 12px;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border-strong);
+        border-radius: 7px;
+        text-align: center;
+        grid-column: var(--from) / var(--to);
+      }
+      .seq-msg.back {
+        border-style: dashed;
+      }
+      .seq-msg.ok {
+        border-color: var(--green);
+        background: var(--green-soft);
+        color: #2d4a1c;
+      }
+      .seq-msg.fail {
+        border-color: var(--red);
+        background: var(--red-soft);
+        color: var(--red);
+      }
+      .seq-msg .dir {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text-soft);
+        margin-right: 6px;
+      }
+
+      /* ── 狀態演進（垂直流程 + mock）── */
+      .steps {
+        position: relative;
+        padding-left: 34px;
+      }
+      .steps::before {
+        content: "";
+        position: absolute;
+        left: 11px;
+        top: 6px;
+        bottom: 6px;
+        width: 2px;
+        background: var(--border);
+      }
+      .step {
+        position: relative;
+        margin-bottom: 18px;
+      }
+      .step::before {
+        content: "";
+        position: absolute;
+        left: -29px;
+        top: 6px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--clay);
+        border: 2.5px solid var(--bg);
+        box-shadow: 0 0 0 1.5px var(--clay);
+      }
+      .step-title {
+        font-family: var(--serif);
+        font-size: 15.5px;
+      }
+      .step-desc {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+      .mock {
+        background: var(--bg-soft);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 13px 15px;
+        margin-top: 10px;
+        position: relative;
+      }
+      .mock-label {
+        position: absolute;
+        top: -8px;
+        left: 12px;
+        background: var(--bg-card);
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-soft);
+        padding: 2px 8px;
+        border: 1px solid var(--border);
+        border-radius: 3px;
+      }
+      .tokrow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12.5px;
+        padding: 5px 0;
+      }
+      .tokrow .k {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text-soft);
+        width: 92px;
+        flex-shrink: 0;
+      }
+      .tokchip {
+        font-family: var(--mono);
+        font-size: 11px;
+        padding: 2px 9px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        background: var(--paper);
+        color: var(--text-muted);
+      }
+      .tokchip.live {
+        border-color: var(--green-border);
+        background: var(--green-soft);
+        color: var(--green);
+      }
+      .tokchip.dead {
+        border-color: var(--red-border);
+        background: var(--red-soft);
+        color: var(--red);
+        text-decoration: line-through;
+      }
+      .tokchip.none {
+        opacity: 0.5;
+      }
+
+      /* ── 誤解破解（左紅右綠）── */
+      .myth {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      @media (max-width: 900px) {
+        .myth {
+          grid-template-columns: 1fr;
+        }
+      }
+      /* 三欄在手機只剩約 35px 給說明欄，中文會被壓成直排 */
+      @media (max-width: 600px) {
+        .layer {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+      }
+      .myth > div {
+        padding: 16px 20px;
+      }
+      .myth .m-wrong {
+        background: var(--red-soft);
+      }
+      .myth .m-right {
+        background: var(--green-soft);
+        border-left: 1.5px solid var(--border);
+      }
+      .myth .h {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .myth .m-wrong .h {
+        color: var(--red);
+      }
+      .myth .m-right .h {
+        color: var(--green);
+      }
+      .myth .body {
+        font-size: 13.5px;
+        line-height: 1.65;
+        color: var(--slate);
+      }
+
+      /* ── 邊界卡 ── */
+      .bound {
+        display: grid;
+        grid-template-columns: 26px 1fr;
+        gap: 12px;
+        padding: 13px 16px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        background: var(--bg-card);
+        font-size: 13.5px;
+      }
+      .bound .ico {
+        font-family: var(--mono);
+        font-weight: 700;
+        color: var(--yellow);
+        text-align: center;
+      }
+      .bound b {
+        display: block;
+        margin-bottom: 2px;
+      }
+      .bound .why {
+        color: var(--text-muted);
+        font-size: 12.5px;
+      }
+
+      /* ── 漸進揭露 ── */
+      .reveal {
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        background: var(--bg-card);
+        margin-top: 12px;
+        overflow: hidden;
+      }
+      .reveal > summary {
+        cursor: pointer;
+        padding: 12px 16px;
+        font-size: 13.5px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        list-style: none;
+        transition: background 0.15s;
+      }
+      .reveal > summary::-webkit-details-marker {
+        display: none;
+      }
+      .reveal > summary::before {
+        content: "▸";
+        color: var(--clay);
+        font-size: 11px;
+        transition: transform 0.18s;
+        flex-shrink: 0;
+      }
+      .reveal[open] > summary::before {
+        transform: rotate(90deg);
+      }
+      .reveal > summary:hover {
+        background: var(--bg-soft);
+        color: var(--text);
+      }
+      .reveal > summary .tag {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-soft);
+      }
+      .reveal-body {
+        padding: 4px 18px 18px;
+        font-size: 13.5px;
+        line-height: 1.7;
+        color: var(--text-muted);
+        border-top: 1px dashed var(--border);
+      }
+      .reveal-body p {
+        max-width: 72ch;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ════════ Masthead ════════ -->
+    <header style="border-bottom: 1.5px solid var(--border)">
+      <div class="wrap" style="padding-top: 46px; padding-bottom: 34px">
+        <div class="eyebrow">Brewly 技術小學堂 · HTTP 快取</div>
+        <h1 style="font-size: clamp(34px, 4.6vw, 56px); margin-top: 14px">
+          網頁沒變，為什麼能<em>不再重傳</em>
+        </h1>
+        <p
+          style="
+            font-size: 16.5px;
+            color: var(--text-muted);
+            margin-top: 14px;
+            line-height: 1.7;
+          "
+        >
+          開啟 Brewly 豆款介紹頁時，瀏覽器能先問版本有沒有變。ETag 負責識別版本，304 告訴瀏覽器沿用已儲存的內容，省下重複下載。
+        </p>
+        <nav class="toc">
+          <a href="#what"><span class="n">01</span>一句話定義</a>
+          <a href="#analogy"><span class="n">02</span>類比</a>
+          <a href="#model"><span class="n">03</span>核心模型</a>
+          <a href="#walk"><span class="n">04</span>走一遍</a>
+          <a href="#myth"><span class="n">05</span>常見誤解</a>
+          <a href="#bound"><span class="n">06</span>邊界</a>
+          <a href="#deep"><span class="n">07</span>想更深入</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="wrap" style="padding-top: 44px; padding-bottom: 20px">
+      <main class="space-y-14">
+        <!-- ════════ 01 一句話定義 ════════ -->
+        <section id="what">
+          <div class="sec-head">
+            <span class="sec-idx">01</span>
+            <div>
+              <h2 style="font-size: 27px">一句話定義</h2>
+              <div class="sec-sub">兩個名詞，先各給一句話</div>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="def-card">
+              <div class="def-term">
+                版本標籤<span class="orig">ETag</span>
+              </div>
+              <div class="def-oneliner">
+                伺服器為內容版本附上的<em>識別標籤</em>，供之後的請求核對。
+              </div>
+              <div class="def-detail">
+                標籤由伺服器決定，不必是時間或雜湊。瀏覽器可連同內容保存，重新驗證時放進 If-None-Match 請求標頭。
+              </div>
+            </div>
+            <div class="def-card">
+              <div class="def-term">
+                未修改回應<span class="orig">304 Not Modified</span>
+              </div>
+              <div class="def-oneliner">
+                一種<em>不帶內容本體</em>的回應，表示條件符合、可以沿用快取。
+              </div>
+              <div class="def-detail">
+                在條件式 GET 或 HEAD 中，版本符合時伺服器可回 304。瀏覽器更新快取中繼資料，再使用原本保存的內容。
+              </div>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-4 mt-6">
+            <div class="stat-card">
+              <div class="stat-label">首次取得內容</div>
+              <div class="stat-value">200 OK</div>
+              <div class="stat-sub">回傳內容本體，也可附上 ETag</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">驗證後沒有變</div>
+              <div class="stat-value">304</div>
+              <div class="stat-sub">不重傳內容，但仍有網路往返</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">快取仍然新鮮</div>
+              <div class="stat-value">直接用</div>
+              <div class="stat-sub">依快取規則，可能不必送出請求</div>
+            </div>
+          </div>
+
+          <div class="highlight-box mt-6">
+            <strong>不懂會怎樣：</strong
+            >看到 304 不代表載入失敗。分清直接使用新鮮快取、向伺服器驗證、重新下載內容，才知道流量省在哪一步。
+          </div>
+        </section>
+
+        <!-- ════════ 02 類比 ════════ -->
+        <section id="analogy">
+          <div class="sec-head">
+            <span class="sec-idx">02</span>
+            <div>
+              <h2 style="font-size: 27px">類比</h2>
+              <div class="sec-sub">用你已經熟的東西對照，細節等下一段</div>
+            </div>
+          </div>
+
+          <div class="analogy">
+            <div class="analogy-head">
+              這套機制就像 <em>咖啡豆目錄的版次與核對回覆</em>
+            </div>
+            <div class="analogy-row">
+              <span class="known">手上留有一份豆款目錄與版次</span
+              ><span class="arrow">↔</span><span class="target">本機內容</span>
+            </div>
+            <div class="analogy-row">
+              <span class="known">詢問時先報手上的目錄版次</span
+              ><span class="arrow">↔</span><span class="target">If-None-Match 條件</span>
+            </div>
+            <div class="analogy-row">
+              <span class="known">版次相同，回「沿用那份」</span
+              ><span class="arrow">↔</span
+              ><span class="target">304：內容未變</span>
+            </div>
+            <div class="analogy-row">
+              <span class="known">版次改變，寄來新版完整目錄</span
+              ><span class="arrow">↔</span
+              ><span class="target">200：傳送新內容</span>
+            </div>
+            <div class="analogy-limit">
+              <strong>類比在哪裡失準：</strong
+              >紙本版次通常按數字遞增，ETag 卻是不可自行推算的標籤；同一網址也可能因語言或壓縮方式而有不同版本，不能只看網址就認定是同一份內容。
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════ 03 核心模型 ════════ -->
+        <section id="model">
+          <div class="sec-head">
+            <span class="sec-idx">03</span>
+            <div>
+              <h2 style="font-size: 27px">核心模型</h2>
+              <div class="sec-sub">誰保存內容、誰帶條件、誰判斷版本是否相同</div>
+            </div>
+          </div>
+
+          <h3 style="font-size: 18px; margin-bottom: 12px">快取驗證分成哪些責任</h3>
+          <div class="layers">
+            <div class="layer">
+              <span class="name">瀏覽器</span>
+              <span class="role"
+                >保存回應內容、ETag 與新鮮度資訊</span
+              >
+              <span class="tag">前端</span>
+            </div>
+            <div class="layer emph">
+              <span class="name">HTTP 快取層</span>
+              <span class="role">判斷能否直接重用，必要時發出條件式請求</span>
+              <span class="tag">機制主場</span>
+            </div>
+            <div class="layer">
+              <span class="name">來源伺服器</span>
+              <span class="role">比對目前版本與 If-None-Match，選擇 200 或 304</span>
+              <span class="tag">後端</span>
+            </div>
+            <div class="layer dim">
+              <span class="name">內容來源</span>
+              <span class="role">提供豆款介紹的目前內容與版本依據</span>
+              <span class="tag">版本依據</span>
+            </div>
+          </div>
+
+          <div class="highlight-box mt-5">
+            ETag<strong>不決定快取能存多久</strong>，它只協助核對版本。是否可直接重用、何時需要驗證，由 Cache-Control 等快取規則決定。
+          </div>
+
+          <h3 style="font-size: 18px; margin: 26px 0 12px">
+            快取需要驗證時，誰跟誰講話
+          </h3>
+          <div class="seq" style="--lanes: 3">
+            <div class="seq-actors">
+              <div class="seq-actor">瀏覽器</div>
+              <div class="seq-actor">HTTP 快取層</div>
+              <div class="seq-actor">來源伺服器</div>
+            </div>
+            <div class="seq-body">
+              <div class="seq-lane" style="--i: 0"></div>
+              <div class="seq-lane" style="--i: 1"></div>
+              <div class="seq-lane" style="--i: 2"></div>
+
+              <div class="seq-msg" style="--from: 1; --to: 3">
+                <span class="dir">①→</span>請求 Brewly 豆款介紹頁
+              </div>
+              <div class="seq-msg fail" style="--from: 2; --to: 3">
+                <span class="dir">②</span>發現本機快取已過新鮮期
+              </div>
+              <div class="seq-msg back" style="--from: 1; --to: 3">
+                <span class="dir">③←</span>取出已保存的內容與 ETag
+              </div>
+              <div class="seq-msg" style="--from: 1; --to: 3">
+                <span class="dir">④→</span>請快取層驗證已保存的版本
+              </div>
+              <div class="seq-msg" style="--from: 2; --to: 4">
+                <span class="dir">⑤→</span>帶 If-None-Match 查目前版本
+              </div>
+              <div class="seq-msg ok" style="--from: 1; --to: 3">
+                <span class="dir">⑥←</span>版本相同，收到 304 與回應標頭
+              </div>
+              <div class="seq-msg ok" style="--from: 1; --to: 3">
+                <span class="dir">⑦→</span>更新快取資訊、使用已存內容
+              </div>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-soft); margin-top: 10px">
+            這裡畫的是版本未變的路徑。若版本已變，伺服器回 200 與新內容，瀏覽器便更新本機快取。
+          </p>
+        </section>
+
+        <!-- ════════ 04 走一遍 ════════ -->
+        <section id="walk">
+          <div class="sec-head">
+            <span class="sec-idx">04</span>
+            <div>
+              <h2 style="font-size: 27px">走一遍</h2>
+              <div class="sec-sub">
+                用 Brewly 的虛構豆款頁，追蹤第一次下載、版本驗證與更新
+              </div>
+            </div>
+          </div>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-title">09:00 · 首次開啟豆款頁</div>
+              <div class="step-desc">
+                伺服器回 200、完整內容與 ETag；示範新鮮期為 10 分鐘。
+              </div>
+              <div class="mock">
+                <div class="mock-label">此刻的狀態</div>
+                <div class="tokrow">
+                  <span class="k">本機內容</span
+                  ><span class="tokchip live">已存 v1 · 新鮮 10 分</span
+                  ><span style="color: var(--text-soft); font-size: 11.5px"
+                    >200 帶回完整內容</span
+                  >
+                </div>
+                <div class="tokrow">
+                  <span class="k">ETag</span
+                  ><span class="tokchip live">已存「beans-v1」</span
+                  ><span style="color: var(--text-soft); font-size: 11.5px"
+                    >與內容一起保存</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-title">09:11 · 快取超過新鮮期</div>
+              <div class="step-desc">
+                內容仍然存在；超過新鮮期只表示下次使用前通常需要驗證。
+              </div>
+              <div class="mock">
+                <div class="mock-label">此刻的狀態</div>
+                <div class="tokrow">
+                  <span class="k">本機內容</span
+                  ><span class="tokchip dead">已過新鮮期</span>
+                </div>
+                <div class="tokrow">
+                  <span class="k">ETag</span
+                  ><span class="tokchip live">已存「beans-v1」</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-title">09:12 · 再次開啟 → 條件式驗證</div>
+              <div class="step-desc">
+                瀏覽器帶 If-None-Match；伺服器確認版本相同，回 304，沿用 v1 的內容。
+              </div>
+              <div class="mock">
+                <div class="mock-label">驗證後</div>
+                <div class="tokrow">
+                  <span class="k">本機內容</span
+                  ><span class="tokchip live">v1 · 已重新驗證</span>
+                </div>
+                <div class="tokrow">
+                  <span class="k">ETag</span
+                  ><span class="tokchip live">仍是「beans-v1」</span
+                  ><span style="color: var(--text-soft); font-size: 11.5px"
+                    >新鮮度依回應標頭更新</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-title">12:30 · 豆款內容已更新</div>
+              <div class="step-desc">
+                再次驗證時版本不同，伺服器回 200 與 v2 內容，取代本機舊副本。
+              </div>
+              <div class="mock">
+                <div class="mock-label">更新前一刻</div>
+                <div class="tokrow">
+                  <span class="k">本機內容</span
+                  ><span class="tokchip none">v2 尚未下載</span>
+                </div>
+                <div class="tokrow">
+                  <span class="k">ETag</span
+                  ><span class="tokchip live">伺服器為「beans-v2」</span
+                  ><span style="color: var(--green); font-size: 11.5px"
+                    >→ 收到 200 後保存新內容與標籤</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-title">18:00 · 清除本機快取</div>
+              <div class="step-desc">
+                內容與標籤都被清除。下次沒有副本可用，通常要重新取得完整回應。
+              </div>
+              <div class="mock">
+                <div class="mock-label">清除後</div>
+                <div class="tokrow">
+                  <span class="k">本機內容</span
+                  ><span class="tokchip none">清掉了</span>
+                </div>
+                <div class="tokrow">
+                  <span class="k">ETag</span
+                  ><span class="tokchip dead">本機標籤已清除</span
+                  ><span style="color: var(--text-soft); font-size: 11.5px"
+                    >不會讓伺服器上的內容失效</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════ 05 常見誤解 ════════ -->
+        <section id="myth">
+          <div class="sec-head">
+            <span class="sec-idx">05</span>
+            <div>
+              <h2 style="font-size: 27px">常見誤解</h2>
+              <div class="sec-sub">這三個是踩最多次的</div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="myth">
+              <div class="m-wrong">
+                <div class="h">常見的理解</div>
+                <div class="body">
+                  「304 是錯誤，所以必須重新下載整頁。」
+                </div>
+              </div>
+              <div class="m-right">
+                <div class="h">實際上</div>
+                <div class="body">
+                  304<strong>表示條件式驗證通過</strong>。它沒有內容本體，瀏覽器使用已保存的內容，並依回應標頭更新快取資訊。
+                </div>
+              </div>
+            </div>
+
+            <div class="myth">
+              <div class="m-wrong">
+                <div class="h">常見的理解</div>
+                <div class="body">「有 ETag，就能永久直接用快取。」</div>
+              </div>
+              <div class="m-right">
+                <div class="h">實際上</div>
+                <div class="body">
+                  ETag 只用來<strong>核對內容版本</strong>。新鮮期與重用限制由快取規則決定；需要驗證時，即使有標籤也仍要連線。
+                </div>
+              </div>
+            </div>
+
+            <div class="myth">
+              <div class="m-wrong">
+                <div class="h">常見的理解</div>
+                <div class="body">
+                  「304 不帶內容，所以完全沒有網路成本。」
+                </div>
+              </div>
+              <div class="m-right">
+                <div class="h">實際上</div>
+                <div class="body">
+                  304 仍然<strong>需要請求與回應的網路往返</strong>，只是省下內容本體。新鮮快取若可直接重用，才可能連驗證請求都省掉。
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════ 06 邊界 ════════ -->
+        <section id="bound">
+          <div class="sec-head">
+            <span class="sec-idx">06</span>
+            <div>
+              <h2 style="font-size: 27px">邊界</h2>
+              <div class="sec-sub">
+                知道邊界比知道機制重要——不然會套到不該套的地方
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <div class="bound">
+              <span class="ico">!</span>
+              <div>
+                <b>沒有可用的本機副本</b>
+                <span class="why"
+                  >304 不附內容本體；快取遭清除或副本不可用時，不能只靠版本標籤畫出頁面，必須重新取得內容。</span
+                >
+              </div>
+            </div>
+            <div class="bound">
+              <span class="ico">!</span>
+              <div>
+                <b>個人資料與共享快取</b>
+                <span class="why"
+                  >Brewly 的訂閱帳單與公開豆款頁不同。個人回應要依需求使用 private 或 no-store；ETag 本身不提供存取權限。</span
+                >
+              </div>
+            </div>
+            <div class="bound">
+              <span class="ico">!</span>
+              <div>
+                <b>同網址有不同回應版本</b>
+                <span class="why"
+                  >語言與壓縮方式可能改變回應內容。伺服器需正確設定 Vary 與對應標籤，避免把不同版本當成同一份快取。</span
+                >
+              </div>
+            </div>
+            <div class="bound">
+              <span class="ico">!</span>
+              <div>
+                <b>離線時無法取得 304</b>
+                <span class="why"
+                  >驗證需要連線；離線時能否使用過期副本要看快取規則與應用設計，不能假設一定可以沿用。</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════ 07 想更深入 ════════ -->
+        <section id="deep">
+          <div class="sec-head">
+            <span class="sec-idx">07</span>
+            <div>
+              <h2 style="font-size: 27px">想更深入</h2>
+              <div class="sec-sub">
+                主線到上一段就完整了；以下是原理與邊界案例
+              </div>
+            </div>
+          </div>
+
+          <details class="reveal">
+            <summary>
+              強 ETag 與弱 ETag 的差別
+              <span class="tag">版本</span>
+            </summary>
+            <div class="reveal-body">
+              <p>
+                強標籤要求對應的表示資料逐位元相同；弱標籤以 W/ 開頭，表示伺服器認為內容語意等價，但不保證每個位元都相同。
+              </p>
+              <p>
+                If-None-Match 使用弱比較，因此弱標籤也能用於 GET 的快取驗證。範圍請求與其他前置條件有不同規則，不能一概套用。
+              </p>
+            </div>
+          </details>
+
+          <details class="reveal">
+            <summary>
+              no-cache 與 no-store 是同一件事嗎
+              <span class="tag">原理</span>
+            </summary>
+            <div class="reveal-body">
+              <p>
+                no-cache 允許儲存，但每次重用前都必須向來源成功驗證；若版本沒變，就可能收到 304。這個名字並不是「完全不能保存」的意思。
+              </p>
+              <p>
+                no-store 則要求快取不要儲存該請求或回應。這與 private 的「不得存入共享快取」也不同，選用時先確認資料用途。
+              </p>
+            </div>
+          </details>
+
+          <details class="reveal">
+            <summary>
+              新鮮期該設多久，如何查標準
+              <span class="tag">實務</span>
+            </summary>
+            <div class="reveal-body">
+              <p>
+                沒有所有頁面通用的數字。公開豆款介紹可以容忍短暫延遲，庫存與個人帳單則要另外評估；本頁的 10 分鐘只是虛構示範。
+              </p>
+              <p>
+                延伸閱讀可查 RFC 9110 的 ETag、If-None-Match 與 304，以及 RFC 9111 的新鮮度與驗證章節；兩份分別規範 HTTP 語意與快取行為。
+              </p>
+            </div>
+          </details>
+        </section>
+      </main>
+    </div>
+
+    <footer class="k-mark">
+      <div class="glyph">∾</div>
+      <div class="meta">Brewly 技術小學堂 · ETag 與 304 · 虛構豆款頁示例</div>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- Session 識別 — 多視窗並行時分辨這份是哪個 session 產的     -->
+    <!-- 產出時把 scripts/session-label.sh 的結果填進下面兩個值      -->
+    <!-- 留空 = 整段停用（範本原檔即此狀態）                        -->
+    <!-- 完整說明見 references/session-identity.md                 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <script>
+      window.VT_SESSION = { label: "", id: "", project: "" };
+    </script>
+    <style>
+      .vt-session-badge {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 5px 16px;
+        background: var(--vt-session-color, #666);
+        color: #fff;
+        font-family: var(--mono, ui-monospace, monospace);
+        font-size: 11.5px;
+        letter-spacing: 0.06em;
+      }
+      .vt-session-badge .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #fff;
+        opacity: 0.85;
+        flex-shrink: 0;
+      }
+      .vt-session-badge .lb {
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .vt-session-badge .id {
+        margin-left: auto;
+        opacity: 0.75;
+      }
+    </style>
+    <script>
+      (function () {
+        const s = window.VT_SESSION || {};
+        if (!s.label) return;
+        const seed = s.id || s.label;
+        let hue = 7;
+        for (const c of seed) hue = (hue * 31 + c.charCodeAt(0)) % 360;
+        const col = `hsl(${hue} 58% 42%)`;
+        document.title = `${s.label} · ${document.title}`;
+        try {
+          const cv = document.createElement("canvas");
+          cv.width = cv.height = 64;
+          const g = cv.getContext("2d");
+          g.fillStyle = col;
+          if (g.roundRect) {
+            g.beginPath();
+            g.roundRect(2, 2, 60, 60, 14);
+            g.fill();
+          } else {
+            g.fillRect(2, 2, 60, 60);
+          }
+          g.fillStyle = "#fff";
+          g.font = '700 38px ui-sans-serif, system-ui, "PingFang TC"';
+          g.textAlign = "center";
+          g.textBaseline = "middle";
+          const ch = (s.label.match(/[A-Za-z0-9一-鿿]/) || ["?"])[0];
+          g.fillText(ch.toUpperCase(), 32, 36);
+          const link = document.createElement("link");
+          link.rel = "icon";
+          link.href = cv.toDataURL();
+          document.head.appendChild(link);
+        } catch (e) {}
+        const b = document.createElement("div");
+        b.className = "vt-session-badge";
+        b.style.setProperty("--vt-session-color", col);
+        b.innerHTML =
+          '<span class="dot"></span><span class="lb"></span><span class="id"></span>';
+        b.querySelector(".lb").textContent = s.label;
+        b.querySelector(".id").textContent = s.id || "";
+        const host = document.querySelector("header") || document.body;
+        host.insertBefore(b, host.firstChild);
+      })();
+    </script>
+  <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 全頁評論系統 — 預設內建、可手動移除                       -->
+    <!-- 完整 snippet 見 references/interaction-patterns.md       -->
+    <!-- § 全頁評論系統（page-wide commenting，預設內建）         -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <style>
+      .vt-comment-trigger {
+        position: fixed;
+        z-index: 9998;
+        background: var(--paper);
+        border: 1.5px solid var(--clay);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+        color: var(--clay);
+        font-family: var(--mono);
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(20, 20, 19, 0.12);
+        display: none;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
+      }
+      .vt-comment-trigger:hover {
+        background: var(--clay);
+        color: var(--paper);
+      }
+      .vt-comment-popup {
+        position: fixed;
+        z-index: 9999;
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(20, 20, 19, 0.15);
+        padding: 14px 16px;
+        width: 340px;
+        display: none;
+      }
+      .vt-comment-popup .quote {
+        background: var(--g100);
+        border-left: 3px solid var(--clay);
+        padding: 8px 10px;
+        font-size: 12.5px;
+        color: var(--g700);
+        line-height: 1.45;
+        margin-bottom: 10px;
+        max-height: 80px;
+        overflow-y: auto;
+      }
+      .vt-comment-popup textarea {
+        width: 100%;
+        border: 1.5px solid var(--g300);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        font-family: var(--sans);
+        resize: vertical;
+        min-height: 60px;
+        color: var(--slate);
+        box-sizing: border-box;
+      }
+      .vt-comment-popup textarea:focus {
+        outline: none;
+        border-color: var(--clay);
+      }
+      .vt-comment-popup .actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        font-size: 11.5px;
+      }
+      .vt-comment-popup .hint {
+        color: var(--g500);
+        font-family: var(--mono);
+      }
+      .vt-comment-popup button.send {
+        background: var(--clay);
+        color: var(--paper);
+        border: none;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .vt-comment-popup button.send:hover {
+        background: var(--clay-d);
+      }
+      .vt-comment-popup button.cancel {
+        background: transparent;
+        border: 1px solid var(--g300);
+        color: var(--g500);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12.5px;
+        cursor: pointer;
+        margin-right: 8px;
+      }
+      mark.vt-comment-mark {
+        background: var(--oat);
+        padding: 0 2px;
+        border-radius: 2px;
+        cursor: pointer;
+      }
+      mark.vt-comment-mark:hover {
+        background: #d5c4a8;
+      }
+      .vt-comment-pill {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 9990;
+        background: var(--paper);
+        border: 1.5px solid var(--clay);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--clay);
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(20, 20, 19, 0.1);
+        display: none;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
+      }
+      .vt-comment-pill.is-active {
+        display: inline-flex;
+      }
+      .vt-comment-pill:hover {
+        background: var(--clay);
+        color: var(--paper);
+      }
+      .vt-comment-pill strong {
+        font-weight: 600;
+      }
+      .vt-comment-list {
+        position: fixed;
+        right: 16px;
+        bottom: 60px;
+        width: 360px;
+        max-height: 60vh;
+        z-index: 9991;
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-radius: 14px;
+        box-shadow: 0 12px 32px rgba(20, 20, 19, 0.15);
+        display: none;
+        flex-direction: column;
+      }
+      .vt-comment-list.is-open {
+        display: flex;
+      }
+      .vt-comment-list-header {
+        background: var(--paper);
+        border-bottom: 1.5px solid var(--g200);
+        padding: 12px 16px;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--g500);
+        font-weight: 600;
+        border-radius: 14px 14px 0 0;
+      }
+      .vt-comment-list-items {
+        overflow-y: auto;
+        flex: 1;
+      }
+      .vt-comment-item {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--g200);
+      }
+      .vt-comment-item:last-child {
+        border-bottom: none;
+      }
+      .vt-comment-item .item-quote {
+        font-size: 11.5px;
+        color: var(--g500);
+        font-style: italic;
+        border-left: 2px solid var(--oat);
+        padding-left: 8px;
+        line-height: 1.4;
+        margin-bottom: 6px;
+      }
+      .vt-comment-item .item-body {
+        font-size: 13px;
+        color: var(--slate);
+        line-height: 1.5;
+      }
+      .vt-comment-item .item-del {
+        font-size: 11px;
+        color: var(--g500);
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin-top: 4px;
+        padding: 0;
+        font-family: inherit;
+      }
+      .vt-comment-item .item-del:hover {
+        color: var(--red);
+      }
+      .vt-comment-list-footer {
+        border-top: 1.5px solid var(--g200);
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        border-radius: 0 0 14px 14px;
+        background: var(--g100);
+      }
+      .vt-comment-list-footer button {
+        background: transparent;
+        border: 1.5px solid var(--g300);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        color: var(--g700);
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .vt-comment-list-footer button:hover {
+        border-color: var(--slate);
+        color: var(--slate);
+      }
+      .vt-comment-list-footer button.copy {
+        background: var(--clay);
+        color: var(--paper);
+        border-color: var(--clay);
+      }
+      .vt-comment-list-footer button.copy:hover {
+        background: var(--clay-d);
+      }
+      body.vt-has-existing-export .vt-comment-list-footer button.copy {
+        display: none;
+      }
+    </style>
+    <button class="vt-comment-trigger" id="vt-comment-trigger">💬 評論</button>
+    <div class="vt-comment-popup" id="vt-comment-popup">
+      <div class="quote" id="vt-popup-quote"></div>
+      <textarea
+        id="vt-popup-textarea"
+        placeholder="對這段文字的評論 / 疑問 / 補充..."
+      ></textarea>
+      <div class="actions">
+        <span class="hint">⌘ + Enter 送出 · Esc 取消</span>
+        <div>
+          <button class="cancel" id="vt-popup-cancel">取消</button
+          ><button class="send" id="vt-popup-send">送出</button>
+        </div>
+      </div>
+    </div>
+    <button class="vt-comment-pill" id="vt-comment-pill">
+      💬 <strong id="vt-count">0</strong>
+    </button>
+    <div class="vt-comment-list" id="vt-comment-list">
+      <div class="vt-comment-list-header">— 我的評論</div>
+      <div class="vt-comment-list-items" id="vt-comment-list-items"></div>
+      <div class="vt-comment-list-footer">
+        <button id="vt-clear-all">全部清除</button>
+        <button class="copy" id="vt-copy-fallback">📋 複製評論</button>
+      </div>
+    </div>
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 共用複製工具 — file:// 下瀏覽器停用 navigator.clipboard，   -->
+    <!-- 一定會落到 execCommand 備援；備援也可能失敗，必須誠實回報   -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <script>
+      // 三段式：clipboard API → execCommand 備援 → 都失敗回 false（不假報成功）
+      window.vtCopyText = async function (text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(text);
+            return true;
+          } catch (err) {
+            // 落到 execCommand 備援
+          }
+        }
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.top = "-9999px";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        try {
+          ta.select();
+          ta.setSelectionRange(0, ta.value.length);
+          return document.execCommand("copy") === true;
+        } catch (err) {
+          return false;
+        } finally {
+          ta.remove();
+        }
+      };
+
+      // 複製失敗時的出路：把文字放進可選取區域並全選，使用者按一次 Cmd+C 即可
+      // target 有給就用頁面既有的預覽區（wrap 為它的外層、會自動展開）；
+      // 沒有預覽區就建一個臨時可選取區（雙擊可關閉）。
+      window.vtSelectForManualCopy = function (text, target, wrap) {
+        let node = target;
+        if (node) {
+          node.textContent = text;
+          if (wrap) wrap.classList.remove("hidden");
+        } else {
+          node = document.getElementById("vt-manual-copy-box");
+          if (!node) {
+            node = document.createElement("pre");
+            node.id = "vt-manual-copy-box";
+            node.title = "雙擊關閉";
+            node.style.cssText =
+              "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;" +
+              "max-width:min(720px,92vw);max-height:40vh;overflow:auto;white-space:pre-wrap;" +
+              "background:#fff;color:#111;border:1.5px solid #999;border-radius:10px;" +
+              "padding:14px 16px;font-size:12.5px;line-height:1.6;" +
+              "box-shadow:0 12px 40px rgba(0,0,0,.28)";
+            node.addEventListener("dblclick", function () {
+              node.remove();
+            });
+            document.body.appendChild(node);
+          }
+          node.textContent = text;
+        }
+        node.scrollIntoView({ block: "nearest" });
+        const sel = window.getSelection();
+        if (sel) {
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+        return node;
+      };
+    </script>
+
+    <script>
+      (function () {
+        const S = "vt-comments-" + location.pathname,
+          L = 80;
+        let c = JSON.parse(localStorage.getItem(S) || "[]"),
+          sel = null;
+        const $ = (i) => document.getElementById(i),
+          tr = $("vt-comment-trigger"),
+          p = $("vt-comment-popup"),
+          pq = $("vt-popup-quote"),
+          pt = $("vt-popup-textarea"),
+          pi = $("vt-comment-pill"),
+          ce = $("vt-count"),
+          le = $("vt-comment-list"),
+          li = $("vt-comment-list-items");
+        window.vtCollectComments = function () {
+          if (!c.length) return "";
+          return (
+            "\n\n---\n\n" +
+            c
+              .map((x) => {
+                const q =
+                  x.quote.length > L ? x.quote.slice(0, L) + "…" : x.quote;
+                return `@評論「${q}」\n  → ${x.body}`;
+              })
+              .join("\n\n")
+          );
+        };
+        function hs(e) {
+          if (
+            e.target.closest(
+              ".vt-comment-popup,.vt-comment-trigger,.vt-comment-pill,.vt-comment-list,button,input,select,textarea",
+            )
+          )
+            return;
+          setTimeout(() => {
+            const s = getSelection(),
+              t = s.toString().trim();
+            if (!t || t.length < 2) {
+              tr.style.display = "none";
+              return;
+            }
+            const r = s.getRangeAt(0),
+              b = r.getBoundingClientRect();
+            sel = { text: t, range: r.cloneRange() };
+            tr.style.display = "inline-flex";
+            tr.style.top = Math.max(8, b.top - 38) + "px";
+            tr.style.left = Math.max(8, b.left + b.width / 2 - 40) + "px";
+          }, 10);
+        }
+        document.addEventListener("mouseup", hs);
+        document.addEventListener("touchend", hs);
+        tr.addEventListener("click", op);
+        function op() {
+          if (!sel) return;
+          const q = sel.text.length > L ? sel.text.slice(0, L) + "…" : sel.text;
+          pq.textContent = q;
+          pt.value = "";
+          const t = tr.getBoundingClientRect();
+          let l = t.left;
+          if (l + 340 > innerWidth - 16) l = innerWidth - 356;
+          let to = t.bottom + 6;
+          if (to + 220 > innerHeight) to = t.top - 230;
+          p.style.left = Math.max(8, l) + "px";
+          p.style.top = Math.max(8, to) + "px";
+          tr.style.display = "none";
+          p.style.display = "block";
+          setTimeout(() => pt.focus(), 50);
+        }
+        $("vt-popup-cancel").addEventListener("click", cp);
+        $("vt-popup-send").addEventListener("click", sc);
+        pt.addEventListener("keydown", (e) => {
+          if (e.isComposing || e.keyCode === 229) return;
+          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            e.stopPropagation();
+            sc();
+          }
+          if (e.key === "Escape") cp();
+        });
+        function cp() {
+          p.style.display = "none";
+          sel = null;
+        }
+        function sc() {
+          const b = pt.value.trim();
+          if (!b || !sel) return cp();
+          const id = "c-" + Date.now(),
+            q = sel.text;
+          try {
+            const m = document.createElement("mark");
+            m.className = "vt-comment-mark";
+            m.dataset.commentId = id;
+            sel.range.surroundContents(m);
+          } catch (e) {}
+          c.push({ id, quote: q, body: b, ts: Date.now() });
+          ps();
+          rn();
+          cp();
+          getSelection().removeAllRanges();
+        }
+        function ps() {
+          localStorage.setItem(S, JSON.stringify(c));
+        }
+        function rn() {
+          ce.textContent = c.length;
+          pi.classList.toggle("is-active", c.length > 0);
+          if (!c.length) le.classList.remove("is-open");
+          li.innerHTML = c
+            .map((x) => {
+              const q =
+                x.quote.length > 60 ? x.quote.slice(0, 60) + "…" : x.quote;
+              return `<div class="vt-comment-item" data-id="${x.id}"><div class="item-quote">「${eh(q)}」</div><div class="item-body">${eh(x.body)}</div><button class="item-del" data-del="${x.id}">刪除</button></div>`;
+            })
+            .join("");
+          li.querySelectorAll("[data-del]").forEach((b) =>
+            b.addEventListener("click", () => dc(b.dataset.del)),
+          );
+        }
+        function dc(id) {
+          c = c.filter((x) => x.id !== id);
+          document
+            .querySelectorAll(`mark.vt-comment-mark[data-comment-id="${id}"]`)
+            .forEach((m) => {
+              const pr = m.parentNode;
+              while (m.firstChild) pr.insertBefore(m.firstChild, m);
+              pr.removeChild(m);
+              pr.normalize();
+            });
+          ps();
+          rn();
+        }
+        function eh(s) {
+          return String(s).replace(
+            /[&<>"']/g,
+            (ch) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              })[ch],
+          );
+        }
+        pi.addEventListener("click", () => le.classList.toggle("is-open"));
+        $("vt-clear-all").addEventListener("click", () => {
+          if (!c.length) return;
+          if (!confirm("確定清除全部 " + c.length + " 條評論？")) return;
+          document.querySelectorAll("mark.vt-comment-mark").forEach((m) => {
+            const pr = m.parentNode;
+            while (m.firstChild) pr.insertBefore(m.firstChild, m);
+            pr.removeChild(m);
+            pr.normalize();
+          });
+          c = [];
+          ps();
+          rn();
+        });
+        $("vt-copy-fallback").addEventListener("click", async (e) => {
+          if (!c.length) return;
+          const t = window.vtCollectComments().replace(/^\n\n---\n\n/, ""),
+            b = e.currentTarget,
+            o = b.textContent;
+          const ok = await window.vtCopyText(t);
+          if (ok) {
+            b.textContent = "✅ 已複製";
+          } else {
+            // 複製不到就不假報成功：把評論放進臨時區域並全選
+            window.vtSelectForManualCopy(t);
+            b.textContent = "已選取 → 請按 Cmd+C";
+          }
+          setTimeout(() => (b.textContent = o), ok ? 2000 : 6000);
+        });
+        setTimeout(() => {
+          if (typeof window.vtBuildDecisionExport === "function")
+            document.body.classList.add("vt-has-existing-export");
+        }, 100);
+        document.addEventListener("click", (e) => {
+          if (
+            p.style.display === "block" &&
+            !e.target.closest(".vt-comment-popup,.vt-comment-trigger")
+          )
+            cp();
+        });
+        rn();
+      })();
+    </script>
+  
+    <!-- ═══════════════════════════════════════════════════════ -->
+    </body>
+</html>

@@ -1,0 +1,172 @@
+/* 結構圖探索層 — 與 diagram-explore.js 成對，整段內嵌進頁面 <style>（不外連）。
+   依賴頁面既有 token：--sans --mono --g300 --g700 --slate；缺的用後備值。
+   掛載條件與標記規則見 references/structure-diagrams.md §6.7。 */
+.xp {
+  --xp-hot: #1f5fbf;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .xp {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .xp .xp-side {
+    position: static;
+  }
+}
+.xp .figure {
+  min-width: 0;
+}
+.xp .xp-main {
+  min-width: 0;
+}
+/* 章節設定資料的 script 也掛 .xp-views，下面的 display:flex 會把它撐成可見文字（0907 實踩）；只給 div */
+.xp script.xp-views {
+  display: none !important;
+}
+.xp div.xp-views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+.xp .xp-views button {
+  font: 12.5px var(--sans, sans-serif);
+  padding: 5px 10px;
+  border: 1px solid var(--g300, #d1cfc5);
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--g700, #3d3d3a);
+}
+.xp .xp-views button.active {
+  background: var(--slate, #141413);
+  color: #fff;
+  border-color: var(--slate, #141413);
+}
+.xp .xp-note {
+  background: #fff;
+  border-left: 3px solid var(--xp-hot);
+  padding: 8px 12px;
+  border-radius: 0 6px 6px 0;
+  margin: 0 0 8px;
+  font-size: 13.5px;
+}
+.xp .xp-note:empty {
+  display: none;
+}
+.xp .xp-side {
+  background: #fff;
+  border: 1px solid var(--g300, #d1cfc5);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  position: sticky;
+  top: 12px;
+  color: var(--g700, #3d3d3a);
+}
+.xp .xp-side h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: var(--slate, #141413);
+}
+.xp .xp-side .hint {
+  color: #87867f;
+  font-size: 12.5px;
+}
+.xp .xp-side ul,
+.xp .xp-side ol {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+.xp .xp-side li {
+  margin: 2px 0;
+}
+.xp .xp-side .btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+.xp .xp-side .btns button {
+  font: 12.5px var(--sans, sans-serif);
+  padding: 4px 10px;
+  border: 1px solid var(--g300, #d1cfc5);
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--g700, #3d3d3a);
+}
+.xp .xp-side .btns button.active,
+.xp .xp-side .btns button:hover {
+  border-color: var(--xp-hot);
+}
+.xp .xp-side .btns button.active {
+  background: var(--xp-hot);
+  color: #fff;
+}
+.xp kbd {
+  font: 11px var(--mono, monospace);
+  border: 1px solid var(--g300, #d1cfc5);
+  border-bottom-width: 2px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: #fff;
+}
+
+svg.xplore {
+  user-select: none;
+  -webkit-user-select: none;
+}
+svg.xplore .node {
+  cursor: pointer;
+  outline: none;
+}
+svg.xplore .node:hover .box,
+svg.xplore .node:focus-visible .box {
+  stroke: var(--xp-hot, #1f5fbf);
+  stroke-width: 1.8;
+}
+svg.xplore .edge .hit {
+  cursor: pointer;
+}
+svg.xplore .node,
+svg.xplore .edge,
+svg.xplore .elabel {
+  transition: opacity 0.18s;
+}
+svg.xplore.has-focus .node:not(.on),
+svg.xplore.has-focus .elabel:not(.on) {
+  opacity: 0.22;
+}
+svg.xplore.has-focus .edge:not(.on) {
+  opacity: 0.15;
+}
+svg.xplore .node.on.is-focus .box {
+  stroke: var(--xp-hot, #1f5fbf);
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 4px rgba(31, 95, 191, 0.35));
+}
+svg.xplore .edge.on .ln {
+  stroke: var(--xp-hot, #1f5fbf);
+  stroke-width: 2.2;
+}
+svg.xplore .node.off {
+  opacity: 0.18;
+}
+svg.xplore .lg {
+  cursor: pointer;
+}
+svg.xplore .lg.off {
+  opacity: 0.35;
+}
+svg.xplore .ordbg {
+  fill: var(--xp-hot, #1f5fbf);
+}
+svg.xplore .ord {
+  font-size: 10px;
+  font-weight: 700;
+  fill: #fff;
+}
