@@ -2052,3 +2052,30 @@ pre.sdiff {
 | 連續任務 / commit 列 | Commit box |
 | 狀態標記 | Badge |
 | 等使用者拍板 | Decision card with radio |
+
+## 方案對照表（拍板題常用；2026-09-09 加）
+
+多方案比較的表格最容易跑版：瀏覽器自動分欄會把長句那欄撐到最寬、把短標籤欄與中等長度欄壓成一行三四個字。規則三條：**固定版面＋明定欄寬、只有標籤欄不換行、手機寬度整表橫向捲動**。
+
+```html
+<div class="opt-table-wrap">
+  <table class="opt-table">
+    <colgroup><col style="width:9%"><col style="width:38%"><col style="width:23%"><col style="width:30%"></colgroup>
+    <thead><tr><th></th><th>做法</th><th>改動</th><th>取捨</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A（推薦）</strong></td><td>…</td><td>…</td><td>…</td></tr>
+      <tr><td>B</td><td>…</td><td>…</td><td>…</td></tr>
+    </tbody>
+  </table>
+</div>
+```
+
+```css
+.opt-table { width:100%; border-collapse:collapse; table-layout:fixed; min-width:640px; font-size:13.5px; }
+.opt-table th, .opt-table td { border-bottom:1px solid var(--border); padding:9px 10px; text-align:left; vertical-align:top; }
+.opt-table th { font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--g500); }
+.opt-table td:first-child { white-space:nowrap; }   /* 只有 A／B 標籤欄不換行 */
+.opt-table-wrap { overflow-x:auto; }                 /* 手機寬度整表橫向捲動 */
+```
+
+**禁**：對內容欄加 `white-space: nowrap`（該欄會吃掉整列寬度、鄰欄被壓成直排；版面健檢會報「長文字被設成不換行」）。欄數不同時比例自己配，原則是「最長句的欄 ≤ 40%」。

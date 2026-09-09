@@ -10,6 +10,8 @@
  */
 import { pathToFileURL } from "node:url";
 import path from "node:path";
+import os from "node:os";
+import fs from "node:fs";
 import { createRequire } from "node:module";
 
 const WIDTHS = [390, 768, 1440]; // 手機 / 平板 / 桌機
@@ -73,6 +75,9 @@ function probe() {
   // 中文被壓成一個字一行，而只量「溢出／切字」的檢查全數放行）
   const squeezed = [];
   const collapsed = [];
+  // 表格欄位失衡（0909 事故：為了過手機寬度檢查給末欄加 nowrap，桌機上那欄吃掉一半寬度、
+  // 鄰欄被壓到一行三四個字；直排檢查的門檻是「不到三個字」，這種「一行四個字疊十行」量不到）
+  const lopsided = [];
   const invisible = [];
   const covered = [];
   const parseRGB = (v) => {
@@ -188,6 +193,40 @@ function probe() {
     }
   }
 
+  // ── 表格欄位失衡：只在 ≥ 700px 量（手機寬度本來就允許整表橫向捲動）──
+  if (vw >= 700) {
+    for (const table of document.querySelectorAll("table")) {
+      const rows = [...table.querySelectorAll("tr")].filter((tr) => tr.querySelectorAll("td").length >= 2);
+      if (!rows.length) continue;
+      const ncol = Math.max(...rows.map((tr) => tr.querySelectorAll("td").length));
+      if (ncol < 2) continue;
+      const cols = Array.from({ length: ncol }, () => ({ w: 0, chars: 0, lines: 0, n: 0, nowrapLong: null }));
+      for (const tr of rows) {
+        [...tr.querySelectorAll("td")].forEach((td, i) => {
+          const c = cols[i]; if (!c) return;
+          const r = td.getBoundingClientRect();
+          const cs = getComputedStyle(td);
+          const fs = parseFloat(cs.fontSize) || 14;
+          const lh = parseFloat(cs.lineHeight) || fs * 1.5;
+          const t = (td.textContent || "").trim();
+          c.w = Math.max(c.w, r.width); c.chars += t.length; c.n++;
+          c.lines = Math.max(c.lines, Math.round(r.height / lh));
+          if (cs.whiteSpace === "nowrap" && t.length >= 40 && !c.nowrapLong) c.nowrapLong = td;
+        });
+      }
+      const widest = Math.max(...cols.map((c) => c.w));
+      cols.forEach((c, i) => {
+        const avg = c.n ? c.chars / c.n : 0;
+        const fs = parseFloat(getComputedStyle(table).fontSize) || 14;
+        // 這欄平均超過 12 字、卻窄到不足 8 個字寬且疊了 6 行以上，而同表另有一欄寬它 2.5 倍以上
+        if (avg >= 12 && c.w < fs * 8 && c.lines >= 6 && widest >= c.w * 2.5) {
+          lopsided.push({ el: table, col: i + 1, w: Math.round(c.w), lines: c.lines, widest: Math.round(widest) });
+        }
+        if (c.nowrapLong) lopsided.push({ el: c.nowrapLong, col: i + 1, nowrap: true });
+      });
+    }
+  }
+
   // 只留最外層的凸出元素——父層凸出時子層必然跟著凸，全列會淹沒訊號
   const outermost = overflowing.filter(
     (a) => !overflowing.some((b) => b.el !== a.el && b.el.contains(a.el)),
@@ -208,6 +247,7 @@ function probe() {
     collapsed: collapsed.slice(0, 5).map((x) => ({ what: label(x.el), h: x.h, fs: x.fs })),
     invisible: invisible.slice(0, 5).map((x) => ({ what: label(x.el), ratio: x.ratio })),
     covered: covered.slice(0, 5).map((x) => ({ what: label(x.el), by: label(x.by) })),
+    lopsided: lopsided.slice(0, 5).map((x) => ({ what: label(x.el), col: x.col, w: x.w, lines: x.lines, widest: x.widest, nowrap: !!x.nowrap })),
   };
 }
 
@@ -227,7 +267,11 @@ for (const width of WIDTHS) {
     await page.goto(url, { waitUntil: "load", timeout: 20000 });
     // 外連樣式（Tailwind CDN 等）要時間套上，沒等會量到未套版的假結果
     await page.waitForTimeout(1200);
-    report.push({ width, ...(await page.evaluate(probe)) });
+    const shotDir = process.env.HTML_VISUALIZER_SHOT_DIR || path.join(os.tmpdir(), "html-visualizer-shots");
+    fs.mkdirSync(shotDir, { recursive: true });
+    const shot = path.join(shotDir, `${path.basename(file, ".html")}-${width}.png`);
+    await page.screenshot({ path: shot, fullPage: true });
+    report.push({ width, shot, ...(await page.evaluate(probe)) });
   } catch (e) {
     report.push({ width, error: String(e).split("\n")[0] });
   } finally {
@@ -265,11 +309,15 @@ for (const r of report) {
     issues.push(`文字看不見 對比 ${v.ratio}:1：${v.what}`);
   for (const c of r.covered || [])
     issues.push(`被不透明元素蓋住：${c.what} ← ${c.by}`);
+  for (const t of r.lopsided || [])
+    issues.push(t.nowrap
+      ? `表格第 ${t.col} 欄長文字被設成不換行（會吃掉整列寬度）：${t.what}`
+      : `表格第 ${t.col} 欄被壓窄 ${t.w}px 疊 ${t.lines} 行、最寬欄 ${t.widest}px：${t.what}`);
   if (!issues.length) {
-    console.log(`  ${r.width}px  ✓ 無跑版`);
+    console.log(`  ${r.width}px  ✓ 無跑版  截圖 ${r.shot}`);
   } else {
     bad++;
-    console.log(`  ${r.width}px  ✗ ${issues.length} 項`);
+    console.log(`  ${r.width}px  ✗ ${issues.length} 項  截圖 ${r.shot}`);
     for (const i of issues) console.log(`         ${i}`);
   }
 }

@@ -1,0 +1,15 @@
+<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><title>lopsided table fixture</title>
+<style>
+body{font-family:system-ui;font-size:14px;padding:24px}
+table{width:100%;border-collapse:collapse}
+td,th{border-bottom:1px solid #ccc;padding:8px;vertical-align:top;text-align:left}
+td:last-child{white-space:nowrap}
+</style></head><body>
+<h1>方案對照表（故意寫壞：末欄不換行）</h1>
+<table>
+<thead><tr><th></th><th>做法</th><th>改動</th><th>取捨</th></tr></thead>
+<tbody>
+<tr><td>A</td><td>維持既有流程，但在總表加一個快捷檢視，並允許主管勾選一批客戶做批次動作，門檻改成只算同一段期間內的次數</td><td>前端檢視加一支批次處理的介面；不動狀態機與資料結構</td><td>身分語意上仍有點彆扭，靠檢視與批次動作補；但操作一次就能處理整批，年底前做得完，而且不會動到任何統計口徑與既有報表的分母定義</td></tr>
+<tr><td>B</td><td>新增一個中間狀態，讓這類資料停在那裡，下一階段開始時直接推回起點</td><td>動狀態機與狀態列舉，儀表板、統計、比率分母全部要跟著改</td><td>語意最對，但正是先前拍板要避開的結構改動；三個月內做完風險高，而且每一張報表與每一個計數都要重新驗證一次</td></tr>
+</tbody></table>
+</body></html>
