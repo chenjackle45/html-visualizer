@@ -24,6 +24,7 @@ metadata:
 6. **可及性與 id**：`<svg role="img" aria-labelledby="<slug>-title <slug>-desc">`；marker／mask 的 `id` 一律加 slug 前綴，同頁多張圖不撞。
 7. **4px grid**：上游要求字級與座標全是 4 的倍數；本機字級以蒸餾版 §5 為準（12／13），座標 grid 建議照守但不強制——中文標籤寬度不是 4 的倍數，硬對齊會讓遮罩貼線。
 8. **動畫可用**：本機沒有內容過濾（若你的頁面要嵌進會剝掉 script 與 data-* 的環境就不適用），`references/animation.md` 的 step-through 控制腳本可以放；仍守「靜態幀資訊完整」原則，動畫只做逐步高亮、不承載唯一資訊。
+9. **資料圖表不歸這包**：§3 表列的 Bar chart、Line chart（含 slopegraph／ridgeline／bump）、Scatter plot（含 bubble／beeswarm）、Treemap、Polar、Radar 是資料圖表，本機一律交 `chart` skill（@unovis）畫，不照這包手刻 SVG——手刻座標算錯不會報錯、只會安靜畫出錯的形狀。判準（「要讀數字→表格、要看形狀→chart、要讀關係→這包」）見 html-visualizer `references/component-library.md` § 資料圖表 與 `references/structure-diagrams.md` §1。這包只負責結構圖：架構、流程、時序、狀態機、泳道、依賴、部署、ER、甘特等。
 
 # Diagram Design
 
