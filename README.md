@@ -63,7 +63,7 @@ zip -r chart.zip chart
 zip -r diagram-design.zip diagram-design
 ```
 
-三個 zip 分別上傳。網頁版對 `description` 的上限是 200 字元（比 Agent Skills 規格的 1024 嚴），本 repo 的三份都已控制在內；自己改過 description 的話，上傳前跑 `python3 tests/check-frontmatter.py` 確認。
+三個 zip 分別上傳。網頁版有兩個文件沒寫全的限制：`description` 最多 200 字元（Agent Skills 規格是 1024）、一個 zip 最多 200 個檔。本 repo 三份都已控制在內；自己改過 description 的話，上傳前跑 `python3 tests/check-frontmatter.py` 確認。
 
 **其他工具**下載回來跑安裝腳本：
 

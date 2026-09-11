@@ -63,7 +63,7 @@ zip -r chart.zip chart
 zip -r diagram-design.zip diagram-design
 ```
 
-Upload the three zips separately. The web upload caps `description` at 200 characters (stricter than the 1024 in the Agent Skills spec); all three here stay under it. If you edit a description, run `python3 tests/check-frontmatter.py` before uploading.
+Upload the three zips separately. The web upload has two limits the docs don't spell out: `description` max 200 characters (the Agent Skills spec says 1024) and max 200 files per zip. All three here stay under both. If you edit a description, run `python3 tests/check-frontmatter.py` before uploading.
 
 **Everything else** — clone it and run the installer:
 
