@@ -53,6 +53,18 @@ https://github.com/chenjackle45/html-visualizer
 
 用 `/plugin list` 確認裝好了。更新用 `/plugin update html-visualizer@chenjackle45`，移除用 `/plugin uninstall html-visualizer@chenjackle45`。
 
+**claude.ai 網頁版 / Claude Cowork** 不吃 plugin，要把 skill 打包成 zip 上傳（Settings → Capabilities → Skills）。zip 的根目錄必須是 skill 資料夾本身，一個 skill 一個 zip：
+
+```
+git clone https://github.com/chenjackle45/html-visualizer.git
+cd html-visualizer/skills
+zip -r html-visualizer.zip html-visualizer
+zip -r chart.zip chart
+zip -r diagram-design.zip diagram-design
+```
+
+三個 zip 分別上傳。網頁版對 `description` 的上限是 200 字元（比 Agent Skills 規格的 1024 嚴），本 repo 的三份都已控制在內；自己改過 description 的話，上傳前跑 `python3 tests/check-frontmatter.py` 確認。
+
 **其他工具**下載回來跑安裝腳本：
 
 ```

@@ -1,6 +1,6 @@
 ---
 name: chart
-description: 做「統一又漂亮」的資料圖表 / 視覺化。觸發場景：需要畫柱狀圖 / 折線圖 / 趨勢圖 / 占比圖（甜甜圈、圓餅）/ 分組或堆疊柱 / 目標vs實際 / dashboard / 週報圖表 / 行銷數據圖 / KPI 圖；或使用者說「做個圖表 / 畫個 chart / 視覺化這組數據 / 弄成圖 / 加個趨勢圖 / 占比圖」。用 @unovis（單一圖庫）+ 一份 design token 出統一風格、各圖型共用視覺語言的漂亮圖表。涵蓋獨立 HTML demo 與專案內 Vue 兩種交付。注意：這是「資料視覺化原語」skill；若是整份報告/文件要圖文版面，搭配 html-visualizer。
+description: 用 @unovis 加一份 design token 做風格統一的資料圖表：柱狀、折線、趨勢、甜甜圈／圓餅、分組或堆疊柱、目標 vs 實際、KPI、dashboard。使用者說「做個圖表／畫個 chart／視覺化這組數據／加個趨勢圖」時使用。只管單張圖；整份報告的圖文排版搭配 html-visualizer。
 ---
 
 # Chart —— 統一又漂亮的圖表

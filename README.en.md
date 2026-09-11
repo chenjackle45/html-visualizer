@@ -53,6 +53,18 @@ Works with Claude Code, Codex, Cursor, Cline, GitHub Copilot, OpenCode and other
 
 Check with `/plugin list`. Update with `/plugin update html-visualizer@chenjackle45`, remove with `/plugin uninstall html-visualizer@chenjackle45`.
 
+**claude.ai (web) / Claude Cowork** doesn't take plugins — upload each skill as a zip (Settings → Capabilities → Skills). The skill folder itself must be the zip root, one zip per skill:
+
+```
+git clone https://github.com/chenjackle45/html-visualizer.git
+cd html-visualizer/skills
+zip -r html-visualizer.zip html-visualizer
+zip -r chart.zip chart
+zip -r diagram-design.zip diagram-design
+```
+
+Upload the three zips separately. The web upload caps `description` at 200 characters (stricter than the 1024 in the Agent Skills spec); all three here stay under it. If you edit a description, run `python3 tests/check-frontmatter.py` before uploading.
+
 **Everything else** — clone it and run the installer:
 
 ```

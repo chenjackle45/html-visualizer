@@ -1,6 +1,6 @@
 ---
 name: html-visualizer
-description: 把長文件 / 報告 / 規格 / 設計決策（ADR）/ 架構說明 / 研究結論 / PR review / 教學 / 儀表板 / 互動式探索界面 / 決策追認 / marathon 收尾簡報 / prototype 預設用 HTML 而非 Markdown 呈現給人類看。觸發場景包含但不限於：使用者說「整理成文件 / 做一份報告 / 給我份視覺化 / 圖像化呈現 / 給人看的版本 / 報告我老闆 / 做個 dashboard / review 用 / 教我這個概念 / 做個解釋 / 寫個 spec 給我看 / 給我幾個選項拍板 / 列待確認的決策 / marathon 結束追認 / sprint 收尾 / 我醒了回報狀況」、或內容超過 50 行 markdown、或累積 2+ 條待使用者拍板的選項、或內容適合用對比圖 / 流程圖 / 表格 / 卡片視覺化呈現時。即使使用者沒明說 HTML、只要情境是給人類閱讀的長文件 / 視覺化內容 / 含拍板選項的決策追認、應主動使用此 skill。精神是「人類看 HTML、AI 看 Markdown」— AI 思考 / 規劃 / Inter-agent 溝通用 Markdown、最終給人類看的長文件用 HTML。
+description: 把長文件、報告、規格、設計決策、架構說明、教學、儀表板、待拍板選項預設做成 HTML 而非 Markdown 給人看。使用者說「整理成文件／做份報告／視覺化／給我看的版本／給老闆看／教我這個／列選項讓我選」、內容超過 50 行、或適合用表格／流程圖／對比圖呈現時主動使用。精神：人類看 HTML、AI 看 Markdown。
 ---
 
 # HTML Visualizer
@@ -41,6 +41,8 @@ description: 把長文件 / 報告 / 規格 / 設計決策（ADR）/ 架構說�
 | 決策追認表 / 詢問選項 | 「列出選項讓我選」 |
 | ⭐ **UX audit / 設計提案 / 視覺改版** | 「審視這個頁面 UX」/「給我改版建議」/「體檢一下這個畫面」 |
 | ⭐ **對比型 review（現況 vs 建議）** | 「列出有問題的地方 + 怎麼改」/「audit 報告」/「設計 review」 |
+| 決策追認 / marathon 收尾 / sprint 收尾 | 「列待確認的決策」/「marathon 結束追認」/「我醒了回報狀況」 |
+| PR review / 儀表板 / prototype | 「review 用」/「做個 dashboard」/「做個解釋」 |
 | 長 markdown（超過 50 行） | 任何長文件。50 行約等於終端機兩個畫面——超過就得反覆捲動才能前後對照，HTML 的結構化排版才開始划算。覺得太鬆或太緊，直接改這個數字 |
 
 預設用 Markdown / 純文字（**不**用此 skill）：

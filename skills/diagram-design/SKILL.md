@@ -1,9 +1,7 @@
 ---
 name: diagram-design
-description: 畫結構圖（架構／流程圖／時序／狀態機／泳道／時間軸／分層／樹／依賴／部署／ER／甘特等 39 型）的完整規範庫：選型、語意 pattern、連線幾何、複雜度預算、每型範例 HTML、動畫變體。本機 html-visualizer 畫圖時的「按需深讀」來源——日常先讀 html-visualizer/references/structure-diagrams.md（蒸餾版），需要該型完整範例、語意 pattern、或逐步動畫時才進來。
+description: 畫結構圖（架構、流程、時序、狀態機、泳道、時間軸、分層、樹、依賴、部署、ER、甘特等 39 型）的完整規範庫：選型、語意 pattern、連線幾何、複雜度預算、每型範例 HTML、動畫變體。html-visualizer 畫圖時的按需深讀來源。
 license: MIT
-metadata:
-  version: "2.6"
 ---
 
 <!-- 上游：github.com/cathrynlavery/diagram-design v2.6（MIT）。本複本與上游的差異：
