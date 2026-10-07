@@ -926,10 +926,10 @@ window.vtBuildDecisionExport = buildClaudePrompt;
     if (comments.length === 0) listEl.classList.remove('is-open');
     listItemsEl.innerHTML = comments.map(c => {
       const qs = c.quote.length > 60 ? c.quote.slice(0, 60) + '…' : c.quote;
-      return `<div class="vt-comment-item" data-id="${c.id}">
+      return `<div class="vt-comment-item" data-id="${escapeHtml(c.id)}">
         <div class="item-quote">「${escapeHtml(qs)}」</div>
         <div class="item-body">${escapeHtml(c.body)}</div>
-        <button class="item-del" data-del="${c.id}">刪除</button>
+        <button class="item-del" data-del="${escapeHtml(c.id)}">刪除</button>
       </div>`;
     }).join('');
     listItemsEl.querySelectorAll('[data-del]').forEach(btn => {

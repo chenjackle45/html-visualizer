@@ -1049,7 +1049,7 @@
             .map((x) => {
               const q =
                 x.quote.length > 60 ? x.quote.slice(0, 60) + "…" : x.quote;
-              return `<div class="vt-comment-item" data-id="${x.id}"><div class="item-quote">「${eh(q)}」</div><div class="item-body">${eh(x.body)}</div><button class="item-del" data-del="${x.id}">刪除</button></div>`;
+              return `<div class="vt-comment-item" data-id="${eh(x.id)}"><div class="item-quote">「${eh(q)}」</div><div class="item-body">${eh(x.body)}</div><button class="item-del" data-del="${eh(x.id)}">刪除</button></div>`;
             })
             .join("");
           li.querySelectorAll("[data-del]").forEach((b) =>

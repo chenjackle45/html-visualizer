@@ -3629,6 +3629,12 @@
 
       // 題目地圖（題數 ≥ 5 自動顯示）＋ 側欄逐段題數
       const QMAP_MIN = 5;
+      // 取自頁面文字或屬性的值，拼進 HTML 前先跳脫
+      const escHtml = (s) =>
+        String(s).replace(
+          /[&<>"']/g,
+          (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch],
+        );
       function renderQuestionMap() {
         const decisions = [...document.querySelectorAll("[data-decision]")];
         const qmap = document.getElementById("qmap");
@@ -3659,7 +3665,7 @@
                 d.querySelector(".eyebrow")?.textContent ||
                 d.dataset.id
               ).trim();
-              return `<a class="qmap-row" href="#${sec ? sec.id : ""}"><span class="q-idx">${String(n + 1).padStart(2, "0")}</span><span class="q-title">${title}</span><span class="q-sec">${label}</span><span class="qmap-state ${done ? "done" : "todo"}">${done ? "已選" : "未選"}</span></a>`;
+              return `<a class="qmap-row" href="#${escHtml(sec ? sec.id : "")}"><span class="q-idx">${String(n + 1).padStart(2, "0")}</span><span class="q-title">${escHtml(title)}</span><span class="q-sec">${escHtml(label)}</span><span class="qmap-state ${done ? "done" : "todo"}">${done ? "已選" : "未選"}</span></a>`;
             })
             .join("");
         }
@@ -4219,7 +4225,7 @@
             .map((x) => {
               const q =
                 x.quote.length > 60 ? x.quote.slice(0, 60) + "…" : x.quote;
-              return `<div class="vt-comment-item" data-id="${x.id}"><div class="item-quote">「${eh(q)}」</div><div class="item-body">${eh(x.body)}</div><button class="item-del" data-del="${x.id}">刪除</button></div>`;
+              return `<div class="vt-comment-item" data-id="${eh(x.id)}"><div class="item-quote">「${eh(q)}」</div><div class="item-body">${eh(x.body)}</div><button class="item-del" data-del="${eh(x.id)}">刪除</button></div>`;
             })
             .join("");
           li.querySelectorAll("[data-del]").forEach((b) =>
