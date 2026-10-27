@@ -25,13 +25,13 @@
 
 這些元素必含、缺一個都會降低 user 拍板效率（拍板題 ≥ 5 題時另含**題目地圖**，`verify.py` 會擋）：
 
-1. **Pain Card**（Hero 內）— ⚠️ icon + 大數字（serif italic）+ 為什麼做這個。立刻讓 user grok「問題嚴重性」、不用看下面才理解動機
+1. **Pain Card**（Hero 內）— ⚠️ icon + 大數字（serif 正體）+ 為什麼做這個。立刻讓 user grok「問題嚴重性」、不用看下面才理解動機
 2. **前情提要段**（02）— 從整體系統流程講起、用 div 流程圖標出本次只動哪格 / 為什麼舊路徑壞（限單向直線鏈；有交接／回頭路改 SVG 結構圖，見 `structure-diagrams.md` §1）。**禁止**直接跳到「我改了什麼」、user 沒前情就無法拍板
 3. **Before/After Side-by-side**（03）— `.ba-row` 紅 → 綠對比、含「脆弱點」「改進點」兩個 sub-card。架構變化必這樣呈現
 4. **ADR 三件組**（04）— 每個設計決策含「方案 table」`.adr-table` + `.chosen` row 標 ✓、「為什麼選」+「什麼時候要重新評估」兩個 `.card-soft` 並列
 5. **失敗處理樹狀圖**（05）— `.tree-node` + `.tree-branch` + 4 種 outcome（`start` clay / `success` olive / `degraded` yellow / `hard-fail` red）+ 每個 leaf 含 `偵測 / 處理 / 觀察` 三段
-6. **改前/改後 Metric Cards**（06）— `.metric-side.before` 紅底大數字 → `.metric-side.after` 綠底大數字 + `.metric-delta` 改善百分比。serif italic 大數字
-7. **互動拍板段** — 每題一組 radio（**禁用 `<select>` / dropdown**，自檢會擋）、預設值合理（user 直接複製就 OK）、每題旁邊固定可見的 `<textarea data-comment-for>` 補充框（不條件顯示、不 hidden）
+6. **改前/改後 Metric Cards**（06）— `.metric-side.before` 紅底大數字 → `.metric-side.after` 綠底大數字 + `.metric-delta` 改善百分比。serif 正體大數字（不用斜體）
+7. **互動拍板段** — 每題一組 radio（**禁用 `<select>` / dropdown**，自檢會擋）、**不預設勾選**（推薦項用 `data-recommended`＋「推薦」膠囊標出來，2026-08-22 起）、每題旁邊固定可見、不收起的 `<textarea data-comment-for>` 補充框（不條件顯示、不 hidden）
 8. **Sticky Bottom Bar** — 預覽 + 複製兩按鈕、`buildSummary()` 產 markdown 摘要、剪貼簿 fallback（`execCommand('copy')` 防 Clipboard API 失敗）+ ✅ 視覺回饋
 9. **Sidebar Nav with IntersectionObserver** — 滾到哪段自動高亮、依議題分組（「議題」/「程序快答」兩組，`mono` uppercase 小標；不再是「技術說明 / 待你拍板」上下分組）
 10. **Progress Counter**（Top header 右側）— 「X / Y 已選」即時更新、每選一個就遞增、給 user 完成感
@@ -106,13 +106,13 @@ mock 要**長得像產品本人**：用該產品的配色、字體、間距、�
 
 - **淺色 only**（除非 user 明確要 dark mode）
 - **容器寬版 `width: min(94vw, 1760px)`**：吃滿寬螢幕、不要兩側大片留白（取代舊「最寬 1400px」規則 — 寬螢幕兩側浪費是 user 實際痛點）。但**長段落文字加 `max-width: 72ch` 行長護欄**保持好讀；grid / 卡片 / 對比 / 表格 / mock 吃滿寬
-- **Tailwind utility 為主、CSS variable 為配色**：utility 處理 layout / spacing、CSS variable 處理 token
+- **頁內 class 為主、CSS variable 為配色**：layout / spacing 寫成頁內 class（例：範本的 `.wrap`、`.cards`）、CSS variable 處理 token；不載入外部 CSS 框架，utility class 寫了也不生效
 - **元件複用**：寫第二個類似的 card 之前、看能不能共用 class
 
 ### 互動處理
 
 - **互動 = 探索**：使用者可以「玩」trade-off 才加 slider / drag。靜態展示不要加
-- **預設值合理**：radio default 選最推薦的選項、user 直接複製就 OK
+- **推薦但不代選**：拍板 radio 不預設勾選，推薦項用「推薦」膠囊標出；讀者自己點下去才算拍板，複製摘要只含已選的題（2026-08-22 起）
 - **每個 export 都 work**：「複製」按鈕一定要有 fallback、避免 clipboard API 失敗時 silent 失敗
 
 ### 開檔處理
@@ -181,7 +181,7 @@ mock 要**長得像產品本人**：用該產品的配色、字體、間距、�
 
 ### 何時用 functional 風（藍 + 純 sans）取代 Anthropic 風
 
-預設一律用 Anthropic 風。下列情境例外、可改用 functional 風（藍 accent + Tailwind utility + 純 sans-serif、不用 serif 標題）：
+預設一律用 Anthropic 風。下列情境例外、可改用 functional 風（藍 accent + 密集的頁內 class + 純 sans-serif、不用 serif 標題）：
 
 | 情境 | 為什麼 |
 |---|---|

@@ -38,15 +38,15 @@
   03 架構變化（before/after side-by-side）
   04 設計決策 × N —— 每張卡自己收完一個完整決策：
         問題 → 方案 table → 為什麼選 + 重新評估時機
-        ↳ 這個決策要你追認：radio + 補充框（.inline-decide 區塊）
+        ↳ 「你要追認的是：<跟卡頭同一句的決策標題>」＋ radio ＋ 補充框（.inline-decide 區塊；不要另起一個不同說法的標題）
   05 失敗處理（樹狀圖：start → success / degraded / hard-fail）
   06 數據佐證（改前/改後 metric cards + Review timeline）
 
 ──── 程序快答（不需要前面的背景就能拍）────
-  A 其他已 default 追認（沒有對應說明段的追認題）
-  B 流程微調
-  C 延後項目（tech-debt：延後 / 立刻 / 不做）
-  D 經驗寫入（SOP 候選 → 寫入專案筆記 / 不寫）
+  A 其他已先照做的追認（沒有對應說明段的追認題；每題一條「現在 → 選另一個之後」）
+  B 流程微調（同上，每題一條示意）
+  C 延後項目（延後 / 立刻做 / 不做；每題一條「現在 → 做了之後」；三選項一律排一列，窄卡改緊湊格、「推薦」換到下一行，`.choice-row.c3`）
+  D 經驗寫入（寫進記憶 / 不寫；段首一張「寫進記憶後長這樣」規則卡當樣張；兩選項在 767px 以下並排，`.choice-row.c2`）
   E 實機驗證（自己跑 / Claude 帶我跑 / 跳過）
   F Commit（拆法 + push 與否）
   G 補充（自由 textarea）
@@ -65,11 +65,21 @@
 
 改版後第一道題落在 **33%**，且每題與它的說明同卡。**設計決策段的三個 ADR，各自本來就有一題完全對應的決策題被丟在下半部**——這就是配對斷裂最典型的樣子。
 
-底部 sticky bar：
-- 左側 eyebrow + 提示「完成 → 複製 → 貼回 chat」
-- 右側「預覽摘要」+「📋 複製決策摘要」兩按鈕
-- 預覽攤開後是 `<pre>` 顯示 markdown 摘要（給使用者確認再複製）
-- 複製成功 ✅ 視覺回饋
+底部回傳列（2026-10-27 第 2 輪改：**從頁首就顯示**，不再等捲到第一張拍板卡才出現；結構與 base 範本的 `.bar-in／.bar-row／.bar-btns` 同一套）：
+- 左側第一行「已選 N / M · 還差：<段號 段名 · 題名>」，點了捲到那題、焦點落在它第一個選項（按空白鍵就能選）；手機上側欄隱藏，這行是唯一的進度入口，收成「已選 N / M · 下一題 →」
+- 左側第二行是「反白任何一段文字就能留言 · 已留 N 則」（`body.vt-has-bar`：右下浮動計數藏起、由這裡承接，點了打開評論清單）
+- 右側「預覽摘要」+「複製決策摘要」兩按鈕；手機縮成「預覽」「複製」（`long／short` 兩個 span，各自帶 `data-en`）
+- 列高：1440px 約 70px、390px 約 61px（上限 90px）
+- 預覽是**從底部升起的抽屜**（`#preview-area` 放在 footer 外面：列有 backdrop-filter，fixed 子元素會被困在列裡），停在列上方、附「關閉」鈕；開預覽時收起評論清單（它也浮在右下，會蓋住關閉鈕）
+- 複製成功按鈕文字換成「已複製」；複製不到就打開抽屜、全選摘要，提示按 Cmd+C（不假報成功）
+- 頂端列右側「跳到未選的題目」（手機「跳到未選」）做同一件事：捲到第一題未選、焦點放到第一個選項
+- 複製格式照 base 的 `buildFeedback`（§ buildFeedback 複製格式）：`# <頁面標題> · 拍板摘要`／時間／`- <題名>：<選項> — <補充>`／`還有 K 題沒選：…（之後再貼）`／留言。題名寫在 `LABELS` 一張表，已選與還沒選兩處共用；改題目時表與 `add(...)` 一起改（verify 會對 `getValue`／`getComment` 的 id）
+- 補充寫了但那題沒選：列上「還差」後面與抽屜底部都出現「第 N 題寫了補充但還沒選，這段不會複製」，點了收抽屜、跳到那題（§ 補充提示）。手機上有這種題時，列的第一行只剩短版「第 N 題補充還沒選 →」（進度包在 `.vt-prog`、列加 `has-note`），沒有就照舊顯示「已選 N / M · 下一題 →」
+- F 題選「自訂」卻沒寫內容：列上與抽屜出現「第 N 題選了自訂，還沒寫內容 →」，點了聚焦那題的補充框；這種題不算都選完，列上不顯示「都選了」；複製摘要那行標「— （還沒寫要怎麼拆）」（§ 自訂沒寫內容，判斷看 radio 的 value 是不是「自訂」，改選項文字時一起改）。同時有「補充沒選」與「自訂沒寫」時，手機列只放第一條，後接「 · 另 1 項 →」，桌機兩條全句
+- 跳題（頂端「跳到未選」、列上「下一題」、補充提示）：題卡比可視高度高時（設計決策 1–3，選項在卡尾），不捲卡頂，改把第一個選項格 `scrollIntoView({block:'nearest'})`，只捲一次；焦點落在該選項
+- 補充框聚焦後從一行長到 72px：等兩個畫格（版面更新完）再 `scrollIntoView({block:'nearest'})`，框底不落在回傳列下
+- 選項與補充存在 localStorage（`vt-decisions-<路徑>-<版本>`，§ 拍板保存；版本是每張卡的 id、畫面題名、卡內第一個 h2–h4、各選項 value＝文字的雜湊，改題名或選項文字舊答案就不還原，舊鍵載入時刪掉），重新整理會還原；G 段「額外補充」也存在同一個物件（鍵 `_note`），一起還原、一起清；抽屜裡有「清除我的選擇」；「未選的題全部選推薦」選完也會存
+- Tab 捲動讓出兩條固定列：`scroll-padding` 上＝頂端列（`header.topbar`）高＋16、下＝回傳列高＋16，ResizeObserver 盯列重算。radio 的隱藏層蓋滿整張選項格（`inset: 0`），瀏覽器才會把整格捲進可視區；用 1px 隱藏層時窄卡會差 2–4px 被列蓋到
 
 ## 必含設計元素
 
@@ -78,13 +88,13 @@
 1. **Pain Card** — Hero 內、含 ⚠️ icon + 大數字 + 為什麼做這個（紅色 / clay 強調）。讓使用者立刻 grok「問題嚴重性」
 2. **前情提要段** — 用整體系統流程圖標出本次只動哪格（單向直線鏈用 div 流程圖；有分支 / 交接 / 回頭路改 SVG 結構圖，見 `structure-diagrams.md` §1） / 為什麼舊路徑壞。**禁止**直接跳到「我改了什麼」
 3. **Before/After Side-by-side** — 紅 → 綠的對比視覺、含「脆弱點」「改進點」兩個 sub-card
-4. **ADR 三件組** — 每個設計決策含「方案 table」「為什麼選」「什麼時候要重新評估」三段
+4. **ADR 三件組** — 每個設計決策含「方案 table」「為什麼選」「什麼時候要重新評估」三段。方案表同一欄只用一套顏色：只把**最差值**標紅字、採用的方案整列綠底，表下放一行 `.adr-legend` 圖例（不要一欄裡紅綠黃混用，讀者會分不清哪個是警示）
 5. **失敗處理樹狀圖** — `tree-node` + `tree-branch` + 4 種 outcome（start / success / degraded / hard-fail）+ 每個 leaf 含 `偵測 / 處理 / 觀察`
 6. **改前/改後 Metric Cards** — `metric-side.before` 紅底大數字 + `metric-side.after` 綠底大數字 + `metric-delta` 改善百分比
-7. **互動拍板** — 每題必須用 **Radio Group**（**禁用 `<select>` / dropdown**，2-step 操作 UX 差）、預設值合理（直接複製即可）、**每個 `data-decision` 卡片末尾必含一個 always-visible `<textarea>` 補充框**（不條件顯示、不 hidden、固定可見）
+7. **互動拍板** — 每題必須用 **Radio Group**（**禁用 `<select>` / dropdown**，2-step 操作 UX 差）、**不預設勾選**（推薦項在 `<label>` 上標 `data-recommended`＋`<span class="rec">推薦</span>` 膠囊；題目地圖有「未選的題全部選推薦」一鍵按鈕，只補沒選的題，按完旁邊顯示「已幫你選 N 題 · 復原」10 秒（`role="status"`），復原只把這一次填的題還原成未選，再按一次就換成這一次的復原，每題都選了時顯示「每題都已經選了」；複製摘要只含已選的題，可分批貼回）、**每個 `data-decision` 卡片末尾必含一個 `<textarea data-comment-for="<id>">` 補充框**，**一律常駐、不收合**（2026-10-27 起：讀者習慣直接有補充框可以輸入）。版面靠樣式壓：空的時候是一行高（約 40px）的淡底欄、緊接在選項下面當選項的延伸；聚焦或有內容時自動長高（`field-sizing: content`）；placeholder 寫清楚能補什麼。推薦項的標法見上
    - ⭐ **位置規則**：有背景說明的題 → 用 `.inline-decide` 嵌在該說明卡末尾（同卡收完）；不需要背景的程序題 → 收進尾段「程序快答」。**禁**把所有題一律堆到尾段
 7b. **題目地圖** — 開場區之後、拍板題 ≥ 5 時顯示。由 `renderQuestionMap()` 掃 `[data-decision]` 自動生成（題名取卡內 `<h3>`、段名取所在 section 的 `<h2>`），改內容不必手工維護；題數 < 5 會自動移除整段
-8. **Sticky Bottom Bar** — 預覽 + 複製兩按鈕、`buildSummary()` 產 markdown 摘要、剪貼簿 fallback（execCommand）防 clipboard API 失敗
+8. **底部回傳列** — 從頁首就顯示；預覽抽屜 + 複製兩按鈕、`buildSummary()` 產 markdown 摘要、剪貼簿 fallback（execCommand）防 clipboard API 失敗
 9. **Sidebar Nav + IntersectionObserver** — 滾到哪段自動高亮；**依議題分組**（「議題」/「程序快答」兩組，不再是「技術說明 / 待你拍板」），每段右側自動掛 `data-count-for` 題數徽章（例 `0/2`，全選完轉綠）
 10. **Progress Counter** — 右上角顯示「X / Y 已選」即時更新；每次變動同步重繪題目地圖與側欄題數
 
@@ -95,24 +105,23 @@
 完整 token 見 `../../color-and-typography.md`。重點：
 
 - **底色 ivory `#FAF9F5`**、不用純白
-- **主 accent clay `#D97757`** — 連結 / radio 選中 / section index border / hover
-- **Section index 用 mono 兩位數**（`01` / `02`；字母 `A`-`G` 只給尾段程序快答的題號），帶 1.5px clay 邊
+- **主 accent clay `#D97757`** — 填色、邊框、radio 選中；24px 以下的字一律用 `--clay-ink`（clay 在 ivory 上只有 2.96:1）
+- **章節頭用 eyebrow「02 · 前情提要」＋ serif h2**（字母 `A`-`G` 只給尾段程序快答：「程序快答 A」）；卡片內的小節標籤用 `.sub-label`，不再用 eyebrow
 - **Hero h1 含 em 強調**（`<em>` + clay 色、換字重不用斜體 —— 中文沒有義大利體，見 `color-and-typography.md`）
 - **Eyebrow 用 mono uppercase + 24px clay 短線**
 - **Status semantic 對齊 warm palette**：
-  - 成功 / 已做 → olive `#788C5D`（不用 emerald）
-  - 失敗 / 改前 → clay-d `#B85C3E`（不用 ruby）
-  - 警告 / 推翻 → yellow `#C49845`（warm yellow）
-- **大數字用 serif italic** — Pain Stat / Metric num / Stat value 都用 serif 加 italic
+  - 成功 / 已做 → 填色 olive `#788C5D`、字 `--green-ink` `#566B40`（不用 emerald）
+  - 失敗 / 改前 → 填色 clay-d `#B85C3E`、字 `--clay-ink` `#A64B2E`（不用 ruby）
+  - 警告 / 推翻 → 邊線 yellow `#C49845`、字 `--yellow-ink` `#7D6019`（warm yellow）
+- **大數字用 serif 正體** — Pain Stat / Metric num / Stat value 都用 serif、不加斜體（2026-10-27 改：中文不用斜體，數字跟著一致；不要改回 italic）
 
 ## 互動細節（重要、不能省）
 
 `<script>` 必含：
 
 ```js
-// 1. Textarea 固定可見、不條件 toggle hidden（user UX 偏好：補充欄位永遠在）
-//    → 移除 isDefault toggle 邏輯
-//    → 每個 data-decision 末尾預設帶 textarea、不加 .hidden class
+// 1. 補充框：markup 每題都帶 textarea[data-comment-for] rows="1"、常駐不收合、不加 hidden
+//    → 版面交給 CSS（一行淡底欄、聚焦或有內容才長高），不寫條件顯示的腳本
 //    → buildSummary() 一律 read textarea.value（trim 後若非空就附 — comment）
 
 // 2. Progress counter
@@ -137,7 +146,7 @@ copyBtn.addEventListener('click', async () => {
   const text = buildSummary();
   try { await navigator.clipboard.writeText(text); }
   catch { /* fallback: textarea + execCommand('copy') */ }
-  copyBtn.innerHTML = '✅ 已複製！';
+  copyBtn.textContent = '已複製';   // 複製不到：打開預覽抽屜、全選摘要、提示按 Cmd+C（不假報成功）
   setTimeout(() => { copyBtn.innerHTML = orig; }, 2000);
 });
 ```
@@ -154,6 +163,25 @@ python3 <本 skill 目錄>/scripts/verify.py <file>
 
 指令標 `!` 的兩項要人工判斷（機器判斷不了）：**哪些題涉及畫面**（涉及的每題至少 2 個樣張）、**中英混雜詞哪些該保留**（技術名詞保留、其餘照對照表換）。
 
+## 不載入外部 CSS 框架（2026-10-27 第 2 輪起；同日拿掉 Tailwind CDN）
+
+**本頁排版一個 utility class 都不用**，`<head>` 也不再載入 Tailwind CDN（2026-10-27 起：離線也穩、少一個外部依賴）。第 1 輪評審擋掉 CDN 實測：側欄掉到內容上方、內容貼左、頂端列擠成一團。
+
+- 原本約 350 處 utility class（掃 class 屬性裡頁內 CSS 沒定義的 token 得 357 個，扣掉 JS 模板字串的誤抓與狀態用的 `hidden`）全部換成頁內 class；`#qmap.hidden`、`#preview-area.hidden` 是腳本切換的狀態 class，本頁自己定義：骨架是 `.topbar／.topbar-in／.wrap／.layout／.sidenav／.content`，內容慣用型是 `.tag-row`（膠囊列）、`.g2／.g3`（卡內兩欄三欄）、`.split／.split-main`（說明三分之二＋選項三分之一）、`.stack`（垂直間距，`.s16／.s12／.s8` 調間距）、`.card.quick／.card.mini`（內距）。**新增排版寫頁內 class，不要加 `flex`、`mt-3` 這類 utility**——CDN 在時看起來正常，離線才垮，自檢抓不到。
+- 原本靠 CDN 重置處理的東西寫在 `<style>` 開頭那段「不載入外部 CSS 框架」：內文行高 1.6 用 `html body` 提權（當初為了蓋過 CDN 的重置，沒有 CDN 也無害）、`p／ul／ol` 歸零、表單元件繼承字型與字重、`button` 去底色與框、`svg` 垂直置中、連結用 `body a`（墨色加底線）。
+- 標題規則用 `body h1` 而不是 `h1`：當初是為了蓋過執行期注入的 CDN 重置（它會把標題字重洗回 400），現在沒有 CDN 也無害，留著。
+- 驗法：拿掉 CDN 前後各截一次 1440、390 的首屏與整頁，逐像素比對：0 個差異（2026-10-27）。
+
+## 評論系統：以 base 範本為唯一來源
+
+`.vt-comment-*` 的 CSS、markup、複製工具與評論腳本從「全頁評論系統」註解到 `</body>` 整段照抄 `assets/base-template.html`（含重新整理後依引文重掛標記、找不到時標「原文已變動」、點清單項目捲回原文、session 徽章 `hsl(… 56% 30%)`）。**不要在本頁另外改評論樣式**；跟回傳列的接法（評論清單往上讓出列高、右下計數藏起）寫在主 `<style>` 的回傳列段。已知限制：題目地圖每次選題都會重畫，在題目地圖裡反白留言的標記重新整理後找不回來（清單仍在）。
+
+## 給讀者看的字（2026-10-27 第 2 輪）
+
+- 決策編號（`D-229` 這類）只留在 `data-id`／`name` 給摘要與自檢用，畫面上不出現；狀態寫白話（「已先照這樣做」，不寫「已 default」）。
+- 開發用語換成白話：spike → 先試做、cap → 長度上限、tech-debt → 延後項目、寫入 MEMORY → 寫進記憶、RPC caller → 呼叫 AI 平台的程式、ship → 上線、dev → 開發機。改 radio 的 `value` 會直接進摘要，改完按一次預覽對照。
+- 程序快答每題附一條 `.fx`「現在 → 選另一個／做了之後」示意（一條兩格，手機也維持一行，不把頁面拉長）；D 組用一張 `.rule-mock` 規則卡示範寫進記憶後長什麼樣。
+
 ## 嚴格禁止
 
 寫這類範本時、絕不能：
@@ -164,6 +192,8 @@ python3 <本 skill 目錄>/scripts/verify.py <file>
 - **沒實質內容的 placeholder** — 寫不出來不要放
 - **依賴 `<pre>` ASCII 樹狀** — 用 `.tree-node` + `.tree-branch` div 畫
 - **互動沒 fallback** — Clipboard API 失敗時必須用 `execCommand` fallback
+- **用 utility class 排版** — 頁上沒有 CSS 框架，寫了不生效；一律寫頁內 class（見上「不載入外部 CSS 框架」）
+- **預覽在回傳列裡往上長、或回傳列等捲到第一題才出現** — 預覽用底部抽屜、列從頁首就顯示
 - **`<select>` / dropdown 元件** — user 操作 2 步驟（點開選單 + 點選項）、UX 差；一律 Radio Group、所有選項一眼看完
 - **範本 placeholder data-decision 殘留** — 複製 `index.html` 後、必須**整段砍乾淨範本內部 data-decision 卡片再重填新 content**；不能跟新 content 並存（否則 user 預覽摘要會看到舊段落）
 - **buildSummary 沒同步對齊新 data-decision** — 改 body 的 `data-decision` name 後、buildSummary 內每個 `getValue("...")` 必同步改、`## A` / `## B` 標題與 section 對齊；改完跑上面那支自檢指令驗
@@ -176,7 +206,7 @@ python3 <本 skill 目錄>/scripts/verify.py <file>
 
 | | `decision-sheet/`（舊版）| **`marathon-decision-sheet/`（這版）** | `anthropic-gallery/` |
 |---|---|---|---|
-| 視覺風格 | functional（藍 + 純 sans）| Anthropic（ivory + clay + serif italic）| Anthropic（純展示）|
+| 視覺風格 | functional（藍 + 純 sans）| Anthropic（ivory + clay + serif）| Anthropic（純展示）|
 | 互動拍板 | ✓ | ✓ | ✗ |
 | 高層次說明（前情提要 / 架構變化）| ✗ | ✓ | ✗ |
 | Before/After 對比視覺 | 部分 | ✓ | ✗ |

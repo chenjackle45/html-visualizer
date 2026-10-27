@@ -1,6 +1,6 @@
 # Layout 模式
 
-> 容器寬度一律 `width: min(94vw, 1760px)`（`SKILL.md` 必含元素表）；本檔 snippet 已同步，`max-w-[900px]` 只用於單欄純閱讀頁的段落區。
+> 容器一律用起手範本的 `.wrap`（`width: min(94vw, 1760px)`，`SKILL.md` 必含元素表）；本檔片段都套它。只有單欄純閱讀頁另外收窄到 900px（見 § Hero + 內容）。
 
 整體版面結構。挑選方式：依內容量 + 是否互動。
 
@@ -22,42 +22,35 @@
 ```html
 <body>
   <!-- Top Header（sticky）-->
-  <header class="sticky top-0 z-20 bg-white border-b" style="border-color: var(--border);">
-    <div class="max-w-[min(94vw,1760px)] mx-auto px-8 py-4 flex items-center justify-between">
+  <header class="page-head">
+    <div class="wrap page-head-in">
       <div>
-        <div class="text-[11px] uppercase tracking-widest font-semibold"
-             style="color: var(--text-muted);">標題類別 · 日期</div>
-        <h1 class="text-lg font-bold mt-0.5">主標題</h1>
+        <div class="mini-label">標題類別 · 日期</div>
+        <h1 class="page-title">主標題</h1>
       </div>
-      <div class="flex items-center gap-4">
-        <!-- 進度 / 互動指標 -->
-        <span id="progress-summary"
-              class="text-sm font-medium"
-              style="color: var(--accent);">0 / 0</span>
-      </div>
+      <!-- 進度 / 互動指標 -->
+      <span id="progress-summary" class="head-meta">0 / 0</span>
     </div>
   </header>
 
   <!-- Main grid -->
-  <div class="max-w-[min(94vw,1760px)] mx-auto px-8 py-8">
-    <div class="grid grid-cols-12 gap-8">
+  <div class="wrap page-grid">
 
-      <!-- Sidebar (lg+) -->
-      <aside class="col-span-2 hidden lg:block">
-        <div class="sticky top-24 space-y-1">
-          <a href="#section-1" class="nav-link">區段 1</a>
-          <a href="#section-2" class="nav-link">區段 2</a>
-          <!-- ... -->
-        </div>
-      </aside>
+    <!-- Sidebar（900px 以上才顯示）-->
+    <aside class="page-side">
+      <nav class="side-nav">
+        <a href="#section-1" class="nav-link">區段 1</a>
+        <a href="#section-2" class="nav-link">區段 2</a>
+        <!-- ... -->
+      </nav>
+    </aside>
 
-      <!-- Main content -->
-      <main class="col-span-12 lg:col-span-10 space-y-12">
-        <section id="section-1"><!-- 內容 --></section>
-        <section id="section-2"><!-- 內容 --></section>
-      </main>
+    <!-- Main content -->
+    <main class="page-main">
+      <section id="section-1"><!-- 內容 --></section>
+      <section id="section-2"><!-- 內容 --></section>
+    </main>
 
-    </div>
   </div>
 
   <!-- 底部列：需要時整段複製 marathon 範本那條（references/examples/marathon-decision-sheet，含 id="preview-btn"，
@@ -66,6 +59,31 @@
 ```
 
 ```css
+.page-head {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--paper);
+  border-bottom: 1px solid var(--border);
+}
+.page-head-in {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding-top: 16px; padding-bottom: 16px;
+}
+.mini-label { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--text-soft); }
+.page-title { font-size: 18px; font-weight: 700; margin: 2px 0 0; }
+.head-meta { font-size: 14px; font-weight: 500; color: var(--clay-ink); }
+
+.page-grid {
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px;
+  padding-top: 32px; padding-bottom: 32px;
+}
+.page-side { grid-column: span 2; }
+.side-nav { position: sticky; top: 96px; display: grid; gap: 4px; }
+.page-main { grid-column: span 10; display: grid; gap: 48px; }
+@media (max-width: 900px) {
+  .page-side { display: none; }
+  .page-main { grid-column: 1 / -1; }
+}
+
 .nav-link {
   display: flex; align-items: center; gap: 10px;
   padding: 8px 12px;
@@ -84,11 +102,11 @@
 ```
 
 設計重點：
-- `max-w-[min(94vw,1760px)]`：寬版容器（與 `SKILL.md` 必含元素表一致）；長段落另加 `max-w-[72ch]` 行長護欄
-- `grid-cols-12 + gap-8`：sidebar (2) + main (10)
-- Sidebar `hidden lg:block`：手機隱藏、桌機顯示
-- `sticky top-0` 配 `z-20`：header 永遠可見
-- `sticky bottom-0` 配 `z-10`：footer bar 永遠可見
+- `.wrap`：寬版容器（`width: min(94vw, 1760px)`，與 `SKILL.md` 必含元素表一致）；長段落另加 `max-width: 72ch` 行長護欄
+- `.page-grid` 切 12 欄、欄距 32px：側欄 2 欄＋主內容 10 欄
+- 900px 以下側欄隱藏，主內容改佔滿 12 欄
+- 標題列 `position: sticky; top: 0` 配 `z-index: 20`：捲動時一直看得到
+- 底部列用範本那條（見片段末的註解），範本已處理固定與閃避
 
 ---
 
@@ -97,18 +115,23 @@
 **內容單純、不需 nav 跳轉**。例如：教學文件、單一 spec、簡短報告。
 
 ```html
-<header class="sticky top-0 z-20 bg-white border-b" style="border-color: var(--border);">
-  <div class="max-w-[min(94vw,1760px)] mx-auto px-6 py-4">
-    <h1 class="text-lg font-bold">標題</h1>
+<header class="page-head">
+  <div class="wrap page-head-in">
+    <h1 class="page-title">標題</h1>
   </div>
 </header>
 
-<main class="max-w-[min(94vw,1760px)] mx-auto px-6 py-8 space-y-10">
+<main class="wrap page-body">
   <section><!-- 內容 --></section>
 </main>
 ```
 
-閱讀型內容容器仍吃滿寬，靠段落的 `max-w-[72ch]` 控制行長。
+```css
+/* .page-head／.page-head-in／.page-title 照抄 § 完整版那組 */
+.page-body { display: grid; gap: 40px; padding-top: 32px; padding-bottom: 32px; }
+```
+
+閱讀型內容容器仍吃滿寬，段落另加 `max-width: 72ch` 控制行長（起手範本的 `.lead`、`.body-text` 已帶）。
 
 ---
 
@@ -117,20 +140,29 @@
 **極短內容、單頁可讀完**。例如：announcement、status update、簡短決策。
 
 ```html
-<main class="max-w-[900px] mx-auto px-6 py-12">
+<main class="wrap page-narrow">
 
   <!-- Hero -->
-  <div class="card p-10 mb-8 text-center">
-    <h1 class="text-3xl font-bold tracking-tight">主標題</h1>
-    <p class="text-base mt-3" style="color: var(--text-muted);">副說明</p>
+  <div class="card hero-card">
+    <h1 class="hero-title">主標題</h1>
+    <p class="hero-sub">副說明</p>
   </div>
 
   <!-- 內容 -->
-  <div class="space-y-6">
+  <div class="hero-body">
     <section><!-- 內容 --></section>
   </div>
 
 </main>
+```
+
+```css
+/* .wrap 給寬度與左右邊距，這裡再收窄成單欄閱讀寬 */
+.page-narrow { max-width: 900px; padding-top: 48px; padding-bottom: 48px; }
+.hero-card { padding: 40px; margin-bottom: 32px; text-align: center; }
+.hero-title { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+.hero-sub { font-size: 16px; color: var(--text-soft); margin: 12px 0 0; }
+.hero-body { display: grid; gap: 24px; }
 ```
 
 ---
@@ -140,30 +172,36 @@
 **長文 / 教學 / 研究報告**。左固定 TOC、右是內容、左捲右捲分開。
 
 ```html
-<div class="max-w-[min(94vw,1760px)] mx-auto px-8 py-8">
-  <div class="grid grid-cols-12 gap-12">
+<div class="wrap toc-layout">
 
-    <!-- TOC -->
-    <aside class="col-span-3">
-      <div class="sticky top-8">
-        <div class="text-[10px] uppercase tracking-widest font-semibold mb-3"
-             style="color: var(--text-soft);">目錄</div>
-        <ol class="space-y-2 text-sm">
-          <li><a href="#chapter-1" class="nav-link">1. 章節一</a></li>
-          <li><a href="#chapter-2" class="nav-link">2. 章節二</a></li>
-        </ol>
-      </div>
-    </aside>
+  <!-- TOC -->
+  <aside>
+    <nav class="toc-in">
+      <div class="mini-label">目錄</div>
+      <ol class="toc-list">
+        <li><a href="#chapter-1" class="nav-link">1. 章節一</a></li>
+        <li><a href="#chapter-2" class="nav-link">2. 章節二</a></li>
+      </ol>
+    </nav>
+  </aside>
 
-    <!-- Content（更窄、更舒服閱讀）-->
-    <article class="col-span-9 prose-content">
-      <section id="chapter-1"><!-- 內容 --></section>
-    </article>
+  <!-- Content（更窄、更舒服閱讀）-->
+  <article class="prose-content">
+    <section id="chapter-1"><!-- 內容 --></section>
+  </article>
 
-  </div>
 </div>
 
 <style>
+.toc-layout {
+  display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: 48px;
+  padding-top: 32px; padding-bottom: 32px;
+}
+.toc-in { position: sticky; top: 32px; }
+.mini-label { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--text-soft); }
+.toc-in .mini-label { margin-bottom: 12px; }
+/* 章節號寫在文字裡，清掉瀏覽器預設的清單編號 */
+.toc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 14px; }
 .prose-content {
   font-size: 16px;
   line-height: 1.75;
@@ -181,19 +219,27 @@
 **兩個方案 / 視角並排比較、不分主次**。
 
 ```html
-<main class="max-w-[min(94vw,1760px)] mx-auto px-8 py-8">
-  <div class="grid grid-cols-12 gap-8">
-    <section class="col-span-12 lg:col-span-6 card p-6">
-      <h3 class="font-semibold mb-4">方案 A</h3>
-      <!-- ... -->
-    </section>
-    <section class="col-span-12 lg:col-span-6 card p-6">
-      <h3 class="font-semibold mb-4">方案 B</h3>
-      <!-- ... -->
-    </section>
-  </div>
+<main class="wrap duo">
+  <section class="card">
+    <h3>方案 A</h3>
+    <!-- ... -->
+  </section>
+  <section class="card">
+    <h3>方案 B</h3>
+    <!-- ... -->
+  </section>
 </main>
 ```
+
+```css
+.duo {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px;
+  padding-top: 32px; padding-bottom: 32px;
+}
+@media (max-width: 900px) { .duo { grid-template-columns: 1fr; } }
+```
+
+卡片標題沿用起手範本的 `.card h3`，不另寫 class。
 
 ---
 
@@ -202,77 +248,97 @@
 **儀表板 / 多 stat / 多 card 並列**。
 
 ```html
-<main class="max-w-[min(94vw,1760px)] mx-auto px-8 py-8">
+<main class="wrap dash">
 
   <!-- 大標 -->
-  <header class="mb-8">
-    <h1 class="text-2xl font-bold tracking-tight">Dashboard 標題</h1>
-    <p class="text-sm" style="color: var(--text-muted);">副說明</p>
+  <header class="dash-head">
+    <h1 class="dash-title">Dashboard 標題</h1>
+    <p class="dash-sub">副說明</p>
   </header>
 
-  <!-- 主 metric grid -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+  <!-- 主 metric 格線 -->
+  <div class="stat-grid dash-row">
     <!-- stat cards × N -->
   </div>
 
   <!-- 中型 chart 並列 -->
-  <div class="grid lg:grid-cols-2 gap-6 mb-8">
-    <div class="card p-6"><!-- chart 1 --></div>
-    <div class="card p-6"><!-- chart 2 --></div>
+  <div class="dash-charts dash-row">
+    <div class="card"><!-- chart 1 --></div>
+    <div class="card"><!-- chart 2 --></div>
   </div>
 
   <!-- 大表格 -->
-  <div class="card p-6"><!-- detail table --></div>
+  <div class="card"><!-- detail table --></div>
 
 </main>
 ```
+
+```css
+.dash { padding-top: 32px; padding-bottom: 32px; }
+.dash-head { margin-bottom: 32px; }
+.dash-title { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+.dash-sub { font-size: 14px; color: var(--text-soft); margin: 4px 0 0; }
+.dash-row { margin-bottom: 32px; }
+/* stat 格線：桌機四欄、900px 以下兩欄（component-library § Stat card 同一個 class） */
+.stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.dash-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 900px) {
+  .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dash-charts { grid-template-columns: 1fr; }
+}
+```
+
+卡片內距用 `.card` 自帶的，不另加。
 
 ---
 
 ## 響應式原則
 
+斷點跟起手範本一致：900px 與 640px。
+
 | 螢幕寬度 | 行為 |
 |---|---|
-| `< md` (< 768px) | 全部 single column、sidebar 隱藏、進度指標縮小 |
-| `md` (768px+) | 2 column 元素啟用、stat grid `md:grid-cols-4` |
-| `lg` (1024px+) | Sidebar 顯示、主 layout 完整 |
-| `xl` (1280px+) | 接近 max-width、保留邊距 |
+| 640px 以下（手機）| `.wrap` 左右邊距縮成 16px；`.kpis` 改一欄；stat 格線兩欄 |
+| 900px 以下 | 側欄隱藏、主內容佔滿；兩欄並排的版面（`.duo`、`.dash-charts`）改一欄；stat 格線兩欄 |
+| 900px 以上 | 側欄顯示、主版面完整；stat 格線四欄 |
 
 ```html
-<!-- 響應式 grid 範例 -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- 響應式卡片格線：起手範本的 .cards，一張卡至少 280px，放不下就換行，手機一欄 -->
+<div class="cards">
   <!-- ... -->
 </div>
 
-<!-- 響應式 sidebar -->
-<aside class="col-span-2 hidden lg:block"><!-- ... --></aside>
-<main class="col-span-12 lg:col-span-10"><!-- ... --></main>
+<!-- 響應式側欄：用 § 完整版的 .page-side／.page-main，900px 以下側欄隱藏 -->
+<aside class="page-side"><!-- ... --></aside>
+<main class="page-main"><!-- ... --></main>
 ```
 
 ---
 
 ## Padding / spacing 慣例
 
+下表是起手範本實際用的值；新寫的 class 照這組數字。
+
 | 容器層級 | padding |
 |---|---|
-| 頁面外層（`main`）| `px-8 py-8`（手機 `px-6 py-6`）|
-| 卡片（`.card`）| `p-6`（密集時 `p-5`）|
-| 次級卡（`.card-soft`）| `p-4` 或 `p-3` |
-| 內元件（`.choice` 等）| `px-3 py-2` ~ `px-4 py-3` |
+| 頁面外層（`.wrap`）| 左右 32px（640px 以下 16px），上下依區段另加 |
+| 卡片（`.card`）| 範本已帶 22px 24px（640px 以下左右 18px）|
+| 次級卡（`.card-soft`）| 範本已帶 14px 16px |
+| 內元件（`.choice` 等）| 8px 12px ～ 12px 16px |
 
 | 區段間距 | gap |
 |---|---|
-| Header / Main / Footer 之間 | `mt-12` 或 `space-y-12` |
-| Section 之間 | `space-y-12` |
-| 卡片之間（同 section）| `space-y-5` 或 `gap-4`/`gap-5` |
-| Card 內元素 | `space-y-3` 或 `mt-3`/`mt-4` |
+| Header / Main / Footer 之間 | 48px |
+| Section 之間 | 48px |
+| 卡片之間（同 section）| 16–20px（`.cards` 是 16px）|
+| Card 內元素 | 12–16px |
 
 ---
 
 ## 一個完整 base 模板的 layout 部分
 
 見 `assets/base-template.html` — 已包含：
-- Tailwind CDN
+- 頁內樣式（不載入外部 CSS 框架）
 - 配色 / 字體 token
 - Header（sticky + 進度）
 - Sidebar nav（自動高亮）

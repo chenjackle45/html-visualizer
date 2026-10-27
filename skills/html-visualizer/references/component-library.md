@@ -64,6 +64,23 @@
 - [Decision card with radio choices](#decision-card-with-radio-choices)
 - [Choice pills（radio 美化）](#choice-pillsradio-美化)
 
+### 編輯報告類（2026-10-26 從報告頁四輪評審收進；完整範例 `examples/editorial-report/`）
+- [寬 SVG 圖在手機改直式卡片](#寬-svg-圖在手機改直式卡片)
+- [底部回傳列：從頁首就顯示（拍板頁加進度）](#底部回傳列從頁首就顯示拍板頁加進度)
+- [表格在手機每列變一張卡](#表格在手機每列變一張卡)
+- [證據等級藥丸〔查〕〔轉〕〔推〕](#證據等級藥丸查轉推)
+- [對話「現況 vs 改後」並排樣張](#對話現況-vs-改後並排樣張)
+- [中文標題斷行](#中文標題斷行)
+- [結尾深色收束帶](#結尾深色收束帶)
+- 給非工程讀者的探索層 → `structure-diagrams.md` §6.7「給非工程讀者」
+- 版面主幹（報告頁的骨架，2026-10-26 定為規則）：
+  - [結論數字主視覺 hero](#結論數字主視覺-hero)
+  - [頂端固定章節列＋閱讀進度線](#頂端固定章節列閱讀進度線)
+  - [章節開場（淡色大章節號）](#章節開場淡色大章節號)
+  - [主張引言帶（深色整寬）](#主張引言帶深色整寬)
+  - [規格對照雙欄卡](#規格對照雙欄卡)
+  - [刻意不做＋重開條件](#刻意不做重開條件)
+
 ---
 
 # 🌾 Anthropic-signature 元件（首選）
@@ -80,7 +97,7 @@
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--g500);
+  color: var(--text-soft);
   margin-bottom: 18px;
   display: flex;
   align-items: center;
@@ -120,7 +137,7 @@ h1 {
 h1 em {
   font-style: normal;
   font-weight: 700;
-  color: var(--clay);
+  color: var(--clay-ink);
 }
 /* C · 螢光筆（語氣更重、一頁最多一兩次） */
 .hl {
@@ -150,7 +167,7 @@ h1 em {
 .sec-head .idx {
   font-family: var(--mono);
   font-size: 13px;
-  color: var(--clay);
+  color: var(--clay-ink);
   font-weight: 600;
   width: 34px;
   flex-shrink: 0;
@@ -166,7 +183,7 @@ h1 em {
 .sec-head .count {
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--g500);
+  color: var(--text-soft);
   background: var(--g100);
   padding: 2px 8px;
   border-radius: 999px;
@@ -224,10 +241,10 @@ nav.toc a {
 nav.toc a .n {
   font-family: var(--mono);
   font-size: 10px;
-  color: var(--g500);
+  color: var(--text-soft);
 }
 nav.toc a:hover { border-color: var(--slate); color: var(--slate); }
-nav.toc a:hover .n { color: var(--clay); }
+nav.toc a:hover .n { color: var(--clay-ink); }
 ```
 
 ```html
@@ -300,15 +317,15 @@ a.card:hover .thumb { background: var(--oat); }
 .file {
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--g500);
+  color: var(--text-soft);
   border-top: 1px solid var(--g100);
   padding-top: 11px;
   display: flex;
   align-items: center; justify-content: space-between;
 }
 .file .arrow { transition: transform 150ms ease; color: var(--g300); }
-a.card:hover .file { color: var(--clay); }
-a.card:hover .file .arrow { transform: translateX(3px); color: var(--clay); }
+a.card:hover .file { color: var(--clay-ink); }
+a.card:hover .file .arrow { transform: translateX(3px); color: var(--clay-ink); }
 ```
 
 ```html
@@ -423,7 +440,7 @@ a.card:hover .thumb svg .oa { fill: var(--paper); }
   padding: 2px 7px;
   border: 1.5px solid var(--g300);
   border-radius: 6px;
-  color: var(--g500);
+  color: var(--text-soft);
 }
 .hero-fig .pane.right .tag { border-color: var(--slate); color: var(--slate); }
 ```
@@ -465,15 +482,20 @@ a.card:hover .thumb svg .oa { fill: var(--paper); }
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 14px;
+  padding: 22px 24px;
 }
+.card h3 { font-family: var(--serif); font-weight: 500; font-size: 20px; line-height: 1.35; margin: 0 0 8px; }
+.card p { font-size: 14.5px; color: var(--text-muted); }
 ```
 
 ```html
-<div class="card p-6">
-  <h3 class="text-lg font-semibold">標題</h3>
-  <p class="text-sm" style="color: var(--text-muted);">內文</p>
+<div class="card">
+  <h3>標題</h3>
+  <p>內文</p>
 </div>
 ```
+
+起手範本已帶這三條，用範本起手時不必再寫。
 
 ## 次層卡 `.card-soft`
 
@@ -484,14 +506,16 @@ a.card:hover .thumb svg .oa { fill: var(--paper); }
   background: var(--bg-soft);
   border: 1px solid var(--border);
   border-radius: 10px;
+  padding: 14px 16px;
 }
+.mini-label { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--text-soft); }
+.soft-text { font-size: 14px; margin: 4px 0 0; }
 ```
 
 ```html
-<div class="card-soft p-4">
-  <div class="text-[11px] uppercase tracking-widest font-semibold"
-       style="color: var(--text-muted);">標籤</div>
-  <p class="text-sm mt-1">內容</p>
+<div class="card-soft">
+  <div class="mini-label">標籤</div>
+  <p class="soft-text">內容</p>
 </div>
 ```
 
@@ -536,13 +560,17 @@ a.card:hover .thumb svg .oa { fill: var(--paper); }
   font-size: 28px; font-weight: 700; margin-top: 4px; letter-spacing: -0.02em;
 }
 .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.stat-unit { font-size: 18px; font-weight: 400; color: var(--text-muted); }
+/* 格線：桌機四欄、900px 以下兩欄（layout-patterns § Dashboard 同一個 class） */
+.stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 ```
 
 ```html
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="stat-grid">
   <div class="stat-card">
     <div class="stat-label">標籤</div>
-    <div class="stat-value">17<span class="text-lg font-normal" style="color: var(--text-muted);"> 檔</span></div>
+    <div class="stat-value">17<span class="stat-unit"> 檔</span></div>
     <div class="stat-sub">+1267 / −617 行</div>
   </div>
   <!-- 重複 ... -->
@@ -555,6 +583,7 @@ a.card:hover .thumb svg .oa { fill: var(--paper); }
 
 ```css
 .metric-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.metric-title { font-size: 14px; font-weight: 600; }
 .metric-row {
   display: grid; grid-template-columns: 1fr auto 1fr;
   align-items: center; gap: 8px; margin-top: 10px;
@@ -578,7 +607,7 @@ a.card:hover .thumb svg .oa { fill: var(--paper); }
 
 ```html
 <div class="metric-card">
-  <div class="font-semibold text-sm">失敗率</div>
+  <div class="metric-title">失敗率</div>
   <div class="metric-row">
     <div class="metric-side before">
       <div class="num">17%</div>
@@ -598,30 +627,40 @@ a.card:hover .thumb svg .oa { fill: var(--paper); }
 
 **何時用**：兩條長條對比 token cost / 時間 / 成本。
 
+class 名用 `.meter-*`：起手範本的 `.bar-row` 是底部回傳列在用，同名貼進去會把回傳列排壞。
+
 ```css
-.bar-row {
+.meter-row {
   display: grid; grid-template-columns: 110px 1fr 90px;
   gap: 12px; align-items: center; margin-bottom: 10px; font-size: 13px;
 }
-.bar {
+.meter {
   height: 28px; border-radius: 6px;
   display: flex; align-items: center; padding: 0 10px;
   color: white; font-weight: 600; font-size: 12px;
 }
-.bar.warm { background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%); color: #422006; }
-.bar.cool { background: linear-gradient(90deg, #34d399 0%, #10b981 100%); color: #064e3b; }
+.meter.warm { background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%); color: #422006; }
+.meter.cool { background: linear-gradient(90deg, #34d399 0%, #10b981 100%); color: #064e3b; }
+.meter-label { font-size: 12px; font-weight: 500; }
+.meter-end { font-size: 12px; text-align: right; color: var(--text-muted); }
+.meter-good { font-weight: 600; color: var(--green); }
+/* 手機：中間欄太窄，長條裡的字會被切掉；改成標籤與數值一行、長條獨占下一行 */
+@media (max-width: 640px) {
+  .meter-row { grid-template-columns: 1fr auto; row-gap: 4px; }
+  .meter-row .meter { grid-column: 1 / -1; grid-row: 2; }
+}
 ```
 
 ```html
-<div class="bar-row">
-  <div class="text-xs font-medium">不截短</div>
-  <div class="bar warm" style="width: 100%;">31.5K tokens</div>
-  <div class="text-xs text-right" style="color: var(--text-muted);">100%</div>
+<div class="meter-row">
+  <div class="meter-label">不截短</div>
+  <div class="meter warm" style="width: 100%;">31.5K tokens</div>
+  <div class="meter-end">100%</div>
 </div>
-<div class="bar-row">
-  <div class="text-xs font-medium">60K 截短</div>
-  <div class="bar cool" style="width: 50%;">15.5K tokens</div>
-  <div class="text-xs text-right font-semibold" style="color: var(--green);">省 50%</div>
+<div class="meter-row">
+  <div class="meter-label">60K 截短</div>
+  <div class="meter cool" style="width: 50%;">15.5K tokens</div>
+  <div class="meter-end meter-good">省 50%</div>
 </div>
 ```
 
@@ -650,19 +689,22 @@ a.card:hover .thumb svg .oa { fill: var(--paper); }
   font-size: 36px; font-weight: 800;
   color: var(--red); letter-spacing: -0.03em; line-height: 1;
 }
+.pain-kicker { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--red); opacity: 0.8; }
+.pain-line { display: flex; align-items: baseline; gap: 12px; margin-top: 4px; }
+.pain-text { font-size: 14px; color: #7f1d1d; }
+.pain-cause { margin-top: 8px; }
 ```
 
 ```html
 <div class="pain-card">
   <div class="pain-icon">⚠️</div>
   <div>
-    <div class="text-xs uppercase tracking-widest font-semibold"
-         style="color: var(--red); opacity: 0.8;">為什麼做這個</div>
-    <div class="flex items-baseline gap-3 mt-1">
+    <div class="pain-kicker">為什麼做這個</div>
+    <div class="pain-line">
       <span class="pain-stat">17%</span>
-      <span class="text-sm" style="color: #7f1d1d;">的會議分析出現「整片空」</span>
+      <span class="pain-text">的會議分析出現「整片空」</span>
     </div>
-    <div class="text-sm mt-2" style="color: #7f1d1d;">
+    <div class="pain-text pain-cause">
       根因：AI 漏寫文字標記、整段解析失敗。
     </div>
   </div>
@@ -690,14 +732,17 @@ a.card:hover .thumb svg .oa { fill: var(--paper); }
   display: flex; align-items: center; justify-content: center;
   width: 50px; font-size: 22px; color: var(--text-soft);
 }
+.ba-title { font-weight: 600; margin: 8px 0 12px; }
+/* 項目前面自己寫了「·」，清掉瀏覽器預設的圓點 */
+.ba-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
 ```
 
 ```html
 <div class="ba-row">
   <div class="ba-col ba-col-before">
     <span class="badge badge-red">改動前</span>
-    <h3 class="font-semibold mt-2 mb-3">舊方案</h3>
-    <ul class="text-sm space-y-1.5">
+    <h3 class="ba-title">舊方案</h3>
+    <ul class="ba-list">
       <li>· 第一個 pain point</li>
       <li>· 第二個 pain point</li>
     </ul>
@@ -705,8 +750,8 @@ a.card:hover .thumb svg .oa { fill: var(--paper); }
   <div class="ba-arrow">→</div>
   <div class="ba-col ba-col-after">
     <span class="badge badge-green">改動後</span>
-    <h3 class="font-semibold mt-2 mb-3">新方案</h3>
-    <ul class="text-sm space-y-1.5">
+    <h3 class="ba-title">新方案</h3>
+    <ul class="ba-list">
       <li>· 第一個改進</li>
       <li>· 第二個改進</li>
     </ul>
@@ -813,7 +858,7 @@ a.card:hover .thumb svg .oa { fill: var(--paper); }
   color: var(--text-muted);
   margin-right: 4px;
 }
-.mock-chip.on     { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.mock-chip.on     { border-color: var(--accent); color: var(--clay-ink); background: var(--accent-soft); }
 .mock-chip.warn   { border-color: var(--yellow-border); color: var(--yellow); background: var(--yellow-soft); }
 .mock-chip.danger { border-color: var(--red-border); color: var(--red); background: var(--red-soft); }
 .mock-chip.dim    { opacity: 0.5; }
@@ -987,7 +1032,7 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
   .ba-grid.cols-3, .ba-grid.cols-4 { grid-template-columns: 1fr; }
 }
 /* 候選方案欄（中性 accent 色、有別於 before 紅 / after 綠）*/
-.ba-col.option .h { background: var(--accent-soft); color: var(--accent); }
+.ba-col.option .h { background: var(--accent-soft); color: var(--clay-ink); }
 /* 每欄底部拍板 radio 區 */
 .ba-col .pick { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border); }
 ```
@@ -1224,7 +1269,7 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
 }
 .analogy-row .arrow {
   text-align: center;
-  color: var(--olive);
+  color: var(--green-ink);
   font-size: 12px;
 }
 .analogy-row .target {
@@ -1310,7 +1355,7 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
   background: var(--clay-soft);
 }
 .layer.emph .tag {
-  color: var(--clay-d);
+  color: var(--clay-ink);
   font-weight: 600;
 }
 .layer.dim {
@@ -1348,6 +1393,8 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
 **何時用**：多個角色來回互動、而且**順序本身就是重點**（誰先誰後、哪一步會失敗、失敗後退回哪裡）。單向流程用流程圖就好，有來有回才需要時序圖。
 
 **三條時序路由的優先序（2026-09-05 定案，四處說法以此為準）**：① 參與者 ≤2、無分支、訊息 ≤4 → 本節 CSS 版；② 其餘一律 → SVG 時序圖（`references/structure-diagrams.md` §7.3，分支用組合片段）；③ Mermaid 只在使用者明說「用 mermaid」時用，不再是預設。
+
+> ⚠️ **CSS 版的方向只靠訊息框裡的「①→」文字**，三個以上參與者時讀者分不出誰發給誰（2026-10-27 評審實測扣分）。三個參與者以上一律走 SVG 版；完整範例見 `examples/explainer/index.html` 的「過期換發時，誰跟誰講話」：生命線＋水平箭頭、請求實線／回覆虛線、自己內部的判斷畫成小迴圈、自動進行的段落用淡底框起來。
 
 **做法**：橫向是參與者、縱向是時間。訊息用 grid 跨欄定位，**不要手刻座標**——欄位由參與者數量算出來，改內容不會跑版。
 
@@ -1485,15 +1532,19 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
   display: flex; align-items: center; justify-content: center;
   font-size: 18px; color: var(--text-soft);
 }
+/* 格內的小註記；中文最小 12px */
+.flow-note { font-size: 12px; color: var(--clay-ink); }
+/* 4 格＋3 個箭頭＝7 欄 */
+.flow-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; align-items: center; }
 ```
 
 ```html
-<div class="grid grid-cols-7 gap-3 items-center">
-  <div class="flow-stage">🎙️<br>錄音</div>
+<div class="flow-row">
+  <div class="flow-stage"><svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-0.125em"><path d="M12 19v3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><rect x="9" y="2" width="6" height="13" rx="3"/></svg><br>錄音</div>
   <div class="flow-arrow">→</div>
   <div class="flow-stage">📝<br>逐字稿</div>
   <div class="flow-arrow">→</div>
-  <div class="flow-stage highlight">🤖<br>AI 分析<br><span class="text-[10px]" style="color: var(--accent);">本次改動</span></div>
+  <div class="flow-stage highlight"><svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-0.125em"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg><br>AI 分析<br><span class="flow-note">本次改動</span></div>
   <div class="flow-arrow">→</div>
   <div class="flow-stage">✏️<br>校正</div>
 </div>
@@ -1513,10 +1564,11 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
   bottom: -8px; left: 50%; transform: translateX(-50%);
   color: var(--border-strong); font-size: 10px;
 }
+.flow-col { display: grid; gap: 12px; }
 ```
 
 ```html
-<div class="space-y-3">
+<div class="flow-col">
   <div class="flow-stage">階段一</div>
   <div class="flow-arrow-down"></div>
   <div class="flow-stage">階段二</div>
@@ -1536,7 +1588,7 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
   background: var(--bg-card); border: 1.5px solid var(--border);
   display: inline-flex; align-items: center; gap: 8px; font-weight: 500;
 }
-.tree-node.start { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.tree-node.start { border-color: var(--accent); background: var(--accent-soft); color: var(--clay-ink); }
 .tree-node.success { border-color: var(--green); background: var(--green-soft); color: #065f46; }
 .tree-node.degraded { border-color: var(--yellow); background: var(--yellow-soft); color: #713f12; }
 .tree-node.hard-fail { border-color: var(--red); background: var(--red-soft); color: var(--red); }
@@ -1648,18 +1700,21 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
   background: var(--border);
 }
 .commit-box:last-child::after { display: none; }
+.commit-list { display: grid; gap: 12px; padding-left: 12px; }
+.commit-name { font-size: 14px; margin-left: 8px; }
+.commit-meta { font-size: 12px; margin-top: 6px; color: var(--text-muted); }
 ```
 
 ```html
-<div class="space-y-3 pl-3">
+<div class="commit-list">
   <div class="commit-box">
     <span class="badge badge-blue">Commit 1</span>
-    <strong class="text-sm ml-2">baseline config</strong>
-    <div class="text-[11px] mt-1.5" style="color: var(--text-muted);">3 檔</div>
+    <strong class="commit-name">baseline config</strong>
+    <div class="commit-meta">3 檔</div>
   </div>
   <div class="commit-box">
     <span class="badge badge-blue">Commit 2</span>
-    <strong class="text-sm ml-2">backend implementation</strong>
+    <strong class="commit-name">backend implementation</strong>
   </div>
 </div>
 ```
@@ -1680,14 +1735,16 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
   display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: 14px;
 }
+.qa-step-title { font-size: 14px; font-weight: 600; }
+.qa-step-desc { font-size: 12px; margin-top: 4px; color: var(--text-muted); }
 ```
 
 ```html
 <div class="qa-step">
   <div class="qa-step-num">1</div>
   <div>
-    <div class="font-semibold text-sm">第一步</div>
-    <div class="text-xs mt-1" style="color: var(--text-muted);">細節說明</div>
+    <div class="qa-step-title">第一步</div>
+    <div class="qa-step-desc">細節說明</div>
   </div>
 </div>
 ```
@@ -1707,9 +1764,9 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
 .badge-green { background: var(--green-soft); color: var(--green); border: 1px solid var(--green-border); }
 .badge-red { background: var(--red-soft); color: var(--red); border: 1px solid var(--red-border); }
 .badge-yellow { background: var(--yellow-soft); color: var(--yellow); border: 1px solid var(--yellow-border); }
-.badge-blue { background: var(--accent-soft); color: var(--accent); border: 1px solid #bfdbfe; }
+.badge-blue { background: var(--accent-soft); color: var(--clay-ink); border: 1px solid #bfdbfe; }
 .badge-purple { background: var(--purple-soft); color: var(--purple); border: 1px solid var(--purple-border); }
-.badge-orange { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange-border); }
+.badge-orange { background: var(--orange-soft); color: #8a4d06; border: 1px solid var(--orange-border); }
 ```
 
 ```html
@@ -1733,22 +1790,25 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
   border-radius: 8px; margin-right: 12px;
 }
 .section-num.circle { border-radius: 50%; background: var(--purple); }
+.section-title { display: flex; align-items: center; margin-bottom: 16px; }
+.section-h { font-size: 20px; font-weight: 700; margin: 0; }
+.section-sub { font-size: 14px; color: var(--text-muted); margin: 2px 0 0; }
 ```
 
 ```html
-<div class="flex items-center mb-4">
+<div class="section-title">
   <span class="section-num">A</span>
   <div>
-    <h2 class="text-xl font-bold">區段標題</h2>
-    <p class="text-sm" style="color: var(--text-muted);">副說明</p>
+    <h2 class="section-h">區段標題</h2>
+    <p class="section-sub">副說明</p>
   </div>
 </div>
 
 <!-- 圈號版（技術討論區）-->
-<div class="flex items-center mb-4">
+<div class="section-title">
   <span class="section-num circle">②</span>
   <div>
-    <h2 class="text-xl font-bold">系統架構</h2>
+    <h2 class="section-h">系統架構</h2>
   </div>
 </div>
 ```
@@ -1759,41 +1819,52 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
 
 **何時用**：等使用者拍板的決策卡、每張卡含完整 context + 選項。
 
-詳細互動 CSS 見 `interaction-patterns.md`。
+一題一張卡：題目 → 樣張（現況／改後）→ radio → 常駐補充框。這張卡、它的 CSS（`.decide`／`.choice`／`textarea.note`）與回傳列的進度都在 `assets/base-template.html`，照抄即可。規則：radio 不預設勾選（推薦項標 `data-recommended`＋「推薦」膠囊）、不用下拉、原生圓點視覺隱藏但留在 Tab 順序（`opacity:0`＋`position:absolute`，不用 `display:none`，verify 會擋）、整張 label 在 `:has(input:focus-visible)` 時 3px 外框、補充框一律常駐。
 
 ```html
-<div class="card p-6">
-  <div class="grid md:grid-cols-3 gap-6">
-    <div class="md:col-span-2">
-      <div class="flex items-center gap-2 mb-2">
-        <span class="badge badge-purple">D-1</span>
-        <span class="badge badge-green">已 default</span>
-      </div>
-      <h3 class="text-lg font-semibold">決策標題</h3>
-      <p class="text-sm mt-2" style="color: var(--text-muted);">
-        背景說明、為什麼這樣選。
-      </p>
-      <div class="highlight-box mt-3">
-        <strong>推翻代價</strong>：⋯⋯
+<div class="decide" data-decision data-id="q1" id="dec-q1" data-title="Q1 要不要把 X 改成 Y">
+  <div class="decide-head">
+    <span class="badge-n">Q1</span>
+    <h3>題目寫成一個問句：要不要把 X 改成 Y？</h3>
+  </div>
+  <p class="ask">
+    一兩句講為什麼現在要拍、各選項的後果。推薦項掛「推薦」標籤，但不預設勾選：讀者自己點下去才算拍板。
+  </p>
+  <div class="samples">
+    <div class="mock">
+      <span class="mock-tag">現況</span>
+      <div class="mock-ui">
+        <span>用真標籤與真資料畫現況畫面</span><span class="mock-btn">舊按鈕</span>
       </div>
     </div>
-    <div class="md:col-span-1">
-      <div class="text-[10px] uppercase tracking-widest font-semibold mb-2"
-           style="color: var(--text-muted);">你的選擇</div>
-      <div class="choice-row">
-        <label class="choice">
-          <input type="radio" name="d-1" value="認可" checked>
-          <span class="choice-dot"></span>
-          <span><strong>認可</strong></span>
-        </label>
-        <label class="choice choice-warning">
-          <input type="radio" name="d-1" value="推翻">
-          <span class="choice-dot"></span>
-          <span><strong>推翻</strong></span>
-        </label>
+    <div class="mock">
+      <span class="mock-tag after">改後</span>
+      <div class="mock-ui">
+        <span>同一塊畫面改完的樣子</span><span class="mock-btn on">新按鈕</span>
       </div>
     </div>
   </div>
+  <div class="choice-row" role="radiogroup" aria-label="Q1 的選項">
+    <label class="choice" data-recommended
+      ><input type="radio" name="q1" value="改成 Y" /><span class="choice-dot"></span
+      ><span>改成 Y</span><span class="rec">推薦</span></label
+    >
+    <label class="choice"
+      ><input type="radio" name="q1" value="維持現況" /><span class="choice-dot"></span
+      ><span>維持現況</span></label
+    >
+    <label class="choice choice-warning"
+      ><input type="radio" name="q1" value="兩個都不要" /><span class="choice-dot"></span
+      ><span>兩個都不要</span></label
+    >
+  </div>
+  <textarea
+    class="note"
+    rows="1"
+    data-comment-for="q1"
+    aria-label="Q1 補充"
+    placeholder="補充（選填）：條件、但書、不同意的理由"
+  ></textarea>
 </div>
 ```
 
@@ -1803,12 +1874,14 @@ lines.push(`- F-1 自動化規則語意：${getValue("f-1")}${getComment("f-1")}
 
 詳細 CSS 見 `interaction-patterns.md` § Radio 美化。
 
+不預設勾選；原生圓點的藏法與焦點外框照 `interaction-patterns.md` § Radio pills（不用 `display:none`）。
+
 ```html
-<div class="grid md:grid-cols-2 gap-3">
-  <label class="choice">
-    <input type="radio" name="example" value="A" checked>
+<div class="choice-row">
+  <label class="choice" data-recommended>
+    <input type="radio" name="example" value="A">
     <span class="choice-dot"></span>
-    <span><strong>選項 A</strong> · 主要說明</span>
+    <span><strong>選項 A</strong> · 主要說明</span><span class="rec">推薦</span>
   </label>
   <label class="choice choice-warning">
     <input type="radio" name="example" value="B">
@@ -1881,10 +1954,10 @@ pre.codeshape {
   overflow-x: auto;   /* 手機必備：長行捲動、不凸出視窗 */
 }
 .cs-fn   { color: var(--slate); font-weight: 600; }  /* 函式 / 端點 */
-.cs-tag  { color: var(--clay-d); font-weight: 600; } /* Vue / HTML 元件 */
-.cs-hook { color: var(--olive); }                    /* composable / hook / 狀態 */
-.cs-path { color: var(--g500); font-size: 11px; }    /* 檔案路徑註腳 */
-.cs-note { color: var(--g500); font-style: italic; } /* 行內註解 */
+.cs-tag  { color: var(--clay-ink); font-weight: 600; } /* Vue / HTML 元件 */
+.cs-hook { color: var(--green-ink); }                    /* composable / hook / 狀態 */
+.cs-path { color: var(--text-soft); font-size: 11px; }    /* 檔案路徑註腳 */
+.cs-note { color: var(--text-soft); } /* 行內註解（中文不用斜體） */
 ```
 
 ⚠️ 390px 版面陷阱：行內註解（`.cs-note`）跟主體之間**不要墊大量空格對齊**——長行在手機上會凸出；註解間距 2 格即可，`overflow-x: auto` 兜底。
@@ -1955,7 +2028,7 @@ pre.sdiff {
 
 **何時用**：只在使用者明說「用 mermaid」時用（2026-09-05 起不再是預設——它的自動排版正是 diagram-design 列的 slop 特徵之一）。預設路由見 § 時序圖 的優先序：≤2 參與者無分支用 CSS 版，其餘用 SVG 時序圖（`references/structure-diagrams.md` §7.3）。
 
-**引入方式（就一行 CDN script、零 build 步驟，跟 Tailwind CDN 同模式）**：
+**引入方式（就一行 CDN script、零 build 步驟）**：
 
 ```html
 <div class="mermaid-box"><!-- overflow-x:auto 的容器、防手機跑版 -->
@@ -1989,10 +2062,497 @@ pre.sdiff {
 }
 ```
 
-**注意**：① 離線開檔時 CDN 載不到、`pre.mermaid` 會顯示原始文字——圖義仍可讀、版面不會壞，可接受；② `if (window.mermaid)` 守衛必加、CDN 失敗時不拋錯；③ 這是本 skill 唯二的外部 script（另一個是 Tailwind CDN），不要再加別的圖庫——真資料圖表交棒 `chart` skill。
+**注意**：① 離線開檔時 CDN 載不到、`pre.mermaid` 會顯示原始文字——圖義仍可讀、版面不會壞，可接受；② `if (window.mermaid)` 守衛必加、CDN 失敗時不拋錯；③ 這是本 skill 唯一的外部 script（Tailwind CDN 已於 2026-10-27 拿掉），不要再加別的圖庫——真資料圖表交棒 `chart` skill。
 
 ---
 
+# 📰 編輯報告類（2026-10-26 加）
+
+從一份經四輪獨立評審（Awwwards 四項）迭代到四項 8 分的報告頁收進來的做法。每一條都是評審實際扣過分、改了才過的地方。整頁怎麼搭在一起見 `references/examples/editorial-report/`。
+
+## 寬 SVG 圖在手機改直式卡片
+
+**何時用**：SVG 結構圖寬過 900px（`min-width` 撐開、手機要橫捲）。手機讀者橫捲看不全，也點不準格子。
+
+做法：同一份內容出兩種畫法，桌機看圖、≤640px 看直式卡片清單；卡片的說明**直接搬圖上每格的 `template[data-detail]`**，不另寫一份（改一處兩邊都對）。
+
+```html
+<div class="xp desk-only" data-explore>
+  <div class="figure"><svg class="xplore" style="min-width:1100px" viewBox="0 0 1250 610">…</svg></div>
+  <template data-detail="admin" data-tag="斷點 1"><h4>是什麼</h4><p>…</p></template>
+</div>
+<div class="m-only mcards">
+  <div class="mg">整理者</div>
+  <details class="mc mc-broken">
+    <summary><span class="mc-no">1</span><span class="mc-t"><b>整理排程</b><span>每小時一輪</span></span><span class="mc-st">斷點 1</span></summary>
+    <div class="mc-body" data-from="admin"></div><!-- 腳本把同 id 的 template 內容複製進來 -->
+  </details>
+  <div class="m-arrow"><svg class="ic" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+  …
+</div>
+```
+
+```css
+.m-only { display: none; }
+.mc { border: 1.5px solid var(--g500); border-radius: 12px; background: #fff; margin-bottom: 8px; }
+.mc-broken { border-color: var(--clay); background: var(--clay-soft); }
+.mc summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; padding: 14px; }
+.mc summary::-webkit-details-marker { display: none; }
+.mc summary:not(:has(.mc-no)) { grid-template-columns: minmax(0, 1fr) auto; }
+.mc-t { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--g700); }
+.mc-t b { font-size: 15px; color: var(--slate); }
+.mc-st { font: 600 11px/1.4 var(--mono); border: 1px solid var(--g300); border-radius: 999px; padding: 2px 9px; background: #fff; white-space: nowrap; }
+.mc-body { padding: 4px 16px 16px; border-top: 1px dashed var(--g300); font-size: 14px; }
+@media (max-width: 640px) {
+  .desk-only { display: none !important; }
+  .m-only { display: flex; flex-direction: column; }
+}
+```
+
+```js
+document.querySelectorAll(".mc-body[data-from]").forEach(function (b) {
+  var t = document.querySelector('template[data-detail="' + b.dataset.from + '"]');
+  if (t) b.appendChild(t.content.cloneNode(true));
+});
+```
+
+**為什麼**：評審第一輪在 390px 截圖上只看得到圖的左三分之一，扣了「可用性」；縮小整張圖則字小到讀不了。換畫法比縮放有效，卡片的上下順序就是圖的資料流。
+
+## 底部回傳列：從頁首就顯示（拍板頁加進度）
+
+**何時用**：每頁都有。2026-10-27 派工端裁定：回傳列**一律從頁首就顯示**，不做「捲到第一張拍板卡才出現」。舊作法（`.bar-wait` 先藏、捲到第一題才滑出）退場：讀前半頁的人不知道能反白留言，首屏也找不到回饋入口。
+
+| 狀況 | 列上顯示 | 複製內容 |
+|---|---|---|
+| 沒有拍板題 | 「回饋給 AI」＋「反白任何一段文字就能留言 · 已留 N 則」＋預覽＋複製 | 頁面標題＋全部留言 |
+| 有拍板題 | 第一行換成「已選 N / M · 還差：<題名>」，題名是連結：點了捲到那題；都選了就寫「都選了，按「複製給 AI」貼回」 | 只含已選的題，最後寫「還有 K 題沒選：…」，可以分批貼回 |
+
+- **手機（≤ 640px）**：最多兩行、約 90px 高；狀態行縮成一行「已選 N / M · 下一題 →」，放不下就截斷，不要讓列長到三四行。
+- **預覽**：從底部升起的抽屜，停在列上方（複製鈕不被蓋住），附「關閉」鈕；不在列內往上長。抽屜要放在列**外面**：列有 `backdrop-filter`，裡面的 fixed 元素會被困在列的框裡。抽屜的 z-index 要高過頂端章節列，手機上才不會被章節列切掉。
+- **寫法**：`assets/base-template.html` 已內建（搜 `id="bar-status"` 與「回傳列：留言數同步、拍板進度」那段腳本）。題名取拍板卡的 `data-title`，沒寫就取卡裡的 h3。
+- **editorial 範本**：照 base 的做法。章節列的「拍板 N / M」照留；底部列加一個 `.bar-status`，在既有的 `updateProgress()` 裡一起更新成「已選 N / M · 還差：<題名>」，題名連結點了 `scrollIntoView` 到那張卡。
+- **marathon 範本**：已有自己的進度列（`.bar-status`＋「跳到未選的題目」），照它的樣子改成從頁首顯示即可。
+
+⚠️ **頁內要畫「回傳列長什麼樣」的樣張時**（風格展示頁、教學頁）：用自己的 class（例 `.bar-demo`）、**不帶任何 id**、不用 sticky／fixed，按鈕用 `<span>` 不用 `<button>`，外層加 `aria-hidden="true"`。帶了 `preview-btn`／`copy-btn` 這類 id 或 `.sticky-bar` class，腳本、verify 與風格設定鈕都會把樣張當成真的列。
+
+**為什麼**：讀者要在讀的當下就知道「能留言、能回傳」，而拍板頁的讀者要隨時知道還差哪一題；把進度與下一題放進一直看得到的列，比要他捲回題目地圖找省一個動作。
+
+## 表格在手機每列變一張卡
+
+**何時用**：2–4 欄、每格是一兩句話的表（理由／證據、項目／狀態／說明）。欄數多、要逐欄比數字的表不適用，照「方案對照表」整表橫捲。判準（2026-10-27 派工端裁定）：**欄數 ≤ 4、每格是短文字的比較表 → 每列變一張卡；欄數 > 4 或以數字為主的資料表 → `.tbl-wrap` 橫向捲動**。
+
+```html
+<div class="tbl-wrap">
+  <table class="tbl">
+    <thead><tr><th>理由</th><th>證據</th></tr></thead>
+    <tbody>
+      <tr><td data-label="理由"><b>雜訊多</b></td><td data-label="證據">大部分是一次性任務</td></tr>
+    </tbody>
+  </table>
+</div>
+```
+
+```css
+@media (max-width: 640px) {
+  .tbl-wrap table.tbl { min-width: 0; }
+  table.tbl thead, table.tbl colgroup { display: none; }
+  table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
+  table.tbl tr { padding: 12px 0; border-bottom: 1.5px solid var(--g300); }
+  table.tbl td { border: 0; padding: 5px 16px; }
+  table.tbl td::before { content: attr(data-label); display: block; font: 600 12px/1.4 var(--mono); color: var(--text-soft); letter-spacing: 0.06em; } /* 欄名是中文：不低於 12px */
+  table.tbl td:empty { display: none; }
+}
+```
+
+`data-label` 手寫容易漏；產生頁面時從 `<th>` 依欄序自動補（範例的建置腳本就這樣做）。
+
+**為什麼**：表頭藏起來之後，每格靠 `::before` 帶上自己的欄名，讀者不用往上找表頭；比橫捲少一個動作，也不會把長句壓成一行三四個字。
+
+## 證據等級藥丸〔查〕〔轉〕〔推〕
+
+**何時用**：報告裡的事實來源可信度不一，讀者需要逐句知道「這是讀到原文、別人轉述、還是推論」。開頭放一列圖例，句尾放藥丸。
+
+```html
+<span class="ev ev-q" tabindex="0" data-tip="查：讀到原文">查</span>
+<span class="ev ev-z" tabindex="0" data-tip="轉：別人的紀錄轉述，本報告沒複驗">轉</span>
+<span class="ev ev-t" tabindex="0" data-tip="推：推論，不是讀到的事實">推</span>
+<!-- 藥丸後面緊接標點時，整組包 nowrap，避免標點自己掉到下一行 -->
+<span class="nw"><span class="ev ev-q" tabindex="0" data-tip="…">查</span>。</span>
+```
+
+```css
+.ev { display: inline-flex; align-items: center; justify-content: center; min-width: 1.9em; height: 1.55em; padding: 0 0.5em; border-radius: 999px; font: 600 11.5px/1 var(--mono); vertical-align: 0.1em; margin: 0 0.25em; position: relative; cursor: help; white-space: nowrap; }
+.ev-q { background: var(--slate); color: #fff; border: 1px solid var(--slate); }   /* 查＝實心 */
+.ev-z { color: var(--slate); border: 1.5px solid var(--slate); }                   /* 轉＝描邊 */
+.ev-t { color: var(--slate); border: 1.5px dashed var(--g700); }                   /* 推＝虛線 */
+.ev::after { content: attr(data-tip); display: none; position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); width: max-content; max-width: min(240px, 70vw); white-space: normal; background: var(--slate); color: #fff; font: 12px/1.5 var(--sans); padding: 7px 10px; border-radius: 7px; z-index: 60; }
+.ev:hover::after, .ev:focus-visible::after { display: block; }
+.ev:focus-visible { outline: 2px solid var(--clay); outline-offset: 2px; }
+.nw { white-space: nowrap; }
+```
+
+**為什麼**：三種差在「填色→描邊→虛線」由實到虛，不靠顏色（色盲、黑白列印都分得出）；`tabindex` 讓鍵盤和手機點一下也看得到說明。
+
+**outline 沒有證據等級時**：hero 的圖例列（`.legend-row`）、句尾藥丸與 `.ev` 這組 CSS 整組拿掉，不要留一列沒人用的〔查〕〔轉〕〔推〕圖例——讀者會去找頁面上哪裡有藥丸。
+
+## 對話「現況 vs 改後」並排樣張
+
+**何時用**：拍板題改的是 AI 或客服的回話方式，讀者要看到「同一句問話，改前改後怎麼回」。
+
+```html
+<div class="cmp">
+  <div class="cmp-col">
+    <div class="chat before"><span class="lab">現況 · 示意對話</span>
+      <div class="bub u"><span class="who">使用者</span>這個流程誰負責？</div>
+      <div class="bub a"><span class="who">助理</span>是營運組負責。</div>
+      <div class="flag"><svg class="ic">…alert…</svg><span>看不出是查到的還是猜的</span></div>
+    </div>
+  </div>
+  <div class="cmp-col">
+    <div class="chat after"><span class="lab">改後 · 示意對話</span>
+      <div class="bub u"><span class="who">使用者</span>這個流程誰負責？</div>
+      <div class="alt-label">查得到時</div>
+      <div class="bub a"><span class="who">助理</span>依〈流程手冊〉：營運組。<span class="src">出處：某次會議</span></div>
+      <div class="flag ok"><svg class="ic">…check…</svg><span>答案追得回來源</span></div>
+    </div>
+  </div>
+</div>
+```
+
+```css
+.cmp { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+.cmp-col { display: flex; flex-direction: column; }
+.chat { flex: 1; position: relative; background: var(--g100); border: 1px solid var(--g300); border-radius: 12px; padding: 30px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+.chat .lab { position: absolute; top: -9px; left: 12px; font: 600 12px/1.4 var(--mono); padding: 2px 8px; border: 1px solid; border-radius: 3px; }
+.chat.before .lab { color: var(--clay-ink); border-color: var(--red-border); background: var(--red-soft); }
+.chat.after .lab { color: var(--green); border-color: var(--green-border); background: var(--green-soft); }
+.bub { max-width: 88%; padding: 10px 14px; font-size: 14px; line-height: 1.6; }
+.bub.u { align-self: flex-end; background: var(--oat); border-radius: 14px 14px 4px 14px; }
+.bub.a { align-self: flex-start; background: #fff; border: 1px solid var(--g300); border-radius: 14px 14px 14px 4px; }
+.bub .who { display: block; font: 12px var(--mono); color: var(--text-soft); }
+.bub .src { display: block; margin-top: 4px; font-size: 12.5px; color: var(--green); font-weight: 600; }
+.alt-label { font: 12px var(--mono); color: var(--text-soft); }
+.flag { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--clay-ink); margin-top: auto; padding-top: 6px; }  /* 推到框內底部 */
+.flag.ok { color: var(--green); }
+@media (max-width: 900px) { .cmp { grid-template-columns: 1fr; } }
+```
+
+**為什麼**：評審前三輪扣分都在這裡——框外另掛「現況／改後」標籤又在框內寫一次（雙標籤）、兩欄高度不同、警示句掉在框外像註腳。改成**每框只有一個標籤**、兩欄 `stretch`＋`flex:1` 等高、警示行 `margin-top:auto` 固定在框內底部後才過。標籤寫「示意對話」，讓讀者知道不是真實紀錄。
+
+## 中文標題斷行
+
+**何時用**：每一頁。範本與四份範例都已內建。
+
+```css
+h2, h3 { word-break: keep-all; overflow-wrap: break-word; }
+```
+
+**為什麼**：中文能在任兩個字之間斷行，標題常被切成「三個答／案」；`text-wrap: balance` 只讓各行等長、不懂詞，靠它切中文反而更常切在詞中間。`keep-all` 讓中文只在標點與空白斷，`overflow-wrap` 是整串沒斷點時的退路。寫長標題時在想斷的地方放逗號或頓號（「三條輸入，一個整理者，兩個斷點」）。`.ph` 只用在超過 12 個中文字的 h1／h2，h3 不切。細節見 `color-and-typography.md`「排印細節」。
+
+## 結尾深色收束帶
+
+**何時用**：報告或決策頁的正文結束、附錄開始之前。用一句話收全篇，把拍板題串成行動順序，並在讀者讀完的位置再給一次複製鈕。
+
+```html
+<div class="closer" id="closer">
+  <div class="closer-line">先讓迴圈轉起來，再決定要不要<em>多接管線</em>。</div>
+  <ol class="closer-steps">
+    <li><span class="cs-t">整理排程恢復</span><span class="cs-b cs-b0">已排</span></li>
+    <li class="cs-arrow" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></li>
+    <li><span class="cs-t">先查並說出處</span><span class="cs-b">Q1</span></li>
+  </ol>
+  <button id="copy-btn-2" class="btn-primary closer-btn" type="button">複製拍板摘要</button>
+</div>
+```
+
+```css
+.closer { margin-top: clamp(80px, 10vw, 140px); background: var(--slate); color: #fff; border-radius: 22px; padding: clamp(32px, 6vw, 84px) clamp(22px, 5vw, 76px); display: flex; flex-direction: column; gap: 34px; align-items: flex-start; }
+.closer-line { font-family: var(--serif); font-size: clamp(30px, 4.2vw, 62px); line-height: 1.2; max-width: 22em; }
+.closer-line em { color: #f3b69d; font-weight: 600; font-style: normal; }
+.closer-steps { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.closer-steps li { display: flex; align-items: center; gap: 10px; }
+.closer-steps li:not(.cs-arrow) { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.22); border-radius: 12px; padding: 10px 14px; }
+.cs-t { font-size: 15px; font-weight: 600; }
+.cs-b { font: 700 11px/1 var(--mono); background: var(--clay); color: #fff; border-radius: 999px; padding: 4px 9px; }
+.cs-b0 { background: transparent; border: 1px solid #c8d2b8; color: #dfe8cf; }
+.cs-arrow svg { width: 20px; height: 20px; color: #f3b69d; }
+.closer-btn { font-size: 16px; padding: 14px 28px; min-height: 48px; display: inline-flex; align-items: center; gap: 10px; }
+@media (max-width: 640px) {
+  .closer-steps { flex-direction: column; align-items: stretch; }
+  .closer-steps li.cs-arrow { display: none; }
+  .closer-btn { width: 100%; justify-content: center; }
+}
+```
+
+第二顆複製鈕**呼叫同一個摘要函式**：範本的 `bindCopy` 對兩顆各綁一次（`bindCopy(document.getElementById("copy-btn")); bindCopy(document.getElementById("copy-btn-2"));`），不要另寫一份組摘要的程式，否則兩顆複製出來的內容會漂開。
+
+**為什麼**：評審判全篇「沒有收尾，讀到附錄就斷了」。深色帶在淺色頁上形成明確的段落終點；步驟小圖把三題拍板串成順序，讀者知道拍完之後會發生什麼。
+
+
+## 版面主幹：報告頁的六個骨架元件
+
+下面六個不是修正，是報告頁的**版面主幹**：拿同一份報告頁和五份舊報告並排看，差別主要在這六處——舊頁是左對齊標題＋說明段、只在開頭有章節按鈕、小方框「01」＋h2、核心原則用粉紅提示框、多欄密集表格。片段都取自 `references/examples/editorial-report/index.html`（那份的頭部樣式是壓成一行的，可讀版就是下面這些）。
+
+> **小字顏色**（2026-10-27 起）：下面片段的小字用墨色 token——`--text-soft`（#6c6b65）、`--clay-ink`、`--green-ink`、`--yellow-ink`，每個在米白、白、淺灰與各淡色底上都 ≥ 4.5:1。base-template 與四份範例都已內建；`--clay`／`--olive`／`--g500` 只當填色、邊框與 24px 以上的展示字（規則見 `color-and-typography.md` §對比規則）。
+
+## 結論數字主視覺 hero
+
+**何時用**：報告的結論能用**一個數字**講完（0 筆、3 倍、12 天沒人處理）。數字本身就是結論，不是裝飾；找不到這樣的數字就不要硬做，改用一般標題。
+
+左半一個巨大的數字，右半依序：eyebrow → 標題（關鍵片語上色）→ 數字的說明 → 一句主張 → 證據等級圖例 → 往下的提示。
+
+```html
+<header class="masthead" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="zero-wrap"><div class="zero" role="img" aria-label="0 筆">0</div></div>
+      <div>
+        <div class="eyebrow">範例報告 · 知識庫與助理 · 日期</div>
+        <h1 class="hero-h1">助理怎麼<em>越用越懂</em>團隊</h1>
+        <div class="hero-cap">
+          <div class="big">第 3 週起，自動整理寫進知識庫的筆數<!-- 證據藥丸 --></div>
+          <div class="small">整理紀錄最後一筆停在第 2 週；之後沒有新的一筆。</div>
+        </div>
+        <p class="hero-quote">對話不該整段進知識庫，該進的是使用者講出口的事實。</p>
+        <div class="legend-row" aria-label="證據標籤說明">
+          <span class="item"><span class="ev ev-q">查</span> 讀到原文</span>
+          <span class="item"><span class="ev ev-z">轉</span> 別人的紀錄轉述</span>
+          <span class="item"><span class="ev ev-t">推</span> 推論</span>
+        </div>
+        <div class="scroll-cue"><svg class="ic" viewBox="0 0 24 24"><path d="m7 6 5 5 5-5"/><path d="m7 13 5 5 5-5"/></svg> 往下看三個問題的答案</div>
+      </div>
+    </div>
+  </div>
+</header>
+```
+
+```css
+header.masthead { position: relative; overflow: hidden; border-bottom: 1.5px solid var(--g300); background: radial-gradient(1200px 520px at 8% 22%, #fdf1e9 0%, rgba(250,249,245,0) 70%), var(--ivory); }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 5vw, 88px); align-items: center; padding: clamp(36px, 6vw, 84px) 0 clamp(36px, 5vw, 64px); min-height: min(86vh, 900px); overflow: hidden; }
+.zero-wrap { position: relative; display: flex; justify-content: center; align-items: center; }
+.zero-wrap::before { content: ""; position: absolute; width: min(100%, 520px); aspect-ratio: 1; border-radius: 50%; border: 1.5px solid var(--clay-soft); box-shadow: inset 0 0 0 28px rgba(251,233,223,.35); }
+.zero { position: relative; font-family: "Times New Roman", Times, "Songti TC", serif; font-weight: 400; font-size: clamp(200px, 30vw, 500px); line-height: .9; color: var(--clay-ink); letter-spacing: -.03em; font-variant-numeric: lining-nums tabular-nums; }
+.hero-h1 { font-size: clamp(34px, 4.4vw, 68px); line-height: 1.12; margin-top: 18px; }
+.hero-cap { margin-top: 26px; padding-top: 20px; border-top: 1.5px solid var(--slate); }
+.hero-cap .big { font-family: var(--serif); font-size: clamp(18px, 1.7vw, 24px); line-height: 1.45; }
+.hero-cap .small { font-size: 13.5px; color: var(--text-soft); margin-top: 6px; }
+.hero-quote { margin-top: 22px; font-size: clamp(16.5px, 1.4vw, 19px); line-height: 1.8; color: var(--g700); max-width: 54ch; }
+.legend-row { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 26px; font-size: 12.5px; color: var(--g700); }
+.scroll-cue { margin-top: 30px; display: inline-flex; align-items: center; gap: 10px; font: 12px var(--mono); letter-spacing: .1em; color: var(--text-soft); }
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; min-height: 0; }
+  .zero { font-size: clamp(170px, 52vw, 300px); }
+  .zero-wrap::before { width: min(78vw, 340px); }
+}
+```
+
+> **結論是「改前 → 改後」兩個數字時**：大字放改後，改前用小字疊在大字上方，讀者先看到結果、再看到從哪裡來；不要兩個一樣大並排（分不出哪個是結論）。
+>
+> ```html
+> <div class="zero-wrap"><div class="delta-num" role="img" aria-label="從 141px 降到 81px">
+>   <span class="was">改前 <s>141</s> px</span><span class="zero">81</span>
+> </div></div>
+> ```
+> ```css
+> .delta-num { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+> .delta-num .was { font: 500 clamp(16px, 1.6vw, 22px)/1.2 var(--serif); color: var(--text-soft); }
+> .delta-num .was s { text-decoration-color: var(--g500); }
+> ```
+
+> 有拍板題時（2026-10-27 起）：把 `.scroll-cue` 換成題目地圖「要你拍板 N 題：[Q1 …] [Q2 …]」（容器 `id="qmap-list"`，點了跳到題目、選過的標「已選」），只想拍板的讀者不必捲過半頁。寫法見 `examples/editorial-report/index.html`。
+
+**為什麼**：讀者打開頁面第一眼就拿到結論，不用讀完說明段才知道結果；數字大到占半個畫面，標題與主張退到第二層，閱讀順序由版面決定，不靠讀者自己找。手機上數字移到標題上方、縮成約半個畫面寬。大數字用 Times 的等高字形，0 才不會看起來像 o（見 `color-and-typography.md`「serif 數字」）。
+
+## 頂端固定章節列＋閱讀進度線
+
+**何時用**：報告有 4 段以上、要捲好幾個畫面。只有兩三段的短頁不用。
+
+章節列在 hero 下面，捲動後黏在頂端，目前讀到的那章反白；畫面最上緣一條細線顯示讀了多少。**有拍板題才放右側的計數**（`#nav-prog`），沒有就整個拿掉。沒有拍板題、也就沒有底部列時，「風格設定」按鈕停在左下角，手機首屏會蓋住章節列第一項；加 `@media (max-width: 900px) { .topnav .in { padding-left: 52px; } }` 讓出位置。
+
+```html
+<div class="progress" aria-hidden="true" data-tw-lock><i id="progress-bar"></i></div>
+<!-- …hero… -->
+<nav class="topnav" aria-label="章節導覽">
+  <div class="wrap"><div class="in">
+    <a href="#s01" data-sec="s01"><span class="n">01</span>結論先講</a>
+    <a href="#s02" data-sec="s02"><span class="n">02</span>全貌地圖</a>
+    <span class="tag" id="nav-prog">拍板 0 / 2</span><!-- 沒有拍板題就刪這行 -->
+  </div></div>
+</nav>
+```
+
+```css
+html { scroll-padding-top: 70px; }   /* 點章節跳過去時，標題不被章節列蓋住 */
+.progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 9999; pointer-events: none; }
+.progress i { display: block; height: 100%; background: var(--clay); transform-origin: 0 50%; transform: scaleX(0); }
+.topnav { position: sticky; top: 0; z-index: 40; background: rgba(250,249,245,.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--g200); }
+.topnav .in { display: flex; align-items: center; gap: 6px; padding: 9px 0; overflow-x: auto; scrollbar-width: none; }
+.topnav a { flex-shrink: 0; font-size: 13px; padding: 5px 13px; border-radius: 999px; color: var(--g700); text-decoration: none; border: 1px solid transparent; white-space: nowrap; }
+.topnav a .n { font: 12px var(--mono); color: var(--text-soft); margin-right: 6px; }
+.topnav a:hover { border-color: var(--g300); color: var(--slate); }
+.topnav a.on { background: var(--slate); color: #fff; }
+.topnav a.on .n { color: var(--clay-soft); }
+.topnav .tag { margin-left: auto; flex-shrink: 0; font: 11px var(--mono); color: var(--text-soft); padding-left: 12px; white-space: nowrap; }
+@media (max-width: 640px) { .topnav .tag { display: none; } }
+```
+
+```js
+(function () {
+  var bar = document.getElementById("progress-bar");
+  function onScroll() {
+    var h = document.documentElement, max = h.scrollHeight - h.clientHeight;
+    bar.style.transform = "scaleX(" + (max > 0 ? Math.min(1, h.scrollTop / max) : 0) + ")";
+  }
+  var links = [].slice.call(document.querySelectorAll(".topnav a[data-sec]"));
+  var secs = links.map(function (a) { return document.getElementById(a.dataset.sec); }).filter(Boolean);
+  var navIn = document.querySelector(".topnav .in"), cur0 = null;
+  function navSync() {
+    var cur = null;
+    secs.forEach(function (sc) { if (sc.getBoundingClientRect().top <= window.innerHeight * 0.3) cur = sc.id; });
+    if (cur === cur0) return;
+    cur0 = cur;
+    links.forEach(function (l) {
+      var on = l.dataset.sec === cur;
+      l.classList.toggle("on", on);
+      // 手機上章節列會橫捲：把反白的那章捲到中間
+      if (on && navIn.scrollWidth > navIn.clientWidth)
+        navIn.scrollTo({ left: l.offsetLeft - (navIn.clientWidth - l.offsetWidth) / 2, behavior: "smooth" });
+    });
+  }
+  window.addEventListener("scroll", function () { onScroll(); navSync(); }, { passive: true });
+  window.addEventListener("resize", navSync);
+  onScroll(); navSync();
+})();
+```
+
+**為什麼**：舊頁的章節按鈕只在開頭，捲到中段讀者不知道自己在哪、也跳不回去。黏在頂端的列兼做目錄和「你在這裡」的標示；進度線讓讀者知道還剩多少。拍板計數放在同一列，拍到一半的人不用捲回去數。
+
+## 章節開場（淡色大章節號）
+
+**何時用**：每個主章節（`section.chap`）的開頭。一頁統一用這一種，不混用小方框編號。
+
+```html
+<section class="chap" id="s04">
+  <div class="chap-head" data-n="04">
+    <div class="eyebrow">04 · 交叉切面</div>
+    <h2>換個角度：<em>一個問題被問兩次</em></h2>
+    <p class="dek">前面看「資料往哪流」，這裡改看同一個問題第二次被問時，答案有沒有變好。</p>
+  </div>
+  …
+</section>
+```
+
+```css
+.chap { padding-top: clamp(80px, 10vw, 140px); }
+.chap-head { position: relative; margin-bottom: clamp(28px, 4vw, 48px); min-height: clamp(110px, 12vw, 180px); display: flex; flex-direction: column; justify-content: flex-end; }
+.chap-head::before { content: attr(data-n); position: absolute; right: -.02em; top: 50%; transform: translateY(-56%); font: 400 clamp(130px, 18vw, 270px)/1 "Times New Roman", Times, "Songti TC", serif; color: #f2e4d9; letter-spacing: -.04em; pointer-events: none; user-select: none; z-index: 0; }
+.chap-head > * { position: relative; z-index: 1; }
+.chap-head h2 { font-size: clamp(30px, 3.8vw, 56px); line-height: 1.15; margin-top: 12px; }
+.chap-head .dek { margin-top: 12px; font-size: clamp(15px, 1.3vw, 18px); color: var(--g700); max-width: 60ch; text-wrap: pretty; }
+@media (max-width: 640px) {
+  .chap-head { min-height: 0; }
+  .chap-head::before { position: static; transform: none; display: block; font-size: 84px; line-height: .95; margin-bottom: 2px; align-self: flex-start; }
+}
+```
+
+**為什麼**：章節號放大、淡到只剩底色，當背景層用，不跟標題搶；讀者捲動時靠它知道換章了。eyebrow 寫「編號 · 這章的角色」（結論先講、交叉切面、附錄），標題只寫這章的主張、強調片語上色，副標一行交代這章看什麼。手機上大號數字放在標題上方，不疊在字後面。
+
+## 主張引言帶（深色整寬）
+
+**何時用**：**只給全頁最核心的原則**，一頁 1–2 次。一般提醒、注意事項照用 `.callout`；兩者分得開，讀者才知道哪一句最重要。
+
+```html
+<div class="principle">
+  <svg class="q" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/><path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/></svg>
+  <blockquote>知識庫的每一頁，都要<em>追得回某個人說過的話</em>。</blockquote>
+  <p>整理可以由 AI 做；不行的是 AI 在對話裡自己講的斷言，在沒有人說過的情況下變成頁面。</p>
+</div>
+```
+
+```css
+.principle { position: relative; margin-top: 40px; padding: clamp(26px, 4vw, 54px) clamp(24px, 4vw, 60px); background: var(--slate); color: #fff; border-radius: 18px; overflow: hidden; }
+.principle svg.q { position: absolute; right: 28px; top: 22px; width: 64px; height: 64px; color: var(--clay-ink); opacity: .55; }
+.principle blockquote { margin: 0; font-family: var(--serif); font-size: clamp(26px, 3.3vw, 48px); line-height: 1.3; letter-spacing: -.01em; max-width: 22em; }
+.principle blockquote em { color: #f3b69d; font-weight: 600; font-style: normal; }
+.principle p { margin-top: 20px; color: #d7d4ca; font-size: 15px; max-width: 70ch; }
+@media (max-width: 640px) { .principle svg.q { position: static; display: block; width: 34px; height: 34px; margin-bottom: 10px; } }
+```
+
+**為什麼**：舊頁把核心原則放在粉紅提示框裡，和「值得注意」這類一般提醒長得一樣，讀者分不出哪句是全篇的判斷依據。深色整寬帶在淺色頁上是最重的視覺份量，所以只能少用；用超過兩次就等於沒有重點。和「結尾深色收束帶」同色系，兩者一個在中段立原則、一個在結尾收結論。
+
+## 規格對照雙欄卡
+
+**何時用**：**兩到三個對象、五到八個面向**，每一列比同一件事（例：個人筆記 vs 知識庫，比「誰寫／來源追得回嗎／會過期嗎／誰讀得到／適合放」）。取代多欄密集表格。對象超過三個、或要逐格比數字，改用「方案對照表」。
+
+桌機是兩張並排的卡，手機換成三欄小表（左欄項目、右兩欄各一個對象），讓同一列還是並排比較：
+
+```html
+<div class="m-only l3col">
+  <div class="l3h">項目</div><div class="l3h a">個人筆記</div><div class="l3h b">知識庫</div>
+  <div class="l3k">誰寫</div><div>AI 自己判斷</div><div>只有整理排程</div>
+  <div class="l3k">會過期嗎</div><div>會，依時間衰減</div><div>不會自己過期</div>
+</div>
+<div class="layers2 desk-only">
+  <div class="card lay a"><h4>個人筆記<small>每人一份</small></h4>
+    <dl><div><dt>誰寫</dt><dd>AI 自己判斷</dd></div><div><dt>會過期嗎</dt><dd>會，依時間衰減</dd></div></dl></div>
+  <div class="card lay b"><h4>知識庫<small>團隊共用</small></h4>
+    <dl><div><dt>誰寫</dt><dd>只有整理排程</dd></div><div><dt>會過期嗎</dt><dd>不會自己過期</dd></div></dl></div>
+</div>
+```
+
+```css
+.layers2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.lay { padding: 24px 26px; }
+.lay h4 { font-family: var(--serif); font-size: clamp(22px, 2vw, 28px); display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.lay h4 small { font-family: var(--sans); font-size: 13px; font-weight: 400; color: var(--text-soft); }
+.lay.a { background: var(--green-soft); border-color: var(--green-border); }
+.lay.a h4 { color: var(--green); }
+.lay.b { background: var(--paper); border-color: var(--slate); }
+.lay dl { margin: 0; }
+.lay dl > div { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 14px; padding: 11px 0; border-top: 1px solid rgba(20,20,19,.1); font-size: 14.5px; line-height: 1.6; }
+.lay dt { font: 11.5px var(--mono); color: var(--g700); padding-top: 3px; }
+.lay dd { margin: 0; color: var(--slate); }
+.m-only { display: none; }
+.l3col { grid-template-columns: .9fr 1fr 1fr; border: 1.5px solid var(--g300); border-radius: 12px; overflow: hidden; background: var(--paper); font-size: 13px; line-height: 1.55; }
+.l3col > div { padding: 10px; border-bottom: 1px solid var(--g200); }
+.l3col > div:nth-last-child(-n+3) { border-bottom: 0; }
+.l3h { font: 600 11.5px/1.4 var(--mono); background: var(--g100); color: var(--g700); }
+.l3h.a { color: var(--green); background: var(--green-soft); }
+.l3k { font-weight: 600; background: var(--g100); }
+@media (max-width: 640px) {
+  .desk-only { display: none !important; }
+  .m-only.l3col { display: grid; }
+}
+```
+
+兩邊的列要**同一順序、同一組標籤**；一邊寫「不適用」也要留那一列，否則左右對不齊，比較就斷了。
+
+**為什麼**：多欄密集表格把每個對象拆成一欄，讀者得左右來回對；雙欄卡讓每個對象是一張完整的卡，同一高度的列比同一件事，掃一眼就看出差在哪。手機若直接把兩張卡疊起來，讀者讀到第二張時已忘了第一張的同一列，所以手機改成三欄小表。
+
+## 刻意不做＋重開條件
+
+**何時用**：報告裡列出「不做」的事（不做某個機制、不改某個設定）。每一個「不做」都緊接一條帶圖示的重開條件：什麼情況發生就該重新考慮。
+
+```html
+<span class="h3-mono">為什麼不做「每天整段掃所有對話」</span>
+<div class="tbl-wrap"><table class="tbl">…理由｜證據…</table></div>
+<div class="callout green">
+  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+  <span><b>重開條件：</b>主動收件上線一個月後，抽讀對話發現大量該收沒收。</span>
+</div>
+```
+
+```css
+.callout { margin-top: 16px; padding: 13px 17px; border-left: 3px solid #c49845; border-radius: 6px; font-size: 14px; display: flex; gap: 10px; align-items: flex-start; }
+.callout .ic { margin-top: .2em; flex-shrink: 0; }
+.callout.green { background: var(--green-soft); border-left-color: var(--olive); color: var(--slate); }
+```
+
+一次列好幾個「不做」時，改成三欄表「不做什麼｜為什麼｜什麼情況重開」，每列一個；沒有重開條件的寫「無」，不要留空。
+
+**為什麼**：只寫「不做」，下一個讀到的人不知道這是永久決定還是暫時的，常常就重新提案一次。重開條件把「不做」變成有退出條件的決定；用綠色＋重來圖示，和紅色的斷點、黃色的注意事項分得開。
+
+---
 ## 何時用什麼元件 — 速查
 
 | 你想呈現 | 用元件 |
@@ -2018,6 +2578,10 @@ pre.sdiff {
 | 連續任務 / commit 列 | Commit box |
 | 狀態標記 | Badge |
 | 等使用者拍板 | Decision card with radio |
+| 報告的結論能用一個數字講完 | 結論數字主視覺 hero |
+| 全頁最核心的一條原則（一頁 1–2 次）| 主張引言帶（深色整寬）；一般提醒用 callout |
+| 2–3 個對象 × 5–8 個面向的對照 | 規格對照雙欄卡（手機三欄小表）|
+| 「不做」的決定 | 刻意不做＋重開條件 |
 
 ## 方案對照表（拍板題常用；2026-09-09 加）
 
@@ -2039,7 +2603,7 @@ pre.sdiff {
 ```css
 .opt-table { width:100%; border-collapse:collapse; table-layout:fixed; min-width:640px; font-size:13.5px; }
 .opt-table th, .opt-table td { border-bottom:1px solid var(--border); padding:9px 10px; text-align:left; vertical-align:top; }
-.opt-table th { font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--g500); }
+.opt-table th { font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color: var(--text-soft); }
 .opt-table td:first-child { white-space:nowrap; }   /* 只有 A／B 標籤欄不換行 */
 .opt-table-wrap { overflow-x:auto; }                 /* 手機寬度整表橫向捲動 */
 ```

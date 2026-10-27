@@ -279,6 +279,34 @@ class DecisionSelectParser(HTMLParser):
                 break
 
 
+# 畫面樣張的外層結構（2026-10-27 補）：原本只數 class="mock" 字面，editorial 的 .cmp／.mkf、spec 的 .screen
+# 全數不到，帶兩張樣張的拍板頁也報「0 個畫面樣張」。一個 class 名命中就算一張；巢狀的只算最外層，
+# 例：.cmp-col 裡包 .mkf 只算 1 張（.cmp 是兩欄容器、不算）。marathon 範本目前沒有這類結構
+SAMPLE_CLASSES = ("mock", "ba-col", "cmp-col", "mkf", "screen")
+
+
+class SampleCounter(HTMLParser):
+    """數畫面樣張：命中 SAMPLE_CLASSES 的最外層元素各算一張。"""
+
+    def __init__(self):
+        super().__init__()
+        self.stack = []  # (tag, 是不是樣張)
+        self.total = 0
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        cls = (attrs.get("class") or "").split()
+        hit = any(c in SAMPLE_CLASSES for c in cls) and not any(s for _, s in self.stack)
+        self.total += hit
+        self.stack.append((tag, hit))
+
+    def handle_endtag(self, tag):
+        for i in range(len(self.stack) - 1, -1, -1):
+            if self.stack[i][0] == tag:
+                del self.stack[i:]
+                break
+
+
 # 會決定「東西排在哪、多大」的屬性
 _LAYOUT_PROPS = ("display", "position", "grid-template-columns", "grid-template-rows",
                  "flex-direction", "float", "width", "height", "max-width", "max-height")
@@ -400,6 +428,12 @@ def main(path):
     report(OK if depth == 0 else BAD, "div 標籤平衡", "" if depth == 0 else f"收支差 {depth}")
     so, sc = h.count("<section"), h.count("</section>")
     report(OK if so == sc else BAD, f"section {so} 段", "" if so == sc else f"未閉合 {so - sc}")
+    # 結束標籤重複（2026-10-27 加）：存檔時的格式化工具會替暫存片段補一組 </body></html>，
+    # 拼回整頁後中間多出一組，後面的評論系統與腳本就落在 </html> 之後。三個代理同一晚各撞一次
+    n_end = len(re.findall(r"</html\s*>", h, re.I))
+    n_body = len(re.findall(r"</body\s*>", h, re.I))
+    report(OK if n_end <= 1 and n_body <= 1 else BAD, "結束標籤不重複",
+           "" if n_end <= 1 and n_body <= 1 else f"</body> {n_body} 個、</html> {n_end} 個：刪掉中間那組，內容要在唯一的 </body> 之前")
     if "<title>" in h:
         title = re.search(r"<title>(.*?)</title>", h, re.S)
         t = title.group(1).strip() if title else ""
@@ -528,6 +562,12 @@ def main(path):
         ]
         miss = [n for ok, n in trio if not ok]
         report(OK if not miss else BAD, "複製摘要三件套", "" if not miss else "缺：" + "、".join(miss))
+        # 不預設勾選（2026-08-22 起；2026-10-27 範本仍有 18 題預設勾選、進度一開就 18/19，
+        # 讀者分不出哪些是自己拍的）。推薦項改用 data-recommended＋「推薦」膠囊
+        pre = sorted({n for n in did if re.search(r'<input\b[^>]*\bname="' + re.escape(n) + r'"[^>]*\bchecked\b', h_markup)
+                      or re.search(r'<input\b[^>]*\bchecked\b[^>]*\bname="' + re.escape(n) + r'"', h_markup)})
+        report(OK if not pre else BAD, "拍板選項不預設勾選",
+               "" if not pre else f"{len(pre)} 題預設勾選 {pre[:6]}：拿掉 checked，推薦項改標 data-recommended")
         selects = DecisionSelectParser()
         selects.feed(h)
         report(OK if not selects.questions else BAD, "無下拉選單",
@@ -546,21 +586,35 @@ def main(path):
 
         # ── 閱讀動線 ──
         head("閱讀動線")
-        pos = h.find("data-decision") / len(h) * 100
-        report(OK if pos <= 40 else BAD, f"第一題位置 {pos:.0f}%", "門檻 40%" if pos > 40 else "")
+        # 用「可見文字」算比例，不用原始碼字元（2026-10-27 改）：head 裡的 CSS 動輒佔整檔三成、
+        # 格式化工具把整份展開又會改行數，原算法量的是原始碼長相、不是讀者要捲多遠。
+        # 實例：editorial 範例原算法 38% 過關，可見文字 54%；spec 範例原算法 42% 不過，實際畫面 23%。
+        def _vis_len(x):
+            return len(re.sub(r"\s+", "", visible_text(x)))
+        cut = h.find("data-decision")
+        pos = _vis_len(h[:cut]) / max(1, _vis_len(h)) * 100
+        has_map = "qmap-list" in h
+        if pos <= 40:
+            report(OK, f"第一題位置 {pos:.0f}%", "以可見文字計")
+        elif has_map:
+            report(OK, f"第一題位置 {pos:.0f}%", "超過 40%，但開頭有題目地圖可直接跳題")
+        else:
+            report(BAD, f"第一題位置 {pos:.0f}%", "門檻 40%（以可見文字計）；題目往前放，或在開頭放題目地圖（qmap-list）讓只想拍板的讀者直接跳")
         if len(decisions) >= 5:
             report(OK if "qmap-list" in h else BAD, "題數 ≥ 5，有題目地圖")
         else:
-            report(SKIP, "題數 < 5，免題目地圖")
-        mocks = h.count('class="mock"')
+            report(SKIP, "題數 < 5，題目地圖可省", "第一題位置 > 40% 時仍要放（上一項會擋）")
+        sc_ = SampleCounter()
+        sc_.feed(h_markup)
         report(WARN, "UI 決策題需人工確認",
-               f"{mocks} 個畫面樣張 / {len(decisions)} 題（涉及畫面的題每題應有 2 個）")
+               f"{sc_.total} 個畫面樣張 / {len(decisions)} 題（涉及畫面的題每題應有 2 個：現況＋改後）")
 
     # ── 純展示 ───────────────────────────────────
     else:
         head("純展示骨架")
         long_doc = len(h) > 40000
-        has_reveal = 'class="reveal"' in h
+        # class 清單含完整的 reveal 即可（例：class="reveal rv"）；reveal-x 這類不算
+        has_reveal = re.search(r'class="(?:[^"]*\s)?reveal(?:\s[^"]*)?"', h) is not None
         if long_doc:
             report(OK if has_reveal else BAD, "長文件有漸進揭露",
                    "" if has_reveal else "細節應收進 <details class=\"reveal\">")
@@ -578,11 +632,21 @@ def main(path):
         if status == "skip":
             report(UNVERIFIED, "跑版檢查", (lines[0] if lines else "") + " → 未驗證，不等於通過")
         elif status == "ok":
-            report(OK, f"{len(WIDTHS)} 個寬度無跑版", " / ".join(str(w) for w in WIDTHS) + "px")
+            report(OK, f"{len(WIDTHS)} 個寬度無跑版、小字對比與列印都過", " / ".join(str(w) for w in WIDTHS) + "px（設定檔 checkWidths）")
         else:
-            report(BAD, "偵測到跑版", "詳如下")
+            report(BAD, "偵測到跑版或可讀性問題", "詳如下（含小字對比不足、列印看不見、標題孤字）")
             for ln in lines:
-                print("     " + ln)
+                if "RADIO_HIDDEN" not in ln:
+                    print("     " + ln)
+        # 拍板選項要鍵盤選得到（2026-10-27 加，防 editorial 範本的 display:none 重犯）
+        if decisions and status == "skip":
+            report(UNVERIFIED, "拍板選項鍵盤選得到",
+                   (lines[0] if lines else "瀏覽器沒跑起來") + "——量不到 radio 的實際樣式，未驗證不等於通過")
+        elif decisions:
+            hid = [ln.strip() for ln in lines if "RADIO_HIDDEN" in ln]
+            report(OK if not hid else BAD, "拍板選項鍵盤選得到",
+                   "radio 沒有用 display:none／visibility:hidden" if not hid else
+                   hid[0].replace("RADIO_HIDDEN ", "") + "　這幾題的 radio 被 display:none 或 visibility:hidden 藏起來，Tab 落不到——改成 opacity:0＋position:absolute，label 加 :has(input:focus-visible) 外框（見 interaction-patterns.md § Radio pills）")
 
     # 看標記不看腳本：蓋章注入的風格設定腳本字串裡有 <svg，不該讓每一頁都跑 SVG 檢查
     if "<svg" in h_markup.lower():
@@ -671,6 +735,16 @@ def main(path):
     else:
         report(OK if not plain else BAD, "每段都有視覺元件",
                "" if not plain else f"純文字段落：{plain}")
+
+    # 回傳列（2026-10-27 加）：每頁都要讓讀者知道能反白留言、一鍵複製給 AI。
+    # 評審實測：教學頁拿掉了評論系統、規格頁只有頁尾一顆按鈕，讀者讀完有意見只能另開對話打字
+    has_bar = 'class="sticky-bar' in h_markup and 'id="preview-btn"' in h_markup and 'id="copy-btn"' in h_markup
+    has_comments = "vtCollectComments" in h
+    if has_bar and has_comments:
+        report(OK, "回傳列＋反白留言", "底部列有預覽與複製，全頁評論已內建")
+    else:
+        miss = [x for x, ok in (("底部回傳列（sticky-bar＋preview-btn＋copy-btn）", has_bar), ("全頁評論系統", has_comments)) if not ok]
+        report(BAD, "回傳列＋反白留言", "缺：" + "、".join(miss) + "（照 base-template 的回傳列三段整段複製）")
 
     # 視覺手法重複（軟規則、只報數不擋）—— 取自 taste-skill §4.7：每段都放一條
     # 大寫寬字距小標，會產生同樣的模板化節奏。判準用它給的 CSS 特徵（同一條規則裡

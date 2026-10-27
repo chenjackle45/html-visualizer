@@ -10,7 +10,7 @@
 | ② 動態 favicon | 依 session 產穩定色的色塊 + 首字 | 分頁縮到只剩 icon 時，靠顏色認 |
 | ③ 頂部色帶徽章 | 頁面最上方一條彩色帶：`● session 名 · 短 id` | 全螢幕看內容時，抬頭就知道在看誰的 |
 
-顏色由短 id 雜湊而來、**同一 session 每次都同色**，所以「藍色那個是部署那條線」這種記憶會累積。
+顏色由短 id 雜湊而來、**同一 session 每次都同色**，所以「藍色那個是部署那條線」這種記憶會累積。飽和度與明度固定在 `56% 30%`：色帶上是白字，這組值讓 360 個色相配白字都 ≥ 4.5:1（逐度算過，最差是 hue 60 的黃綠，4.72:1）。範本、本檔與 `scripts/reindex.py` 的索引頁色點用同一組值，改一處要三處一起改。
 
 ## Step 1 — 取得標籤（寫 HTML 前先跑）
 
@@ -48,7 +48,7 @@ echo "$VT_LABEL / $VT_ID / $VT_PROJECT"
     background: var(--vt-session-color, #666);
     color: #fff;
     font-family: var(--mono, ui-monospace, monospace);
-    font-size: 11.5px;
+    font-size: 12px; /* 標籤常含中文：不低於 12px */
     letter-spacing: 0.06em;
   }
   .vt-session-badge .dot {
@@ -59,11 +59,17 @@ echo "$VT_LABEL / $VT_ID / $VT_PROJECT"
     opacity: 0.85;
     flex-shrink: 0;
   }
+  /* 不換行：窄螢幕放不下就截斷標籤、短 id 照留。截斷是設計，verify 的「文字被切掉」不計這一格 */
   .vt-session-badge .lb {
     font-weight: 700;
     text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
   }
   .vt-session-badge .id {
+    flex-shrink: 0;
     margin-left: auto;
     opacity: 0.75;
   }
@@ -75,7 +81,8 @@ echo "$VT_LABEL / $VT_ID / $VT_PROJECT"
     const seed = s.id || s.label;
     let hue = 7;
     for (const c of seed) hue = (hue * 31 + c.charCodeAt(0)) % 360;
-    const col = `hsl(${hue} 58% 42%)`;
+    // 56% / 30%：hue 0–359 每一度配白字都 ≥ 4.5:1（最差 hue 60，4.72:1）。舊值 58% / 42% 在黃綠段只有 2.5:1
+    const col = `hsl(${hue} 56% 30%)`;
 
     // ① 分頁標題前綴
     document.title = `${s.label} · ${document.title}`;
@@ -127,6 +134,7 @@ echo "$VT_LABEL / $VT_ID / $VT_PROJECT"
 | 顏色用雜湊、不隨機 | 同一 session 每次同色，顏色才會變成可累積的記憶 |
 | 標籤留空即整段停用 | 範本原檔自己打開時乾淨、不顯示假資料；忘了填也不會露出 placeholder |
 | favicon 用 canvas 現產、不外連 | 零依賴、離線可用，且不必管圖檔放哪 |
+| 徽章標籤不換行、放不下就截斷加省略號 | 長標籤（例：36 字的 `[html-visualizer]skill-followup-1026`）在 390 寬換行會把徽章撐高（第 3 輪追加要求：12px、不換行、不重疊）。截斷是設計，verify 的「文字被切掉」不計 `.vt-session-badge .lb`，頁內不必加覆寫 |
 
 ## 何時可以省略
 

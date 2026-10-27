@@ -173,8 +173,12 @@
   painted(function () {
     root.setAttribute("data-vt-lang", lang);
     document.querySelectorAll("[data-en]").forEach(function (e) {
-      if (!e.hasAttribute("data-zh")) e.setAttribute("data-zh", e.textContent);
-      e.textContent = e.getAttribute(lang === "en" ? "data-en" : "data-zh");
+      // 只換第一段非空白的直接文字、前後空白照留：整個蓋 textContent 會把裡面的子元素（例如計數 span）刪掉
+      var t = [].find.call(e.childNodes, function (n) {
+        return n.nodeType === 3 && n.nodeValue.trim();
+      });
+      if (!e.hasAttribute("data-zh")) e.setAttribute("data-zh", t.nodeValue.trim());
+      t.nodeValue = t.nodeValue.replace(t.nodeValue.trim(), e.getAttribute(lang === "en" ? "data-en" : "data-zh"));
     });
   });
 

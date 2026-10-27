@@ -5,6 +5,8 @@
 用法：
     python3 <skill 目錄>/scripts/reindex.py [歸檔目錄]
 
+不想被收進索引的資料夾（工作副本、備份、測試頁），在資料夾裡放一個空的 .reindex-skip 檔。
+
 預設目錄 ~/Documents/claude-html/，結構：
     claude-html/
       index.html      ← 本 script 產生，別手改
@@ -58,7 +60,11 @@ def parse(path):
 
 def collect():
     items = []
-    for dirpath, _, files in os.walk(ROOT):
+    for dirpath, dirs, files in os.walk(ROOT):
+        # 資料夾裡有 .reindex-skip 就整個跳過（放工作副本、備份、測試頁的資料夾用）
+        if ".reindex-skip" in files:
+            dirs[:] = []
+            continue
         for f in files:
             if not f.endswith(".html") or f == "index.html":
                 continue
@@ -84,7 +90,7 @@ def render(items):
             cur_month = month
             rows.append(f'<div class="month">{month}</div>')
         seed = it["id"] or it["label"] or it["title"]
-        col = f"hsl({hue_of(seed)} 58% 42%)" if it["label"] else "var(--g300)"
+        col = f"hsl({hue_of(seed)} 56% 30%)" if it["label"] else "var(--g300)"
         label = _html.escape(it["label"] or "—")
         rows.append(
             f'<a class="row" href="{_html.escape(it["path"])}" '
@@ -98,7 +104,7 @@ def render(items):
         )
 
     chips = "".join(
-        f'<span class="chip"><span class="dot" style="background:hsl({hue_of(v["id"])} 58% 42%)"></span>'
+        f'<span class="chip"><span class="dot" style="background:hsl({hue_of(v["id"])} 56% 30%)"></span>'
         f'{_html.escape(k)}<b>{v["n"]}</b></span>'
         for k, v in sorted(sessions.items(), key=lambda kv: -kv[1]["n"])
     )
