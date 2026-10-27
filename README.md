@@ -222,7 +222,7 @@ Jackle Chen — [jackle.pro](https://jackle.pro/) · [@chenjackle45](https://git
 
 - [diagram-design](https://github.com/cathrynlavery/diagram-design) by Cathryn Lavery — MIT。圖示來自 Tabler（MIT）、Simple Icons（CC0）、Devicon（MIT）、log-z/logos（MIT），詳見 `skills/diagram-design/THIRD_PARTY_LICENSES.md`。
 - [@unovis](https://unovis.dev) — Apache-2.0，走 CDN 載入。
-- [Tailwind CSS](https://tailwindcss.com) — MIT，走 CDN 載入。
+- [Lucide](https://lucide.dev) — ISC，圖示以 inline SVG 內嵌在範本裡。
 - [Mermaid](https://mermaid.js.org) — MIT，只在你明講要 Mermaid 圖時才載入。
 - code-shape 元件的概念參考 HumanLayer 的 *show-me* skill。
 - 預設視覺風格取向於 Anthropic 的編輯式排版；沒有複製 Anthropic 的任何內容。

@@ -2551,16 +2551,16 @@
           if (!c.length) return;
           const t = window.vtCollectComments().replace(/^\n\n---\n\n/, ""),
             b = e.currentTarget,
-            o = b.textContent;
+            o = b.innerHTML; // innerHTML：按鈕裡有 SVG 圖示，用 textContent 還原會把圖示弄丟
           const ok = await window.vtCopyText(t);
           if (ok) {
-            b.textContent = "✅ 已複製";
+            b.textContent = "已複製";
           } else {
             // 複製不到就不假報成功：把評論放進臨時區域並全選
             window.vtSelectForManualCopy(t);
             b.textContent = "已選取 → 請按 Cmd+C";
           }
-          setTimeout(() => (b.textContent = o), ok ? 2000 : 6000);
+          setTimeout(() => (b.innerHTML = o), ok ? 2000 : 6000);
         });
         setTimeout(() => {
           if (typeof window.vtBuildDecisionExport === "function")

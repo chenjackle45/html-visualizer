@@ -224,7 +224,7 @@ Questions and suggestions: [open an issue](https://github.com/chenjackle45/html-
 
 - [diagram-design](https://github.com/cathrynlavery/diagram-design) by Cathryn Lavery — MIT. Icons: Tabler (MIT), Simple Icons (CC0), Devicon (MIT), log-z/logos (MIT). See `skills/diagram-design/THIRD_PARTY_LICENSES.md`.
 - [@unovis](https://unovis.dev) — Apache-2.0, loaded from CDN.
-- [Tailwind CSS](https://tailwindcss.com) — MIT, loaded from CDN.
+- [Lucide](https://lucide.dev) — ISC, icons are embedded as inline SVG in the templates.
 - [Mermaid](https://mermaid.js.org) — MIT, loaded only when you explicitly ask for a Mermaid diagram.
 - The "code-shape" component was inspired by HumanLayer's *show-me* skill.
 - The default visual style follows Anthropic's editorial look; nothing is copied from Anthropic.

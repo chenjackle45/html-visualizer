@@ -1,1074 +1,3794 @@
-<title>Brewly 訂閱方案變更規格・由上而下（使用者操作視角）</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  :root {
-        --wrap-max: 1120px; /* 內容寬度：設定檔 tokens.layout.maxWidth 與「風格設定」改的就是它 */
-    --ivory: #f7f4ec;
-    --paper: #fffdf8;
-    --ink: #1f1b16;
-    --ink-soft: #4a443b;
-    --line: #e4dccd;
-    --clay: #c15f3c;
-    --clay-soft: #e8d9c9;
-    --amber: #b8860b;
-    --amber-bg: #fbf3df;
-    --green: #3e6b4f;
-    --green-bg: #e6f0e7;
-    --red: #a23b3b;
-    --red-bg: #f6e7e4;
-    --blue: #3a5a7a;
-    --blue-bg: #e6edf4;
-  }
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    background: var(--ivory);
-    color: var(--ink);
-    font-family:
-      -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
-    margin: 0;
-    line-height: 1.7;
-    -webkit-font-smoothing: antialiased;
-    font-synthesis: none;
-  }
-  .serif {
-    font-family:
-      "Iowan Old Style", "Palatino Linotype", "Noto Serif TC", Georgia, serif;
-  }
-  .wrap {
-    width: min(94vw, var(--wrap-max, 1120px));
-    margin: 0 auto;
-    padding: 0 4px;
-  }
-  .prose {
-    max-width: 74ch;
-  }
-  em {
-    font-style: italic;
-    color: var(--clay);
-  }
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.76rem;
-    font-weight: 600;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    background: var(--paper);
-  }
-  .card {
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 1.5rem 1.6rem;
-    box-shadow: 0 1px 2px rgba(31, 27, 22, 0.03);
-  }
-  .tag {
-    display: inline-block;
-    white-space: nowrap;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 0.14rem 0.5rem;
-    border-radius: 6px;
-  }
-  .t-have {
-    background: var(--green-bg);
-    color: var(--green);
-  }
-  .t-change {
-    background: var(--clay-soft);
-    color: var(--clay);
-  }
-  .t-new {
-    background: var(--blue-bg);
-    color: var(--blue);
-  }
-  h1,
-  h2,
-  h3 {
-    line-height: 1.25;
-  }
-  .num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    background: var(--clay);
-    color: #fff;
-    font-weight: 700;
-    font-size: 0.95rem;
-    flex-shrink: 0;
-  }
-  /* mock screen */
-  .screen {
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    overflow: hidden;
-    background: #fff;
-    font-size: 0.82rem;
-  }
-  .screen-bar {
-    background: #f1ece1;
-    padding: 0.4rem 0.7rem;
-    font-size: 0.72rem;
-    color: var(--ink-soft);
-    border-bottom: 1px solid var(--line);
-    display: flex;
-    gap: 0.4rem;
-    align-items: center;
-  }
-  .screen-body {
-    padding: 0.8rem 0.9rem;
-  }
-  .row {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.3rem 0;
-    border-bottom: 1px dashed #eee;
-  }
-  .mbtn {
-    display: inline-block;
-    background: var(--ink);
-    color: #fff;
-    border-radius: 7px;
-    padding: 0.28rem 0.7rem;
-    font-size: 0.76rem;
-    font-weight: 600;
-  }
-  .mbtn-o {
-    background: #fff;
-    color: var(--ink);
-    border: 1px solid var(--line);
-  }
-  .mnote {
-    background: var(--amber-bg);
-    border: 1px solid #e9dbb0;
-    border-radius: 8px;
-    padding: 0.5rem 0.65rem;
-    font-size: 0.78rem;
-    color: #7a5c08;
-  }
-  .mnote-r {
-    background: var(--red-bg);
-    border-color: #e7c2bd;
-    color: var(--red);
-  }
-  .mnote-g {
-    background: var(--green-bg);
-    border-color: #c9ddca;
-    color: var(--green);
-  }
-  textarea.cmt {
-    width: 100%;
-    min-height: 42px;
-    border: 1px dashed var(--line);
-    border-radius: 10px;
-    background: #fffdf7;
-    padding: 0.5rem 0.7rem;
-    font: inherit;
-    font-size: 0.85rem;
-    resize: vertical;
-  }
-  textarea.cmt:focus {
-    outline: 2px solid var(--clay-soft);
-    border-style: solid;
-  }
-  .btn {
-    background: var(--ink);
-    color: #fff;
-    border: 0;
-    border-radius: 10px;
-    padding: 0.6rem 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
-  .btn:hover {
-    background: #000;
-  }
-  .modal-bg {
-    position: fixed;
-    inset: 0;
-    background: rgba(31, 27, 22, 0.55);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    padding: 1rem;
-  }
-  .modal-bg.on {
-    display: flex;
-  }
-  .modal {
-    background: var(--paper);
-    border-radius: 16px;
-    max-width: 720px;
-    width: 100%;
-    max-height: 82vh;
-    overflow: auto;
-    padding: 1.4rem;
-  }
-  pre.exp {
-    white-space: pre-wrap;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 0.78rem;
-    background: #f4efe4;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 1rem;
-  }
-  .two {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-  @media (max-width: 820px) {
-    .two {
-      grid-template-columns: 1fr;
-    }
-  }
-
-      /* 多欄表在手機每欄只剩幾十 px，中文會被壓成直排：整表放進橫向捲動容器 */
-      .tbl-scroll { overflow-x: auto; }
-      @media (max-width: 600px) {
-        /* flex／grid 項預設 min-width:auto、不會縮到內容以下，表格最小寬會把外層撐出視窗 */
-        section div { min-width: 0; }
-        .tbl-scroll > table { min-width: 520px; }
-        .items-baseline { flex-wrap: wrap; }
-        strong { overflow-wrap: anywhere; }
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 空 favicon：不加的話瀏覽器每次開頁都去要 /favicon.ico、主控台留一筆 404 -->
+    <link rel="icon" href="data:," />
+    <title>Brewly 訂閱方案變更規格・由上而下（使用者操作視角）</title>
+    <style>
+      /* 只含數字的字族，排在 --serif 最前面：Georgia 的數字是舊式字形（0 像小寫 o） */
+      @font-face {
+        font-family: "VTDigits";
+        src: local("Times New Roman"), local("Times");
+        unicode-range: U+0030-0039, U+002C-002F, U+003A;
       }
-      /* 內文 <em>：保險絲擋掉合成斜體後中文強調會消失，補字重（英文真斜體保留） */
+      :root {
+        --wrap-max: 1760px; /* 內容寬度：設定檔 tokens.layout.maxWidth 與調整面板改的就是它 */
+        /* 共用 token（同 assets/base-template.html） */
+        --ivory: #faf9f5;
+        --paper: #ffffff;
+        --slate: #141413;
+        --g100: #f0eee6;
+        --g200: #e6e3da;
+        --g300: #d1cfc5;
+        --g500: #87867f;
+        --g700: #3d3d3a;
+        --oat: #e3dacc;
+        --clay: #d97757;
+        --clay-d: #b85c3e;
+        --clay-soft: #fbe9df;
+        --clay-border: #e8c4af;
+        --olive: #788c5d;
+        --serif:
+          "VTDigits", ui-serif, Georgia, "Songti TC", "Noto Serif TC",
+          "Source Han Serif TC", "Times New Roman", serif;
+        --sans:
+          system-ui, -apple-system, "Segoe UI", Roboto, "PingFang TC",
+          "Noto Sans TC", Helvetica, Arial, sans-serif;
+        --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+        /* 小字用的墨色：在 ivory / paper / g100 / 各 soft 底上都 ≥ 4.5:1 */
+        --text-soft: #6c6b65;
+        --clay-ink: #a64b2e;
+        --green-ink: #566b40;
+        --yellow-ink: #7d6019;
+        --green-soft: #eff1e8;
+        --green-border: #c8d2b8;
+        --red-soft: #faebe3;
+        --red-border: #e8c4af;
+        --yellow-soft: #f8efd9;
+        --yellow-border: #e8d4a0;
+        --green: var(--green-ink);
+        --yellow: var(--yellow-ink);
+        --red: var(--clay-ink);
+        /* 藍色只有一個用途：建置範圍三態（既有／要改／新造）裡的「新造」。
+       既有用綠、要改用赤陶，新造需要第三個跟警示黃分得開的顏色。字色 #3a5a7a 在 #e6edf4 上約 6.3:1 */
+        --blue-ink: #3a5a7a;
+        --blue-soft: #e6edf4;
+        --blue-border: #c3d2e1;
+      }
+      /* 偽元素也用 border-box：寫了寬度又加框線的箭頭、圓點，寬度才是寫的那個數 */
+      *,
+      ::before,
+      ::after {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      /* html body：權重高於裸 body，行高 1.7（舊版要蓋過外部 CSS 框架的重置才這樣寫，現在不載入框架，留著無害） */
+      html body {
+        margin: 0;
+        background: var(--ivory);
+        color: var(--slate);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.7;
+        -webkit-font-smoothing: antialiased;
+        /* 保險絲：擋掉合成斜體與合成粗體，中文筆畫不變形 */
+        font-synthesis: none;
+      }
+      .wrap {
+        width: min(94vw, var(--wrap-max, 1760px));
+        margin: 0 auto;
+        padding: 0 32px;
+      }
+      p,
+      li,
+      td {
+        text-wrap: pretty;
+      }
+      /* 中文標題只在標點、空白處換行；語意片段用 .ph 包成不拆的一塊 */
+      h1,
+      h2,
+      h3,
+      h4 {
+        word-break: keep-all;
+        overflow-wrap: anywhere;
+        text-wrap: balance;
+      }
+      .ph {
+        display: inline-block;
+      }
+      /* 內文 <em>：中文沒有斜體，改用字重＋墨色 */
       em {
+        font-style: normal;
+        font-weight: 600;
+        color: var(--clay-ink);
+      }
+      /* 連結：墨色＋底線。body a 的權重低於 #qmap-list a 這類帶 id／class 的規則。
+         底線明寫 text-decoration-line（舊版要蓋過外部 CSS 框架的重置才這樣寫，現在不載入框架，留著無害） */
+      body a {
+        color: var(--clay-ink);
+        text-decoration-line: underline;
+        text-decoration-color: var(--clay-border);
+        text-underline-offset: 3px;
+      }
+      /* 表單元件跟著內文的字：瀏覽器預設是 Arial 13.3px、行高 normal，按鈕與輸入框的字會跟內文不同 */
+      body :is(button, input, textarea, select) {
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+        margin: 0;
+      }
+      body a:hover {
+        text-decoration-color: var(--clay-ink);
+      }
+      .ic {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        vertical-align: -0.125em;
+        flex-shrink: 0;
+      }
+
+      /* ── Hero ───────────────────────────────── */
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+        gap: 56px;
+        align-items: start;
+        padding: 64px 0 48px;
+        border-bottom: 1.5px solid var(--g300);
+      }
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        color: var(--text-soft);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+        white-space: nowrap;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 24px;
+        height: 1.5px;
+        background: var(--clay);
+        flex-shrink: 0;
+      }
+      .eyebrow .zh {
+        font-family: var(--sans);
+        font-size: 13px;
+        letter-spacing: 0.02em;
+      }
+      /* body 前綴：權重比裸元素高一級（舊版要蓋過外部 CSS 框架的重置才這樣寫，現在不載入框架，留著無害） */
+      body h1 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: clamp(34px, 4.4vw, 54px);
+        line-height: 1.12;
+        letter-spacing: -0.01em;
+        margin: 0 0 20px;
+        color: var(--slate);
+      }
+      .lede {
+        font-size: 17px;
+        color: var(--g700);
+        margin: 0;
+        max-width: 72ch;
+      }
+      .hero-key {
+        margin: 28px 0 0;
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .hero-key .hk-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--clay-ink);
+        background: var(--clay-soft);
+        border: 1px solid var(--red-border);
+        border-radius: 6px;
+        padding: 2px 10px;
+        white-space: nowrap;
+      }
+      .hero-key .hk-text {
+        font-family: var(--serif);
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--clay-d); /* 28px 展示字，clay-d 4.3:1 過大字門檻 */
+      }
+
+      /* 題目地圖：首屏就看到要拍哪幾件、拍到哪 */
+      .qmap {
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-radius: 14px;
+        padding: 22px 22px 18px;
+      }
+      .qmap-top {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .qmap-title {
+        font-family: var(--serif);
+        font-size: 22px;
+        font-weight: 600;
+        margin: 0;
+      }
+      .qmap-count {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--clay-ink);
+        white-space: nowrap;
+      }
+      .qmap-hint {
+        font-size: 13.5px;
+        color: var(--text-soft);
+        margin: 6px 0 12px;
+        max-width: 72ch;
+      }
+      #qmap-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      #qmap-list li + li {
+        border-top: 1px solid var(--g200);
+      }
+      #qmap-list a {
+        display: grid;
+        grid-template-columns: 26px minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        padding: 9px 4px;
+        color: inherit;
+        text-decoration: none;
+        font-size: 14.5px;
+        line-height: 1.45;
+      }
+      #qmap-list a:hover .qm-t {
+        color: var(--clay-ink);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      /* 題號：圓框數字，題目地圖、題卡、回傳列、落地節奏都用同一個數字；情境字母只當題名後的小註 */
+      .q-no {
+        display: inline-grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--clay-ink);
+        background: var(--clay-soft);
+        border: 1px solid var(--red-border);
+        flex-shrink: 0;
+      }
+      .qm-scn {
+        display: inline-block; /* inline-block 才不會繼承題名 hover 的底線 */
+        margin-left: 8px;
+        font-size: 12px;
+        color: var(--text-soft);
+        white-space: nowrap;
+      }
+      .qm-st {
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        color: var(--text-soft);
+        border: 1px solid var(--g300);
+        border-radius: 999px;
+        padding: 1px 9px;
+      }
+      .qm-st.is-ok {
+        color: var(--green-ink);
+        background: var(--green-soft);
+        border-color: var(--green-border);
+      }
+      .qm-st.is-change {
+        color: var(--clay-ink);
+        background: var(--clay-soft);
+        border-color: var(--red-border);
+      }
+
+      /* ── 章節 ───────────────────────────────── */
+      .chap {
+        padding: 72px 0 0;
+      }
+      .hero + .chap {
+        padding-top: 48px;
+      }
+      /* session 識別條插在第一個 header 最前面；hero 是格線，讓它橫跨兩欄 */
+      .hero > .vt-session-badge {
+        grid-column: 1 / -1;
+      }
+      .chap > h2 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: clamp(26px, 2.6vw, 34px);
+        line-height: 1.25;
+        margin: 0 0 12px;
+      }
+      .chap-intro {
+        font-size: 16px;
+        color: var(--g700);
+        margin: 0 0 28px;
+        max-width: 72ch;
+      }
+
+      /* ── 01 核心模型：截止前／本期截止／截止後 ── */
+      .lc-start {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+        font-size: 15px;
+      }
+      .lc-step {
+        background: var(--g100);
+        border-radius: 8px;
+        padding: 6px 14px;
+        white-space: nowrap;
+      }
+      .lc-step b {
+        font-weight: 700;
+      }
+      .lc-step span {
+        color: var(--text-soft);
+        font-size: 13px;
+        margin-left: 6px;
+      }
+      .lc-arrow {
+        color: var(--g500);
+      }
+      .lc-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) 128px minmax(0, 1fr);
+        align-items: stretch;
+      }
+      .lc-zone {
+        border-radius: 14px;
+        padding: 22px 24px;
+      }
+      .lc-zone.pre {
+        background: var(--green-soft);
+      }
+      .lc-zone.post {
+        background: var(--red-soft);
+      }
+      .lc-when {
+        font-size: 13px;
+        color: var(--text-soft);
+        white-space: nowrap;
+        margin-bottom: 4px;
+      }
+      .lc-zone-h {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .lc-zone.pre .lc-zone-h {
+        color: var(--green-ink);
+      }
+      .lc-zone.post .lc-zone-h {
+        color: var(--clay-ink);
+      }
+      .lc-zone p {
+        margin: 8px 0 0;
+        font-size: 15px;
+        color: var(--g700);
+        max-width: 72ch;
+      }
+      .lc-remind {
+        margin-top: 16px;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        background: var(--paper);
+        border-left: 3px solid #c49845;
+        border-radius: 0 8px 8px 0;
+        padding: 10px 14px;
+      }
+      .lc-remind .ic {
+        color: var(--yellow-ink);
+        margin-top: 4px;
+      }
+      .lc-remind b {
+        display: block;
+        font-size: 14px;
+        color: var(--yellow-ink);
+        white-space: nowrap;
+      }
+      .lc-remind span {
+        display: block;
+        font-size: 14px;
+        color: var(--g700);
+        max-width: 72ch;
+      }
+      /* 本期截止是分界，不是一個步驟：畫成一道虛線，上面掛一顆鎖 */
+      .lc-gate {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .lc-gate::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        bottom: -10px;
+        left: 50%;
+        border-left: 2px dashed var(--clay-d);
+      }
+      .lc-gate-in {
+        position: relative;
+        background: var(--ivory);
+        padding: 12px 4px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .lc-gate-in .ic {
+        width: 22px;
+        height: 22px;
+        color: var(--clay-d);
+      }
+      .lc-gate-in b {
+        font-size: 15px;
+        color: var(--clay-ink);
+        white-space: nowrap;
+      }
+      .lc-gate-in small {
+        font-size: 12px;
+        color: var(--text-soft);
+        white-space: nowrap;
+      }
+
+      /* ── 02 情境 ───────────────────────────── */
+      .scn {
+        padding: 40px 0 0;
+        margin-top: 40px;
+        border-top: 1.5px solid var(--g300);
+      }
+      .scn:first-of-type {
+        margin-top: 0;
+      }
+      .scn-h {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      /* 小節 badge：小方框 */
+      .scn-badge {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--clay-ink);
+        background: var(--clay-soft);
+        border: 1px solid var(--red-border);
+        border-radius: 6px;
+        padding: 2px 10px;
+        white-space: nowrap;
+      }
+      .scn-h h3 {
+        margin: 0;
+        font-size: 22px;
+        line-height: 1.35;
+        font-weight: 700;
+      }
+      .scn-h h3 .freq {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text-soft);
+        margin-left: 6px;
+      }
+      .scn-tags {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .scn-lead {
+        margin: 0 0 20px;
+        color: var(--g700);
+        font-size: 16px;
+        max-width: 72ch;
+      }
+      .scn-rule {
+        margin: 20px 0 0;
+        font-size: 15px;
+        max-width: 72ch;
+        padding-left: 14px;
+        border-left: 3px solid var(--g300);
+      }
+      .scn-rule b {
+        color: var(--slate);
+      }
+      .mock-label {
+        font-weight: 700;
+        font-size: 13px;
+        margin-bottom: 6px;
+        color: var(--text-soft);
+      }
+      .tag {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 2px 9px;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        line-height: 1.5;
+      }
+      .t-have {
+        background: var(--green-soft);
+        color: var(--green-ink);
+        border-color: var(--green-border);
+      }
+      .t-change {
+        background: var(--clay-soft);
+        color: var(--clay-ink);
+        border-color: var(--red-border);
+      }
+      .t-new {
+        background: var(--blue-soft);
+        color: var(--blue-ink);
+        border-color: var(--blue-border);
+      }
+
+      /* 畫面 mock */
+      .two {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 20px;
+      }
+      .screen {
+        border: 1px solid var(--g300);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--paper);
+        font-size: 14px;
+        box-shadow: 0 1px 2px rgba(20, 20, 19, 0.04);
+      }
+      .screen.narrow {
+        max-width: 560px;
+      }
+      .screen-bar {
+        background: var(--g100);
+        padding: 6px 12px;
+        font-size: 12px;
+        color: var(--g700);
+        border-bottom: 1px solid var(--g200);
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .screen-body {
+        padding: 12px 14px;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--g200);
+      }
+      .row .ok {
+        color: var(--green-ink);
         font-weight: 600;
       }
-    </style>
+      .row .warn {
+        color: var(--clay-ink);
+        font-weight: 600;
+      }
+      .mbtn {
+        display: inline-block;
+        background: var(--slate);
+        color: #fff;
+        border-radius: 7px;
+        padding: 4px 11px;
+        font-size: 12.5px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .mbtn-o {
+        background: var(--paper);
+        color: var(--slate);
+        border: 1px solid var(--g300);
+      }
+      .mnote {
+        background: var(--yellow-soft);
+        border: 1px solid var(--yellow-border);
+        border-radius: 8px;
+        padding: 8px 11px;
+        font-size: 13px;
+        color: var(--yellow-ink);
+        margin-top: 8px;
+      }
+      .mnote-r {
+        background: var(--red-soft);
+        border-color: var(--red-border);
+        color: var(--clay-ink);
+      }
+      .mnote-g {
+        background: var(--green-soft);
+        border-color: var(--green-border);
+        color: var(--green-ink);
+      }
+      .mail-h {
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .mail-p {
+        color: var(--g700);
+        margin: 0 0 6px;
+        max-width: 72ch;
+      }
 
-<div class="wrap" style="padding-top: 2.8rem; padding-bottom: 5rem">
-  <!-- HERO -->
-  <header style="margin-bottom: 2.2rem">
-    <div
-      style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem"
-    >
-      <span class="chip">🗓 2026-09-01 Brewly 虛構規格樣張</span>
-      <span class="chip">由上而下 · 使用者操作視角</span>
-    </div>
-    <h1
-      class="serif"
-      style="font-size: 2.5rem; font-weight: 700; margin: 0 0 0.7rem"
-    >
-      Brewly 訂閱後想換豆款<br />方案變更怎麼生效
-    </h1>
-    <p
-      class="prose"
-      style="font-size: 1.1rem; color: var(--ink-soft); margin: 0"
-    >
-      訂閱現在<strong>從官網選方案</strong>。月費 NT$ 690 的方案成立後，換豆款、改配送頻率、暫停一期都從同一處辦理。核心只有一個判斷：<em>本期配送截止了沒。</em>本頁以客服主管操作示範最終規格，所有情境與金額皆為虛構。
-    </p>
-  </header>
+      /* ── 就地拍板卡 ─────────────────────────── */
+      .dq {
+        margin-top: 24px;
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-left: 4px solid var(--clay-d);
+        border-radius: 12px;
+        padding: 18px 20px 16px;
+        scroll-margin-top: 24px;
+      }
+      .dq-head {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .dq-no {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--clay-ink);
+        white-space: nowrap;
+      }
+      .dq h4 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.4;
+        font-weight: 700;
+      }
+      .dq-why {
+        font-size: 15px;
+        color: var(--g700);
+        margin: 0 0 4px;
+        max-width: 72ch;
+      }
+      .dq-aff {
+        font-size: 13px;
+        color: var(--text-soft);
+        margin: 0 0 12px;
+      }
+      .dq-rec {
+        background: var(--g100);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 15px;
+        max-width: 72ch;
+        margin: 0 0 14px;
+      }
+      .dq-rec b {
+        color: var(--clay-ink);
+        margin-right: 4px;
+      }
+      .dq-opts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .dq-opt {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1.5px solid var(--g300);
+        border-radius: 999px;
+        padding: 6px 16px 6px 12px;
+        font-size: 14.5px;
+        cursor: pointer;
+        background: var(--paper);
+        white-space: nowrap;
+      }
+      /* 原生圓點視覺隱藏、但留在 Tab 順序裡：不要用 display:none／visibility:hidden（鍵盤會選不到）。圓點改用 ::before 畫 */
+      /* 隱藏層蓋滿整張選項格：Tab 聚焦時瀏覽器只把 radio 本身捲進畫面，1px 的 radio 會讓格子邊緣停在固定列底下 */
+      .dq-opt input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        margin: 0;
+        pointer-events: none;
+      }
+      .dq-opt::before {
+        content: "";
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 1.5px solid var(--g500);
+        background: var(--paper);
+        flex-shrink: 0;
+        box-sizing: border-box;
+      }
+      .dq-opt:has(input:checked)::before {
+        border-color: var(--clay-d);
+        background: var(--clay-d);
+        box-shadow: inset 0 0 0 3px var(--paper);
+      }
+      .dq-opt:has(input:focus-visible) {
+        outline: 3px solid var(--clay-d);
+        outline-offset: 2px;
+      }
+      .dq-opt:hover {
+        border-color: var(--g500);
+      }
+      .dq-opt:has(input:checked) {
+        border-color: var(--clay-d);
+        background: var(--clay-soft);
+        font-weight: 600;
+      }
+      textarea.cmt {
+        display: block;
+        width: 100%;
+        height: 44px;
+        min-height: 44px;
+        margin-top: 12px;
+        border: 1.5px solid var(--g200);
+        border-radius: 10px;
+        background: var(--g100);
+        padding: 9px 12px;
+        font: inherit;
+        font-size: 15px;
+        line-height: 1.6;
+        resize: vertical;
+        transition: height 0.15s, background 0.15s;
+      }
+      /* 空的時候只佔一行；點進去或寫了字就長高、換白底 */
+      textarea.cmt:focus,
+      textarea.cmt:not(:placeholder-shown) {
+        height: 96px;
+        background: var(--paper);
+        border-color: var(--g300);
+      }
+      textarea.cmt::placeholder {
+        color: var(--text-soft);
+      }
 
-<nav class="qmap-list" aria-label="題目地圖"><a href="#d1">1. 提醒信以哪個日期計算？</a> · <a href="#d2">2. 截止後的變更從哪一期生效？</a> · <a href="#d3">3. 已扣款的本期可以暫停嗎？</a> · <a href="#d4">4. 換豆款與改頻率能一起送出嗎？</a> · <a href="#d5">5. 配送窗口什麼時候收到變更？</a> · <a href="#d6">6. 季節豆款差額是否套用優惠？</a></nav>
-  <!-- §4 技術決策 -->
-  <section id="decisions" style="margin-bottom: 2.4rem">
-    <h2
-      class="serif"
-      style="font-size: 1.7rem; font-weight: 700; margin: 0 0 0.4rem"
-    >
-      ④ 只有這 6 件要你拍板
-    </h2>
-    <p class="prose" style="color: var(--ink-soft); margin: 0 0 1.3rem">
-      這六項會影響生效期別、補收與配送交接。每項附建議，請負責人在補充框留下決定。
-    </p>
-    <div id="dec">
-      <div class="card" id="d1" data-decision data-id="d1" style="margin-bottom:.8rem;border-left:4px solid var(--clay)">
-        <div style="font-weight:700;margin-bottom:.35rem">1. 提醒信以哪個日期計算？</div>
-        <div style="font-size:.86rem;color:var(--ink-soft);margin-bottom:.3rem">每份方案已有下次配送日，提醒應讓訂閱保留足夠調整時間。 <span style="color:var(--blue)">｜ 影響情境 D 的提醒時點。</span></div>
-        <div style="font-size:.86rem;margin-bottom:.5rem"><strong>我的建議</strong>：配送日前 7 天提醒，配送日前 3 天截止；信中同時列出兩個日期。</div>
-        <div style="margin-bottom:.5rem">
-          <label><input type="radio" name="d1" value="採建議" checked> 採建議</label>
-          <label><input type="radio" name="d1" value="另有決定"> 另有決定（見補充）</label>
-        </div>
-        <textarea class="cmt" data-comment-for="d1" placeholder="你的決定…"></textarea>
-      </div>
-      <div class="card" id="d2" data-decision data-id="d2" style="margin-bottom:.8rem;border-left:4px solid var(--clay)">
-        <div style="font-weight:700;margin-bottom:.35rem">2. 截止後的變更從哪一期生效？</div>
-        <div style="font-size:.86rem;color:var(--ink-soft);margin-bottom:.3rem">本期已備貨，若立即改動會讓配送清單與方案不一致。 <span style="color:var(--blue)">｜ 影響情境 C 的生效期別。</span></div>
-        <div style="font-size:.86rem;margin-bottom:.5rem"><strong>我的建議</strong>：本期照常配送；換豆款、改頻率或暫停一律預約下期生效。</div>
-        <div style="margin-bottom:.5rem">
-          <label><input type="radio" name="d2" value="採建議" checked> 採建議</label>
-          <label><input type="radio" name="d2" value="另有決定"> 另有決定（見補充）</label>
-        </div>
-        <textarea class="cmt" data-comment-for="d2" placeholder="你的決定…"></textarea>
-      </div>
-      <div class="card" id="d3" data-decision data-id="d3" style="margin-bottom:.8rem;border-left:4px solid var(--clay)">
-        <div style="font-weight:700;margin-bottom:.35rem">3. 已扣款的本期可以暫停嗎？</div>
-        <div style="font-size:.86rem;color:var(--ink-soft);margin-bottom:.3rem">暫停本期會牽涉已收月費的退回，不能只取消配送。 <span style="color:var(--blue)">｜ 影響情境 B 的可用範圍。</span></div>
-        <div style="font-size:.86rem;margin-bottom:.5rem"><strong>我的建議</strong>：首版未扣款可直接暫停；已扣款由客服主管確認退款後辦理。</div>
-        <div style="margin-bottom:.5rem">
-          <label><input type="radio" name="d3" value="採建議" checked> 採建議</label>
-          <label><input type="radio" name="d3" value="另有決定"> 另有決定（見補充）</label>
-        </div>
-        <textarea class="cmt" data-comment-for="d3" placeholder="你的決定…"></textarea>
-      </div>
-      <div class="card" id="d4" data-decision data-id="d4" style="margin-bottom:.8rem;border-left:4px solid var(--clay)">
-        <div style="font-weight:700;margin-bottom:.35rem">4. 換豆款與改頻率能一起送出嗎？</div>
-        <div style="font-size:.86rem;color:var(--ink-soft);margin-bottom:.3rem">換豆款會影響本期價差，改頻率會影響下次配送日。 <span style="color:var(--blue)">｜ 影響情境 A 的生效與確認方式。</span></div>
-        <div style="font-size:.86rem;margin-bottom:.5rem"><strong>我的建議</strong>：允許一起提出；逐項列出本期或下期生效與差額，確認後套用。</div>
-        <div style="margin-bottom:.5rem">
-          <label><input type="radio" name="d4" value="採建議" checked> 採建議</label>
-          <label><input type="radio" name="d4" value="另有決定"> 另有決定（見補充）</label>
-        </div>
-        <textarea class="cmt" data-comment-for="d4" placeholder="你的決定…"></textarea>
-      </div>
-      <div class="card" id="d5" data-decision data-id="d5" style="margin-bottom:.8rem;border-left:4px solid var(--clay)">
-        <div style="font-weight:700;margin-bottom:.35rem">5. 配送窗口什麼時候收到變更？</div>
-        <div style="font-size:.86rem;color:var(--ink-soft);margin-bottom:.3rem">未截止的內容仍可能調整，太早交接容易拿到舊版本。 <span style="color:var(--blue)">｜ 影響情境 F 的備貨依據。</span></div>
-        <div style="font-size:.86rem;margin-bottom:.5rem"><strong>我的建議</strong>：截止時交接本期有效清單；之後的預約變更留到下一期。</div>
-        <div style="margin-bottom:.5rem">
-          <label><input type="radio" name="d5" value="採建議" checked> 採建議</label>
-          <label><input type="radio" name="d5" value="另有決定"> 另有決定（見補充）</label>
-        </div>
-        <textarea class="cmt" data-comment-for="d5" placeholder="你的決定…"></textarea>
-      </div>
-      <div class="card" id="d6" data-decision data-id="d6" style="margin-bottom:.8rem;border-left:4px solid var(--clay)">
-        <div style="font-weight:700;margin-bottom:.35rem">6. 季節豆款差額是否套用優惠？</div>
-        <div style="font-size:.86rem;color:var(--ink-soft);margin-bottom:.3rem">示範月費 NT$ 690，季節豆款 NT$ 810，標準差額 NT$ 120。 <span style="color:var(--blue)">｜ 影響情境 E 的補收金額。</span></div>
-        <div style="font-size:.86rem;margin-bottom:.5rem"><strong>我的建議</strong>：首版固定補收 NT$ 120，不另疊加優惠；優惠規則另案確認。</div>
-        <div style="margin-bottom:.5rem">
-          <label><input type="radio" name="d6" value="採建議" checked> 採建議</label>
-          <label><input type="radio" name="d6" value="另有決定"> 另有決定（見補充）</label>
-        </div>
-        <textarea class="cmt" data-comment-for="d6" placeholder="你的決定…"></textarea>
-      </div>
-    </div>
-  </section>
+      /* ── 03 範圍表 ─────────────────────────── */
+      .tbl-wrap {
+        overflow-x: auto;
+      }
+      .scope {
+        width: 100%;
+        min-width: 560px;
+        border-collapse: collapse;
+        font-size: 15px;
+      }
+      .scope th {
+        text-align: left;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-soft);
+        padding: 8px 12px 8px 0;
+        border-bottom: 1.5px solid var(--g300);
+      }
+      .scope td {
+        padding: 12px 12px 12px 0;
+        border-bottom: 1px solid var(--g200);
+        vertical-align: top;
+      }
+      .scope td:first-child {
+        white-space: nowrap;
+      }
+      .scope td:first-child b {
+        font-family: var(--mono);
+        color: var(--clay-ink);
+        margin-right: 6px;
+      }
+      .scope td:nth-child(2) {
+        white-space: nowrap;
+      }
+      .good-news {
+        margin: 18px 0 0;
+        font-size: 15px;
+        max-width: 72ch;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .good-news .ic {
+        color: var(--green-ink);
+        margin-top: 5px;
+      }
 
-  <!-- §1 核心模型 -->
-  <section id="overview" style="margin-bottom: 2.6rem">
-    <h2
-      class="serif"
-      style="font-size: 1.7rem; font-weight: 700; margin: 0 0 1.2rem"
-    >
-      ① 一張圖看懂：兩條路
-    </h2>
-    <div class="card">
-      <div
-        style="
-          display: flex;
+      /* 漸進揭露 */
+      .reveal {
+        border: 1.5px solid var(--g300);
+        border-radius: 10px;
+        background: var(--paper);
+        margin-top: 16px;
+        overflow: hidden;
+      }
+      .reveal > summary {
+        cursor: pointer;
+        padding: 11px 16px;
+        font-size: 14.5px;
+        color: var(--g700);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        list-style: none;
+      }
+      .reveal > summary::-webkit-details-marker {
+        display: none;
+      }
+      .reveal > summary::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-right: 2px solid var(--clay-d);
+        border-bottom: 2px solid var(--clay-d);
+        transform: rotate(-45deg);
+        transition: transform 0.18s;
+        flex-shrink: 0;
+      }
+      .reveal[open] > summary::before {
+        transform: rotate(45deg);
+      }
+      .reveal > summary:hover {
+        background: var(--g100);
+        color: var(--slate);
+      }
+      .reveal > summary .rv-kind {
+        margin-left: auto;
+        font-size: 12px;
+        color: var(--text-soft);
+        white-space: nowrap;
+      }
+      .reveal-body {
+        padding: 4px 18px 16px 33px;
+        font-size: 14.5px;
+        line-height: 1.75;
+        color: var(--g700);
+        border-top: 1px dashed var(--g300);
+      }
+      .reveal-body p {
+        margin: 10px 0 0;
+        max-width: 72ch;
+      }
+      .reveal-body .tag {
+        margin-right: 4px;
+      }
+
+      /* ── 04 落地節奏 ───────────────────────── */
+      .rhythm-track {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+      .rh {
+        border-top: 3px solid var(--g300);
+        padding-top: 16px;
+        position: relative;
+      }
+      .rh.now {
+        border-top-color: var(--clay-d);
+      }
+      .rh-top {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .rh-when {
+        font-family: var(--serif);
+        font-size: 24px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .rh-gate {
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 999px;
+        padding: 1px 10px;
+        white-space: nowrap;
+        border: 1px solid transparent;
+      }
+      .rh-gate.free {
+        color: var(--green-ink);
+        background: var(--green-soft);
+        border-color: var(--green-border);
+      }
+      .rh-gate.wait {
+        color: var(--yellow-ink);
+        background: var(--yellow-soft);
+        border-color: var(--yellow-border);
+      }
+      .rh-gate.later {
+        color: var(--g700);
+        background: var(--g100);
+        border-color: var(--g300);
+      }
+      .rh p {
+        margin: 0;
+        font-size: 15px;
+        max-width: 72ch;
+      }
+      .rh a {
+        white-space: nowrap; /* 「第 5 題」不要斷在數字前 */
+      }
+
+      /* ── 05 回傳 ───────────────────────────── */
+      .send-label {
+        display: block;
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 6px;
+      }
+      .send-hint {
+        font-size: 14px;
+        color: var(--text-soft);
+        margin: 0 0 4px;
+        max-width: 72ch;
+      }
+      #global-note {
+        margin-top: 6px;
+        display: block;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--clay-d);
+        color: #fff;
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 18px;
+        font: inherit;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .btn:hover {
+        background: var(--clay-ink);
+      }
+      .foot {
+        margin-top: 64px;
+        padding-top: 16px;
+        border-top: 1px solid var(--g300);
+        font-size: 13px;
+        color: var(--text-soft);
+      }
+      .foot p {
+        margin: 0;
+        max-width: 72ch;
+      }
+
+      /* ════════════════════════════════════════════ */
+      /* 回傳列：每頁都有。讀者在這裡看到「可以選字留言」、已留幾則（有拍板題時加進度），
+         一鍵複製給 AI。拍板頁沿用同一條、把複製內容換成拍板摘要（見 marathon 範本）。
+         風格設定鈕會自動停在「預覽」左邊，所以底部列一律用這條、不要自己另做 */
+      /* ════════════════════════════════════════════ */
+      .sticky-bar {
+        position: sticky;
+        bottom: 0;
+        z-index: 30;
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(12px);
+        border-top: 1.5px solid var(--clay);
+        box-shadow: 0 -8px 24px -10px rgba(20, 20, 19, 0.1);
+      }
+      .bar-in {
+        width: min(94vw, var(--wrap-max, 1760px));
+        margin: 0 auto;
+        padding: 12px 32px; /* 跟內文 .wrap 對齊 */
+      }
+      .bar-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+      .bar-txt {
+        min-width: 0;
+      }
+      .bar-title {
+        font-size: 14.5px;
+        font-weight: 600;
+      }
+      .bar-hint {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+        font-size: 13px;
+        color: var(--g700);
+        margin-top: 2px;
+      }
+      .bar-hint .ic {
+        width: 1em;
+        height: 1em;
+        color: var(--clay-d);
+      }
+      .bar-hint .short {
+        display: none;
+      }
+      .bar-count {
+        font: inherit;
+        color: var(--clay-ink);
+        background: none;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        text-decoration: underline;
+        text-decoration-color: var(--clay-border);
+        text-underline-offset: 3px;
+        white-space: nowrap;
+      }
+      .bar-btns {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      .btn-primary,
+      .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        min-height: 40px;
+      }
+      .btn-primary {
+        background: var(--clay-d);
+        color: #fff;
+        border: 1.5px solid var(--clay-d);
+      }
+      .btn-primary:hover {
+        background: var(--clay-ink);
+        border-color: var(--clay-ink);
+      }
+      .btn-secondary {
+        background: var(--paper);
+        color: var(--slate);
+        border: 1.5px solid var(--g300);
+        font-weight: 500;
+      }
+      .btn-secondary:hover {
+        border-color: var(--slate);
+      }
+      .btn-primary .ic,
+      .btn-secondary .ic {
+        width: 1.05em;
+        height: 1.05em;
+      }
+      /* 有拍板題時，列上第一行換成「已選 N / M · 還差：<題名>」，點題名跳到那題 */
+      .bar-status {
+        font-size: 14.5px;
+        font-weight: 600;
+      }
+      .bar-status strong {
+        font-family: var(--mono);
+        color: var(--clay-ink);
+        white-space: nowrap;
+      }
+      .bar-status a {
+        color: var(--clay-ink);
+        text-decoration-line: underline;
+        text-decoration-color: var(--clay-border);
+        text-underline-offset: 3px;
+      }
+      .bar-status .short {
+        display: none;
+      }
+      /* 補充提示：寫了補充但那題沒選，複製時這段不會帶上 */
+      .vt-note-warn,
+      .vt-note-warn a {
+        color: var(--yellow-ink);
+      }
+      .bar-status .vt-note-warn .sep {
+        color: var(--slate);
+      }
+      .drawer-note {
+        margin-top: 10px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .drawer-note[hidden] {
+        display: none;
+      }
+      .drawer-tools {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      /* 清除我的選擇：文字鈕，只在有拍板題時出現 */
+      .vt-clear-picks {
+        background: none;
+        border: 0;
+        padding: 0;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-soft);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .vt-clear-picks:hover {
+        color: var(--clay-ink);
+      }
+      .vt-clear-picks[hidden] {
+        display: none;
+      }
+
+
+      /* 預覽：從底部升起的抽屜，停在回傳列上方（複製鈕不被蓋住），附關閉鈕；不在列內往上長 */
+      #preview-area {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50; /* 高過頂端章節列（40），手機上抽屜才不會被章節列切掉 */
+        background: var(--paper);
+        border-top: 1.5px solid var(--g300);
+        border-radius: 14px 14px 0 0;
+        box-shadow: 0 -16px 40px -16px rgba(20, 20, 19, 0.28);
+        animation: vt-drawer-up 0.2s ease-out;
+      }
+      #preview-area.hidden {
+        display: none;
+      }
+      @keyframes vt-drawer-up {
+        from {
+          transform: translateY(100%);
+        }
+      }
+      .drawer-in {
+        width: min(94vw, var(--wrap-max, 1760px));
+        margin: 0 auto;
+        padding: 12px 32px 16px;
+      }
+      .drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      pre.preview {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        background: var(--g100);
+        padding: 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--g300);
+        white-space: pre-wrap;
+        max-height: min(340px, 48vh);
+        overflow-y: auto;
+        line-height: 1.55;
+        margin: 0;
+      }
+      .preview-close {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--g700);
+        background: #fff;
+        border: 1.5px solid var(--g300);
+        border-radius: 8px;
+        padding: 6px 12px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .preview-close:hover {
+        border-color: var(--slate);
+      }
+
+      /* 有回傳列時：右下浮動的評論計數改由列上的「已留 N 則」承接，評論清單往上讓出列高 */
+      body.vt-has-bar .vt-comment-pill {
+        display: none !important;
+      }
+      body.vt-has-bar .vt-comment-list {
+        bottom: 92px;
+      }
+      .cb-short {
+        display: none;
+      }
+
+      /* ── 手機 ──────────────────────────────── */
+      @media (max-width: 900px) {
+        .hero {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 32px;
+          padding-top: 40px;
+        }
+      }
+      @media (max-width: 820px) {
+        .two {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .rhythm-track {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 24px;
+        }
+      }
+      @media (max-width: 640px) {
+        /* 收掉桌機的水平留白（390px 上容器＋32px 內距會吃掉近兩成寬） */
+        .wrap {
+          width: 100%;
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+        /* 範圍表：手機改成一列一張卡，「要做的事」整句看得到，不用橫捲 */
+        .scope {
+          min-width: 0;
+        }
+        .scope thead {
+          display: none;
+        }
+        .scope tr {
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          gap: 6px 10px;
+          align-items: center;
+          padding: 12px 0;
+          border-bottom: 1px solid var(--g200);
+        }
+        .scope td {
+          padding: 0;
+          border: 0;
+        }
+        .scope td:nth-child(3) {
+          grid-column: 1 / -1;
+        }
+        /* 起點兩步排得下，最後那個箭頭單獨掉到下一行就拿掉 */
+        .lc-start .lc-arrow:last-child {
+          display: none;
+        }
+        .chap {
+          padding-top: 56px;
+        }
+        .hero-key .hk-text {
+          font-size: 24px;
+        }
+        /* 核心模型改直排：本期截止變成橫向分界線 */
+        .lc-row {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .lc-gate {
+          padding: 6px 0;
+        }
+        .lc-gate::before {
+          top: 50%;
+          bottom: auto;
+          left: -4px;
+          right: -4px;
+          border-left: 0;
+          border-top: 2px dashed var(--clay-d);
+        }
+        .lc-gate-in {
+          flex-direction: row;
+          gap: 8px;
+          padding: 4px 12px;
           flex-wrap: wrap;
-          align-items: stretch;
-          gap: 0;
-          font-size: 0.9rem;
-          margin-bottom: 1.2rem;
-        "
+          justify-content: center;
+        }
+        .lc-zone {
+          padding: 18px;
+        }
+        /* 情境標題：標籤移到標題上方 */
+        .scn-h {
+          grid-template-columns: auto minmax(0, 1fr);
+        }
+        .scn-h h3 {
+          grid-column: 1 / -1;
+          order: 3;
+        }
+        .scn-tags {
+          justify-content: flex-end;
+        }
+        .dq {
+          padding: 16px;
+        }
+        .bar-in {
+          padding: 8px 12px;
+        }
+        .bar-row {
+          gap: 8px;
+        }
+        .bar-title {
+          display: none;
+        }
+        .bar-hint {
+          font-size: 12.5px;
+        }
+        .bar-hint .long,
+        .cb-long {
+          display: none;
+        }
+        .bar-hint .short,
+        .cb-short {
+          display: inline;
+        }
+        .bar-status {
+          font-size: 13.5px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .bar-status .long {
+          display: none;
+        }
+        .bar-status .short {
+          display: inline;
+        }
+        /* § 補充提示（手機）：有「寫了補充但沒選」的題時，這一行只放短版提示 */
+        .bar-status.has-note .vt-prog {
+          display: none;
+        }
+        .bar-status.has-note .sep {
+          display: none;
+        }
+        .drawer-in {
+          width: 100%;
+          padding: 10px 12px 12px;
+        }
+        .btn-primary,
+        .btn-secondary {
+          min-height: 44px;
+          padding: 0 12px;
+          font-size: 13px;
+        }
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--clay-d);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+      @media print {
+        .sticky-bar,
+        .vt-tw-root,
+        .vt-comment-pill,
+        .vt-session-badge,
+        .vt-comment-trigger,
+        #preview-area {
+          display: none !important;
+        }
+        details.reveal {
+          display: block;
+        }
+        body {
+          padding-bottom: 0;
+        }
+      }
+    </style>
+  </head>
+<body>
+  <div class="wrap">
+    <!-- HERO：一句話大原則 ＋ 題目地圖 -->
+    <header class="hero">
+      <div>
+        <div class="eyebrow">
+          <span class="zh">Brewly · 規格對齊（虛構樣張）</span> · 2026-09-01
+        </div>
+        <h1>
+          <span class="ph">Brewly 訂閱後</span><span class="ph">想換豆款，</span
+          ><span class="ph">方案變更怎麼生效</span>
+        </h1>
+        <p class="lede">
+          訂閱現在<strong>從官網選方案</strong>。月費 NT$ 690
+          的方案成立後，換豆款、改配送頻率、暫停一期都從同一處辦理。這份文件從「客服主管實際怎麼操作」的角度，由上而下說明最終規格；所有情境與金額都是虛構的。
+        </p>
+        <p class="hero-key">
+          <span class="hk-label">核心只有一個判斷</span
+          ><span class="hk-text">本期配送截止了沒</span>
+        </p>
+      </div>
+      <aside class="qmap" aria-labelledby="qmap-title">
+        <div class="qmap-top">
+          <p class="qmap-title" id="qmap-title">只有 6 件要你拍板</p>
+          <span class="qmap-count" id="qmap-count">已選 0 / 6</span>
+        </div>
+        <p class="qmap-hint">
+          每題放在它影響的情境末尾。點題目跳過去，選「採用建議」或「改成別的做法」。
+        </p>
+        <ol id="qmap-list">
+          <li>
+            <a href="#d1"
+              ><span class="q-no">1</span
+              ><span class="qm-t"
+                >換豆款與改頻率能一起送出嗎<span class="qm-scn"
+                  >情境 A</span
+                ></span
+              ><span class="qm-st" data-qstate="d1">未選</span></a
+            >
+          </li>
+          <li>
+            <a href="#d2"
+              ><span class="q-no">2</span
+              ><span class="qm-t"
+                >已扣款的本期可以暫停嗎<span class="qm-scn">情境 B</span></span
+              ><span class="qm-st" data-qstate="d2">未選</span></a
+            >
+          </li>
+          <li>
+            <a href="#d3"
+              ><span class="q-no">3</span
+              ><span class="qm-t"
+                >截止後的變更從哪一期生效<span class="qm-scn"
+                  >情境 C</span
+                ></span
+              ><span class="qm-st" data-qstate="d3">未選</span></a
+            >
+          </li>
+          <li>
+            <a href="#d4"
+              ><span class="q-no">4</span
+              ><span class="qm-t"
+                >提醒信以哪個日期計算<span class="qm-scn">情境 D</span></span
+              ><span class="qm-st" data-qstate="d4">未選</span></a
+            >
+          </li>
+          <li>
+            <a href="#d5"
+              ><span class="q-no">5</span
+              ><span class="qm-t"
+                >季節豆款差額要不要套用優惠<span class="qm-scn"
+                  >情境 E</span
+                ></span
+              ><span class="qm-st" data-qstate="d5">未選</span></a
+            >
+          </li>
+          <li>
+            <a href="#d6"
+              ><span class="q-no">6</span
+              ><span class="qm-t"
+                >配送窗口什麼時候收到變更<span class="qm-scn"
+                  >情境 F</span
+                ></span
+              ><span class="qm-st" data-qstate="d6">未選</span></a
+            >
+          </li>
+        </ol>
+      </aside>
+    </header>
+
+    <!-- 01 核心模型 -->
+    <section id="model" class="chap">
+      <div class="eyebrow">01 · <span class="zh">一張圖看懂</span></div>
+      <h2>
+        <span class="ph">兩條路，</span><span class="ph">中間隔著本期截止</span>
+      </h2>
+      <p class="chap-intro">
+        方案成立之後，每一期只有兩段時間：截止前可以調整本期，截止後本期照常配送、變更改從下期生效。
+      </p>
+
+      <figure
+        class="lc"
+        style="margin: 0"
+        aria-label="訂閱方案從成立到配送的兩段時間"
       >
-        <div
-          style="flex: 1; min-width: 130px; text-align: center; padding: 0.6rem"
-        >
-          <div style="font-weight: 700">官網訂閱</div>
-          <div style="color: var(--ink-soft); font-size: 0.8rem">
-            直接進系統
-          </div>
-        </div>
-        <div style="align-self: center; color: var(--clay)">→</div>
-        <div
-          style="flex: 1; min-width: 130px; text-align: center; padding: 0.6rem"
-        >
-          <div style="font-weight: 700">確認 = 方案成立</div>
-        </div>
-        <div style="align-self: center; color: var(--clay)">→</div>
-        <div
-          style="
-            flex: 1.3;
-            min-width: 150px;
-            text-align: center;
-            padding: 0.6rem;
-            background: #f3f8f3;
-            border-radius: 10px;
-          "
-        >
-          <div style="font-weight: 700; color: var(--green)">🔓 截止前</div>
-          <div style="color: var(--ink-soft); font-size: 0.8rem">自由改</div>
-        </div>
-        <div
-          style="
-            align-self: center;
-            color: var(--clay);
-            font-weight: 700;
-            padding: 0 0.3rem;
-          "
-        >
-          本期截止<br /><span style="font-size: 0.7rem; font-weight: 400"
-            >配送日前 3 天</span
+        <div class="lc-start">
+          <span class="lc-step"><b>官網訂閱</b><span>直接進系統</span></span>
+          <svg
+            class="ic lc-arrow"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
           >
-        </div>
-        <div
-          style="
-            flex: 1.3;
-            min-width: 150px;
-            text-align: center;
-            padding: 0.6rem;
-            background: #fbf1ee;
-            border-radius: 10px;
-          "
-        >
-          <div style="font-weight: 700; color: var(--clay)">🔒 截止後</div>
-          <div style="color: var(--ink-soft); font-size: 0.8rem">
-            下期生效
-          </div>
-        </div>
-      </div>
-      <div class="two">
-        <div
-          style="
-            border: 1px solid #c9ddca;
-            background: #f3f8f3;
-            border-radius: 12px;
-            padding: 1rem 1.1rem;
-          "
-        >
-          <div
-            style="font-weight: 700; color: var(--green); margin-bottom: 0.3rem"
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+          <span class="lc-step"><b>確認 ＝ 方案成立</b></span>
+          <svg
+            class="ic lc-arrow"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
           >
-            🔓 截止前 = 可調整本期
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </div>
+        <div class="lc-row">
+          <div class="lc-zone pre">
+            <div class="lc-when">每期開始 → 配送日前 3 天</div>
+            <p class="lc-zone-h">
+              <svg
+                class="ic"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 9.9-1" /></svg
+              >截止前 ＝ 可調整本期
+            </p>
+            <p>
+              <strong>客服主管調整當期方案</strong
+              >，換豆款或改頻率後顯示新方案與差額。暫停一期則保留方案、把配送順延一個週期。
+            </p>
+            <div class="lc-remind">
+              <svg
+                class="ic"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+                <path
+                  d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+                />
+              </svg>
+              <div>
+                <b>截止前先寄提醒：配送日前 7 天</b>
+                <span
+                  >系統<strong>自動發信</strong>提醒「可換豆款、改頻率或暫停一期；配送日前
+                  3 天截止，之後的變更從下期生效」。</span
+                >
+              </div>
+            </div>
           </div>
-          <div style="font-size: 0.9rem; color: var(--ink-soft)">
-            <strong>客服主管調整當期方案</strong
-            >，換豆款或改頻率後顯示新方案與差額。暫停一期則保留方案、將配送順延一個週期。
+          <div class="lc-gate">
+            <div class="lc-gate-in">
+              <svg
+                class="ic"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <b>本期截止</b>
+              <small>配送日前 3 天</small>
+            </div>
+          </div>
+          <div class="lc-zone post">
+            <div class="lc-when">配送日前 3 天 → 配送</div>
+            <p class="lc-zone-h">
+              <svg
+                class="ic"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg
+              >截止後 ＝ 下期生效
+            </p>
+            <p>
+              本期已開始備貨，當期內容<strong>不能改</strong>。變更改為<strong>預約下期方案</strong>，本期照常配送，下期依新方案處理。
+            </p>
           </div>
         </div>
-        <div
-          style="
-            border: 1px solid #e7c7bd;
-            background: #fbf1ee;
-            border-radius: 12px;
-            padding: 1rem 1.1rem;
-          "
-        >
-          <div
-            style="font-weight: 700; color: var(--clay); margin-bottom: 0.3rem"
-          >
-            🔒 截止後 = 下期生效
-          </div>
-          <div style="font-size: 0.9rem; color: var(--ink-soft)">
-            本期已開始備貨，當期內容<strong>不能改</strong>。變更改為<strong>預約下期方案</strong>，本期照常配送，下期依新方案處理。
-          </div>
-        </div>
-      </div>
-      <div class="mnote" style="margin-top: 1rem">
-        🔔 <strong>截止前先寄提醒</strong>：配送日前 7 天，系統會<strong>自動發信</strong>提醒「可換豆款、改頻率或暫停一期；配送日前 3 天截止，之後變更從下期生效」。
-      </div>
-    </div>
-  </section>
+      </figure>
+    </section>
 
-  <!-- §2 使用者操作情境 -->
-  <section id="user-flow" style="margin-bottom: 1.5rem">
-    <h2
-      class="serif"
-      style="font-size: 1.7rem; font-weight: 700; margin: 0 0 0.4rem"
-    >
-      ② 客服主管實際怎麼操作
-    </h2>
-    <p class="prose" style="color: var(--ink-soft); margin: 0 0 1.4rem">
-      用 Brewly 的六個虛構情境走一遍。
-    </p>
-    <div class="card"><nav aria-label="情境導覽"><a href="#change-before-cutoff">A 截止前變更</a> · <a href="#pause-delivery">B 暫停配送</a> · <a href="#schedule-next-cycle">C 下期預約</a> · <a href="#reminder-email">D 自動提醒</a> · <a href="#billing-adjustment">E 差額核對</a> · <a href="#delivery-handoff">F 配送交接</a></nav></div>
-  </section>
+    <!-- 02 使用者操作情境 -->
+    <section id="scenarios" class="chap">
+      <div class="eyebrow">
+        02 · <span class="zh">客服主管實際怎麼操作</span>
+      </div>
+      <h2>
+        <span class="ph">六個情境，</span
+        ><span class="ph">照訂閱者來要改方案的順序走</span>
+      </h2>
+      <p class="chap-intro">
+        每個情境左邊是客服主管的畫面、右邊是訂閱者在官網看到的畫面；要你拍板的題目就放在該情境最後。
+      </p>
 
-  <!-- 情境 A -->
-  <section id="change-before-cutoff" class="card" style="margin-bottom: 1.1rem">
-    <div style="display: flex; gap: 0.9rem; align-items: flex-start">
-      <span class="num">A</span>
-      <div style="flex: 1">
-        <h3 style="margin: 0 0 0.2rem; font-size: 1.2rem; font-weight: 700">
-          截止前，換豆款或改配送頻率
-        </h3>
-        <p style="margin: 0 0 1rem; color: var(--ink-soft); font-size: 0.95rem">
-          需求是「換成季節豆款／每四週改每八週配送」。
+      <!-- 情境 A -->
+      <article class="scn" id="scn-a">
+        <div class="scn-h">
+          <span class="scn-badge">情境 A</span>
+          <h3>截止前，換豆款或改配送頻率<span class="freq">最常見</span></h3>
+          <div class="scn-tags">
+            <span class="tag t-have">部分既有</span
+            ><span class="tag t-change">要補變更入口</span>
+          </div>
+        </div>
+        <p class="scn-lead">
+          訂閱者說「我要換成季節豆款」或「每四週改成每八週配送」。
         </p>
         <div class="two">
           <div>
-            <div
-              style="
-                font-weight: 700;
-                font-size: 0.85rem;
-                margin-bottom: 0.4rem;
-                color: var(--ink-soft);
-              "
-            >
-              客服主管怎麼做
-            </div>
-            <div class="mock screen">
-              <div class="screen-bar">🖥 訂閱詳情（客服主管）</div>
+            <div class="mock-label">客服主管怎麼做</div>
+            <div class="screen">
+              <div class="screen-bar">
+                <svg
+                  class="ic"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect width="20" height="14" x="2" y="3" rx="2" />
+                  <line x1="8" x2="16" y1="21" y2="21" />
+                  <line x1="12" x2="12" y1="17" y2="21" />
+                </svg>
+                訂閱詳情（客服主管）
+              </div>
               <div class="screen-body">
                 <div class="row">
                   <span>Brewly · 經典豆款方案</span
-                  ><span class="mbtn-o mbtn">變更方案</span>
+                  ><span class="mbtn mbtn-o">變更方案</span>
                 </div>
                 <div class="row">
-                  <span>豆款明細</span
-                  ><span style="color: var(--green)">＋ 換豆款</span>
+                  <span>豆款明細</span><span class="ok">＋ 換豆款</span>
                 </div>
                 <div class="row">
                   <span>配送頻率（每四週）</span
-                  ><span style="color: var(--green)">改為每八週</span>
+                  ><span class="ok">改為每八週</span>
                 </div>
-                <div class="mnote-g mnote" style="margin-top: 0.5rem">
+                <div class="mnote mnote-g">
                   換季節豆款，系統試算差額：NT$ 120
                 </div>
               </div>
             </div>
           </div>
           <div>
-            <div
-              style="
-                font-weight: 700;
-                font-size: 0.85rem;
-                margin-bottom: 0.4rem;
-                color: var(--ink-soft);
-              "
-            >
-              官網顯示
-            </div>
-            <div class="mock screen">
-              <div class="screen-bar">📱 官網方案確認頁</div>
+            <div class="mock-label">官網顯示</div>
+            <div class="screen">
+              <div class="screen-bar">
+                <svg
+                  class="ic"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                  <path d="M12 18h.01" />
+                </svg>
+                官網方案確認頁（訂閱者）
+              </div>
               <div class="screen-body">
                 <div class="row">
                   <span>經典方案月費</span><span>NT$ 690</span>
                 </div>
-                <div class="row"><span>換豆款差額</span><span>NT$ 120</span></div>
+                <div class="row">
+                  <span>換豆款差額</span><span>NT$ 120</span>
+                </div>
                 <div class="row" style="font-weight: 700">
                   <span>總計</span><span>NT$ 810</span>
                 </div>
-                <div class="mnote mnote-g" style="margin-top: 0.5rem">
-                  ✔ 本期換豆款差額已列出，改頻率從下期計算
+                <div class="mnote mnote-g">
+                  <svg
+                    class="ic"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  本期換豆款差額已列出，改頻率從下期計算
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <p style="margin: 1rem 0 0; font-size: 0.88rem">
-          <strong>規則</strong
+        <p class="scn-rule">
+          <b>規則</b
           >：換豆款本期生效；改頻率從下期計算。確認前顯示生效期別與差額，客服主管完成補收後才套用付費升級。
-          <span class="tag t-have">部分既有</span>
-          <span class="tag t-change">要補變更入口</span>
         </p>
-      </div>
-    </div>
-  </section>
 
-  <!-- 情境 B -->
-  <section id="pause-delivery" class="card" style="margin-bottom: 1.1rem">
-    <div style="display: flex; gap: 0.9rem; align-items: flex-start">
-      <span class="num">B</span>
-      <div style="flex: 1">
-        <h3 style="margin: 0 0 0.2rem; font-size: 1.2rem; font-weight: 700">
-          截止前，要暫停一期配送
-        </h3>
-        <p style="margin: 0 0 1rem; color: var(--ink-soft); font-size: 0.95rem">
-          外出時可暫停一期；本期不配送、不扣款，既有豆款與頻率保留，下個週期自動恢復。
+        <div
+          class="dq"
+          data-decision
+          data-id="d1"
+          id="d1"
+          data-title="第 1 題 · 換豆款與改頻率能一起送出嗎"
+        >
+          <div class="dq-head">
+            <span class="dq-no"
+              ><span class="q-no">1</span
+              ><span class="zh">第 1 題（共 6 題）· 情境 A</span></span
+            >
+            <h4>換豆款與改頻率能一起送出嗎？</h4>
+          </div>
+          <p class="dq-why">
+            換豆款會影響本期價差，改頻率會影響下次配送日；兩件事生效的期別不同。
+          </p>
+          <p class="dq-aff">影響情境 A 的生效與確認方式。</p>
+          <p class="dq-rec">
+            <b>我的建議</b
+            >允許一起提出；確認頁逐項列出「本期或下期生效」與差額，訂閱者確認後一起套用。
+          </p>
+          <div class="dq-opts" role="radiogroup" aria-label="第 1 題的選擇">
+            <label class="dq-opt"
+              ><input type="radio" name="d1" value="採用建議" />採用建議</label
+            >
+            <label class="dq-opt"
+              ><input
+                type="radio"
+                name="d1"
+                value="改成別的做法"
+              />改成別的做法</label
+            >
+          </div>
+          <textarea
+            class="cmt"
+            data-comment-for="d1"
+            rows="1"
+            placeholder="補充（選填）：要改成什麼、或附帶條件"
+          ></textarea>
+        </div>
+      </article>
+
+      <!-- 情境 B -->
+      <article class="scn" id="scn-b">
+        <div class="scn-h">
+          <span class="scn-badge">情境 B</span>
+          <h3>截止前，要暫停一期配送</h3>
+          <div class="scn-tags"><span class="tag t-new">新造</span></div>
+        </div>
+        <p class="scn-lead">
+          訂閱者外出時可以暫停一期：本期不配送、不扣款，既有豆款與頻率保留，下個週期自動恢復。
         </p>
         <div class="two">
           <div>
-            <div class="mock screen">
-              <div class="screen-bar">🖥 訂閱詳情（客服主管）</div>
+            <div class="mock-label">客服主管怎麼做</div>
+            <div class="screen">
+              <div class="screen-bar">
+                <svg
+                  class="ic"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect width="20" height="14" x="2" y="3" rx="2" />
+                  <line x1="8" x2="16" y1="21" y2="21" />
+                  <line x1="12" x2="12" y1="17" y2="21" />
+                </svg>
+                訂閱詳情（客服主管）
+              </div>
               <div class="screen-body">
                 <div class="row"><span>本期暫停，下期恢復</span></div>
                 <div class="row">
                   <span>→ 走這條</span><span class="mbtn">暫停一期</span>
                 </div>
-                <div class="mnote" style="margin-top: 0.5rem">
-                  系統保留原方案，顯示新的<strong>下期方案</strong>與恢復日期
+                <div class="mnote">
+                  系統保留原方案，顯示新的<strong>下期配送日</strong>與恢復日期
                 </div>
               </div>
             </div>
           </div>
           <div>
-            <div class="mock screen">
-              <div class="screen-bar">📱 官網暫停確認</div>
+            <div class="mock-label">官網顯示</div>
+            <div class="screen">
+              <div class="screen-bar">
+                <svg
+                  class="ic"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                  <path d="M12 18h.01" />
+                </svg>
+                官網暫停確認（訂閱者）
+              </div>
               <div class="screen-body">
                 <div class="row">
-                  <span>本期不配送、不扣款</span><span>確認暫停 ✓</span>
+                  <span>本期不配送、不扣款</span
+                  ><span class="mbtn mbtn-o">確認暫停</span>
                 </div>
-                <div class="mnote mnote-g" style="margin-top: 0.5rem">
-                  ✔ 確認 → 系統順延一個配送週期<br />✔
-                  下期自動恢復原豆款與頻率、不用重填
+                <div class="mnote mnote-g">
+                  <svg
+                    class="ic"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  確認後系統順延一個配送週期<br />
+                  <svg
+                    class="ic"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  下期自動恢復原豆款與頻率，不用重填
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <p style="margin: 1rem 0 0; font-size: 0.88rem">
-          <strong>規則</strong
-          >：保留方案資料，僅將本期標為<strong>暫停一期</strong>，下期依原頻率恢復。已扣款的期別由客服主管確認退款後處理，不重建整份訂閱。
-          <span class="tag t-new">新造</span>
+        <p class="scn-rule">
+          <b>規則</b
+          >：保留方案資料，只把本期標為<strong>暫停一期</strong>，下期依原頻率恢復；不重建整份訂閱。
         </p>
-      </div>
-    </div>
-  </section>
 
-  <!-- 情境 C -->
-  <section id="schedule-next-cycle" class="card" style="margin-bottom: 1.1rem">
-    <div style="display: flex; gap: 0.9rem; align-items: flex-start">
-      <span class="num">C</span>
-      <div style="flex: 1">
-        <h3 style="margin: 0 0 0.2rem; font-size: 1.2rem; font-weight: 700">
-          截止後，預約下期變更
-        </h3>
-        <p style="margin: 0 0 1rem; color: var(--ink-soft); font-size: 0.95rem">
-          本期已開始備貨（配送日前 3 天），此時換豆款、改頻率或暫停都從下期生效。
+        <div
+          class="dq"
+          data-decision
+          data-id="d2"
+          id="d2"
+          data-title="第 2 題 · 已扣款的本期可以暫停嗎"
+        >
+          <div class="dq-head">
+            <span class="dq-no"
+              ><span class="q-no">2</span
+              ><span class="zh">第 2 題（共 6 題）· 情境 B</span></span
+            >
+            <h4>已扣款的本期可以暫停嗎？</h4>
+          </div>
+          <p class="dq-why">暫停已扣款的一期會牽涉月費退回，不能只取消配送。</p>
+          <p class="dq-aff">影響情境 B 能作用的範圍。</p>
+          <p class="dq-rec">
+            <b>我的建議</b
+            >第一版只讓「本期還沒扣款」的訂閱直接暫停；已扣款的由客服主管確認退款後再辦理。
+          </p>
+          <div class="dq-opts" role="radiogroup" aria-label="第 2 題的選擇">
+            <label class="dq-opt"
+              ><input type="radio" name="d2" value="採用建議" />採用建議</label
+            >
+            <label class="dq-opt"
+              ><input
+                type="radio"
+                name="d2"
+                value="改成別的做法"
+              />改成別的做法</label
+            >
+          </div>
+          <textarea
+            class="cmt"
+            data-comment-for="d2"
+            rows="1"
+            placeholder="補充（選填）：要改成什麼、或附帶條件"
+          ></textarea>
+        </div>
+      </article>
+
+      <!-- 情境 C -->
+      <article class="scn" id="scn-c">
+        <div class="scn-h">
+          <span class="scn-badge">情境 C</span>
+          <h3>截止後，預約下期變更</h3>
+          <div class="scn-tags">
+            <span class="tag t-change">共用方案變更入口</span>
+          </div>
+        </div>
+        <p class="scn-lead">
+          本期已開始備貨（配送日前 3
+          天）。這時換豆款、改頻率或暫停，都從下期生效。
         </p>
-        <div class="mock screen" style="max-width: 560px">
-          <div class="screen-bar">🖥 訂閱詳情（客服主管）</div>
+        <div class="mock-label">客服主管怎麼做</div>
+        <div class="screen narrow">
+          <div class="screen-bar">
+            <svg
+              class="ic"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect width="20" height="14" x="2" y="3" rx="2" />
+              <line x1="8" x2="16" y1="21" y2="21" />
+              <line x1="12" x2="12" y1="17" y2="21" />
+            </svg>
+            訂閱詳情（客服主管）
+          </div>
           <div class="screen-body">
             <div class="row">
               <span>Brewly · 本期配送</span
-              ><span style="color: var(--red); font-weight: 700"
-                >🔒 本期已截止</span
+              ><span class="warn"
+                ><svg
+                  class="ic"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                本期已截止</span
               >
             </div>
-            <div class="mnote-r mnote" style="margin: 0.5rem 0">
-              本期已備貨、照常配送。請預約下期方案變更。
+            <div class="mnote mnote-r" style="margin-bottom: 8px">
+              本期已備貨、照常配送。要改方案請預約下期變更。
             </div>
-            <div class="row">
+            <div class="row" style="border-bottom: 0">
               <span></span><span class="mbtn">預約下期變更</span>
             </div>
           </div>
         </div>
-        <p style="margin: 1rem 0 0; font-size: 0.88rem">
-          <strong>規則</strong>：截止後變更 =
+        <p class="scn-rule">
+          <b>規則</b>：截止後變更 ＝
           <strong>登記下期方案</strong
-          >。預約<strong>不影響本期配送</strong>，下期依新設定計費。特殊配送需求由客服主管與配送窗口確認可行性。
-          <span class="tag t-change">共用方案變更入口</span>
+          >。預約<strong>不影響本期配送</strong>，下期依新設定計費。
         </p>
-      </div>
-    </div>
-  </section>
+        <details class="reveal">
+          <summary>
+            例外：特殊配送需求，由客服主管與配送窗口人工確認<span
+              class="rv-kind"
+              >邊界案例</span
+            >
+          </summary>
+          <div class="reveal-body">
+            <p>
+              少數訂閱者在截止後提出特殊配送需求（例如改送到臨時地址）。這類需求不走上面的預約流程，由客服主管直接跟配送窗口確認做不做得到。
+            </p>
+            <p>
+              下面第 3
+              題的建議只管一般變更：一律預約下期，不讓本期清單在截止後還被改動。
+            </p>
+          </div>
+        </details>
 
-  <!-- 情境 D -->
-  <section id="reminder-email" class="card" style="margin-bottom: 1.1rem">
-    <div style="display: flex; gap: 0.9rem; align-items: flex-start">
-      <span class="num">D</span>
-      <div style="flex: 1">
-        <h3 style="margin: 0 0 0.2rem; font-size: 1.2rem; font-weight: 700">
-          系統自動提醒（避免錯過本期截止）
-        </h3>
-        <p style="margin: 0 0 1rem; color: var(--ink-soft); font-size: 0.95rem">
-          不靠人力盯，系統自動發信。
-        </p>
-        <div class="mock screen" style="max-width: 560px">
-          <div class="screen-bar">✉️ 系統自動信（配送日前 7 天寄出）</div>
-          <div class="screen-body" style="font-size: 0.85rem">
-            <div style="font-weight: 700; margin-bottom: 0.3rem">
-              您的 Brewly 咖啡豆即將備貨
-            </div>
-            <div style="color: var(--ink-soft)">
-              您的本期配送日為
-              <strong>9 月 28 日</strong
-              >，請在 9 月 25 日截止前確認。<br />截止前可換豆款、改頻率或暫停一期；截止後的變更將從下期生效。<br />如需協助，請聯繫客服主管。
-            </div>
+        <div
+          class="dq"
+          data-decision
+          data-id="d3"
+          id="d3"
+          data-title="第 3 題 · 截止後的變更從哪一期生效"
+        >
+          <div class="dq-head">
+            <span class="dq-no"
+              ><span class="q-no">3</span
+              ><span class="zh">第 3 題（共 6 題）· 情境 C</span></span
+            >
+            <h4>截止後的變更從哪一期生效？</h4>
+          </div>
+          <p class="dq-why">
+            本期已備貨，截止後還立即改動，配送清單會跟方案對不起來。
+          </p>
+          <p class="dq-aff">影響情境 C 的生效期別。</p>
+          <p class="dq-rec">
+            <b>我的建議</b>本期照常配送；換豆款、改頻率或暫停一律預約下期生效。
+          </p>
+          <div class="dq-opts" role="radiogroup" aria-label="第 3 題的選擇">
+            <label class="dq-opt"
+              ><input type="radio" name="d3" value="採用建議" />採用建議</label
+            >
+            <label class="dq-opt"
+              ><input
+                type="radio"
+                name="d3"
+                value="改成別的做法"
+              />改成別的做法</label
+            >
+          </div>
+          <textarea
+            class="cmt"
+            data-comment-for="d3"
+            rows="1"
+            placeholder="補充（選填）：要改成什麼、或附帶條件"
+          ></textarea>
+        </div>
+      </article>
+
+      <!-- 情境 D -->
+      <article class="scn" id="scn-d">
+        <div class="scn-h">
+          <span class="scn-badge">情境 D</span>
+          <h3>系統自動提醒（避免錯過本期截止）</h3>
+          <div class="scn-tags">
+            <span class="tag t-new">新造（仿既有提醒機制）</span>
           </div>
         </div>
-        <p style="margin: 1rem 0 0; font-size: 0.88rem">
-          <strong>規則</strong>：配送日前 7 天自動提醒，明列截止日與「截止後從下期生效」的規則。
-          <span class="tag t-new">新造（仿既有提醒機制）</span>
+        <p class="scn-lead">不靠人力盯，系統自動發信。</p>
+        <div class="mock-label">訂閱者收到</div>
+        <div class="screen narrow">
+          <div class="screen-bar">
+            <svg
+              class="ic"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+            </svg>
+            系統自動信（配送日前 7 天寄出）
+          </div>
+          <div class="screen-body">
+            <div class="mail-h">您的 Brewly 咖啡豆即將備貨</div>
+            <p class="mail-p">
+              您的本期配送日為
+              <strong>9 月 28 日</strong>，請在 9 月 25 日截止前確認。
+            </p>
+            <p class="mail-p">
+              截止前可換豆款、改頻率或暫停一期；截止後的變更將從下期生效。
+            </p>
+            <p class="mail-p" style="margin: 0">
+              如需協助，請聯繫 Brewly 客服。
+            </p>
+          </div>
+        </div>
+        <p class="scn-rule">
+          <b>規則</b>：配送日前 7
+          天自動提醒，信裡寫明截止日與「截止後從下期生效」的規則。
         </p>
-      </div>
-    </div>
-  </section>
 
-  <!-- 情境 E -->
-  <section id="billing-adjustment" class="card" style="margin-bottom: 1.1rem">
-    <div style="display: flex; gap: 0.9rem; align-items: flex-start">
-      <span class="num">E</span>
-      <div style="flex: 1">
-        <h3 style="margin: 0 0 0.2rem; font-size: 1.2rem; font-weight: 700">
-          差額一定要對得起來（帳單 / 補收）
-        </h3>
-        <div class="two" style="margin-top: 0.6rem">
-          <div class="mock screen">
-            <div class="screen-bar">🧾 本期帳單</div>
-            <div class="screen-body" style="font-size: 0.82rem">
+        <div
+          class="dq"
+          data-decision
+          data-id="d4"
+          id="d4"
+          data-title="第 4 題 · 提醒信以哪個日期計算"
+        >
+          <div class="dq-head">
+            <span class="dq-no"
+              ><span class="q-no">4</span
+              ><span class="zh">第 4 題（共 6 題）· 情境 D</span></span
+            >
+            <h4>提醒信以哪個日期計算？</h4>
+          </div>
+          <p class="dq-why">
+            每份方案已有下次配送日；提醒要讓訂閱者在截止前還有足夠時間調整。
+          </p>
+          <p class="dq-aff">影響情境 D 的提醒時點。</p>
+          <p class="dq-rec">
+            <b>我的建議</b>以下次配送日為準：配送日前 7 天提醒、配送日前 3
+            天截止，信裡同時列出這兩個日期。
+          </p>
+          <div class="dq-opts" role="radiogroup" aria-label="第 4 題的選擇">
+            <label class="dq-opt"
+              ><input type="radio" name="d4" value="採用建議" />採用建議</label
+            >
+            <label class="dq-opt"
+              ><input
+                type="radio"
+                name="d4"
+                value="改成別的做法"
+              />改成別的做法</label
+            >
+          </div>
+          <textarea
+            class="cmt"
+            data-comment-for="d4"
+            rows="1"
+            placeholder="補充（選填）：要改成什麼、或附帶條件"
+          ></textarea>
+        </div>
+      </article>
+
+      <!-- 情境 E -->
+      <article class="scn" id="scn-e">
+        <div class="scn-h">
+          <span class="scn-badge">情境 E</span>
+          <h3>差額一定要對得起來（帳單 / 補收）</h3>
+          <div class="scn-tags">
+            <span class="tag t-have">帳單示範完成</span
+            ><span class="tag t-have">差額試算完成</span
+            ><span class="tag t-change">補收畫面待收尾</span>
+          </div>
+        </div>
+        <p class="scn-lead">換豆款之後，帳單和補收金額都要跟著本期應付走。</p>
+        <div class="two">
+          <div class="screen">
+            <div class="screen-bar">
+              <svg
+                class="ic"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"
+                />
+                <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                <path d="M12 17.5v-11" />
+              </svg>
+              本期帳單
+            </div>
+            <div class="screen-body">
               <div class="row"><span>本期應付</span><span>NT$ 810</span></div>
               <div class="row"><span>原月費已付</span><span>NT$ 690</span></div>
               <div class="row">
-                <span>尚待補收</span
-                ><span style="color: var(--green)">NT$ 120</span>
+                <span>尚待補收</span><span class="ok">NT$ 120</span>
               </div>
-              <div class="mnote mnote-g" style="margin-top: 0.4rem">
+              <div class="mnote mnote-g">
                 原月費加差額等於本期應付，不重複扣款
               </div>
             </div>
           </div>
-          <div class="mock screen">
-            <div class="screen-bar">☕ 換豆款差額</div>
-            <div class="screen-body" style="font-size: 0.82rem">
-              <div class="row"><span>經典方案 NT$ 690</span><span>已收</span></div>
+          <div class="screen">
+            <div class="screen-bar">
+              <svg
+                class="ic"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M10 2v2" />
+                <path d="M14 2v2" />
+                <path
+                  d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"
+                />
+                <path d="M6 2v2" />
+              </svg>
+              換豆款差額
+            </div>
+            <div class="screen-body">
+              <div class="row">
+                <span>經典方案 NT$ 690</span><span>已收</span>
+              </div>
               <div class="row">
                 <span>季節豆款 NT$ 810</span
-                ><span style="color: var(--clay)">補收 NT$ 120</span>
+                ><span class="warn">補收 NT$ 120</span>
               </div>
-              <div class="mnote" style="margin-top: 0.4rem">
-                換豆款的價差 → 系統顯示一次補收金額
-              </div>
+              <div class="mnote">換豆款的價差 → 系統顯示一次補收金額</div>
             </div>
           </div>
         </div>
-        <p style="margin: 1rem 0 0; font-size: 0.88rem">
-          <strong>規則</strong>：NT$ 690 ＋ NT$ 120 ＝ NT$ 810，補收確認後套用季節豆款。
-          <span class="tag t-have">帳單示範完成</span>
-          <span class="tag t-have">差額試算完成</span>
-          <span class="tag t-change">補收畫面待收尾</span>
+        <p class="scn-rule">
+          <b>規則</b>：NT$ 690 ＋ NT$ 120 ＝ NT$ 810，補收確認後才套用季節豆款。
         </p>
-      </div>
-    </div>
-  </section>
 
-  <!-- 情境 F+G 併一張 -->
-  <section id="delivery-handoff" class="card" style="margin-bottom: 1.1rem">
-    <div style="display: flex; gap: 0.9rem; align-items: flex-start">
-      <span class="num">F</span>
-      <div style="flex: 1">
-        <h3 style="margin: 0 0 0.2rem; font-size: 1.2rem; font-weight: 700">
-          配送交接 & 偏好保留
-        </h3>
-        <div class="card" style="font-size: 0.92rem; margin-top: 0.5rem; overflow-x: auto">
-          <div class="tbl-scroll"><table style="width: 100%; border-collapse: collapse; text-align: left">
-            <thead>
-              <tr style="color: var(--ink-soft)">
-                <th scope="col" style="padding: 0.5rem 0.4rem">項目</th>
-                <th scope="col" style="padding: 0.5rem 0.4rem">規則</th>
-                <th scope="col" style="padding: 0.5rem 0.4rem">狀態</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="border-top: 1px solid var(--line); vertical-align: top">
-                <th scope="row" style="padding: 0.55rem 0.4rem">配送交接：</th>
-                <td style="padding: 0.55rem 0.4rem">客服主管可確認變更結果；<strong>配送窗口只接收本期有效的豆款與配送頻率</strong>。截止後預約的新方案留到下期清單，不混入本期備貨。</td>
-                <td style="padding: 0.55rem 0.4rem"><span class="tag t-change">小改 + 待確認交接</span></td>
-              </tr>
-              <tr style="border-top: 1px solid var(--line); vertical-align: top">
-                <th scope="row" style="padding: 0.55rem 0.4rem">訂閱偏好保留：</th>
-                <td style="padding: 0.55rem 0.4rem">已確認的豆款與配送頻率<strong>保存在原訂閱方案</strong>，暫停後恢復時直接沿用、不用重填。</td>
-                <td style="padding: 0.55rem 0.4rem"><span class="tag t-new">新功能</span></td>
-              </tr>
-            </tbody>
-          </table></div>
+        <div
+          class="dq"
+          data-decision
+          data-id="d5"
+          id="d5"
+          data-title="第 5 題 · 季節豆款差額要不要套用優惠"
+        >
+          <div class="dq-head">
+            <span class="dq-no"
+              ><span class="q-no">5</span
+              ><span class="zh">第 5 題（共 6 題）· 情境 E</span></span
+            >
+            <h4>季節豆款差額要不要套用優惠？</h4>
+          </div>
+          <p class="dq-why">
+            示範月費 NT$ 690，季節豆款 NT$ 810，標準差額 NT$
+            120；疊加優惠後，補收金額要另外算。
+          </p>
+          <p class="dq-aff">影響情境 E 的補收金額。</p>
+          <p class="dq-rec">
+            <b>我的建議</b>第一版固定補收 NT$
+            120，不另疊加優惠；優惠規則另案確認。
+          </p>
+          <div class="dq-opts" role="radiogroup" aria-label="第 5 題的選擇">
+            <label class="dq-opt"
+              ><input type="radio" name="d5" value="採用建議" />採用建議</label
+            >
+            <label class="dq-opt"
+              ><input
+                type="radio"
+                name="d5"
+                value="改成別的做法"
+              />改成別的做法</label
+            >
+          </div>
+          <textarea
+            class="cmt"
+            data-comment-for="d5"
+            rows="1"
+            placeholder="補充（選填）：要改成什麼、或附帶條件"
+          ></textarea>
         </div>
-      </div>
-    </div>
-  </section>
+      </article>
 
-  <!-- §3 什麼已有 vs 要做 -->
-  <section id="implementation-status" style="margin: 2.4rem 0">
-    <h2
-      class="serif"
-      style="font-size: 1.7rem; font-weight: 700; margin: 0 0 1rem"
-    >
-      ③ 什麼已經有、什麼要做
-    </h2>
-    <div class="card" style="padding: 1rem 1.2rem">
-      <div class="tbl-scroll"><table style="width: 100%; border-collapse: collapse; font-size: 0.9rem">
-        <thead>
-          <tr
-            style="text-align: left; color: var(--ink-soft); font-size: 0.8rem"
-          >
-            <th style="padding: 0.5rem 0.4rem">情境</th>
-            <th>狀態</th>
-            <th>要做的事</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-top: 1px solid var(--line)">
-            <td style="padding: 0.55rem 0.4rem"><strong>A</strong> 截止前變更</td>
-            <td><span class="tag t-have">部分既有</span></td>
-            <td>顯示換豆款差額與頻率生效期別</td>
-          </tr>
-          <tr style="border-top: 1px solid var(--line)">
-            <td style="padding: 0.55rem 0.4rem"><strong>B</strong> 暫停一期</td>
-            <td><span class="tag t-new">新造</span></td>
-            <td>暫停本期配送與扣款，下期恢復原方案</td>
-          </tr>
-          <tr style="border-top: 1px solid var(--line)">
-            <td style="padding: 0.55rem 0.4rem"><strong>C</strong> 下期預約</td>
-            <td><span class="tag t-change">複用</span></td>
-            <td>共用變更內容，將生效期別設為下期</td>
-          </tr>
-          <tr style="border-top: 1px solid var(--line)">
-            <td style="padding: 0.55rem 0.4rem">
-              <strong>D</strong> 7 天通知
-            </td>
-            <td><span class="tag t-new">新造</span></td>
-            <td>提醒信列出截止日與可調整項目</td>
-          </tr>
-          <tr style="border-top: 1px solid var(--line)">
-            <td style="padding: 0.55rem 0.4rem"><strong>E</strong> 差額核對</td>
-            <td><span class="tag t-have">大致已做</span></td>
-            <td>帳單與價差試算完成；補收確認畫面待補</td>
-          </tr>
-          <tr style="border-top: 1px solid var(--line)">
-            <td style="padding: 0.55rem 0.4rem">
-              <strong>F</strong> 交接/偏好
-            </td>
-            <td>
-              <span class="tag t-change">小改</span>
-              <span class="tag t-new">偏好保留</span>
-            </td>
-            <td>本期清單交接；暫停後沿用訂閱偏好</td>
-          </tr>
-        </tbody>
-      </table></div>
-      <p style="margin: 0.8rem 0 0; font-size: 0.82rem; color: var(--ink-soft)">
-        示範進度：<strong>帳單與差額試算已完成</strong>；訂閱方案變更中的「暫停一期」是本輪主要新增項目。
+      <!-- 情境 F -->
+      <article class="scn" id="scn-f">
+        <div class="scn-h">
+          <span class="scn-badge">情境 F</span>
+          <h3>配送交接 &amp; 偏好保留</h3>
+          <div class="scn-tags">
+            <span class="tag t-change">交接小改</span
+            ><span class="tag t-new">偏好保留新功能</span>
+          </div>
+        </div>
+        <p class="scn-lead">
+          兩件小事：配送窗口只拿本期有效的清單；暫停後恢復時，訂閱偏好直接沿用。
+        </p>
+        <div class="two">
+          <div>
+            <div class="mock-label">配送窗口拿到的本期清單</div>
+            <div class="screen">
+              <div class="screen-bar">
+                <svg
+                  class="ic"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"
+                  />
+                  <path d="M15 18H9" />
+                  <path
+                    d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"
+                  />
+                  <circle cx="17" cy="18" r="2" />
+                  <circle cx="7" cy="18" r="2" />
+                </svg>
+                本期配送清單（配送窗口）
+              </div>
+              <div class="screen-body">
+                <div class="row">
+                  <span>季節豆款 · 每四週</span><span class="ok">本期配送</span>
+                </div>
+                <div class="row">
+                  <span>改每八週（已預約）</span><span>下期清單</span>
+                </div>
+                <div class="mnote mnote-g">
+                  截止後預約的變更留到下期清單，不混進本期備貨
+                </div>
+              </div>
+            </div>
+            <p class="scn-rule">
+              <b>配送交接</b
+              >：客服主管確認變更結果；<strong>配送窗口只接收本期有效的豆款與配送頻率</strong>。
+            </p>
+          </div>
+          <div>
+            <div class="mock-label">暫停後恢復：沿用原偏好</div>
+            <div class="screen">
+              <div class="screen-bar">
+                <svg
+                  class="ic"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                  <path d="M12 18h.01" />
+                </svg>
+                官網訂閱頁（訂閱者）
+              </div>
+              <div class="screen-body">
+                <div class="row">
+                  <span>下期恢復配送</span
+                  ><span class="mbtn mbtn-o">查看方案</span>
+                </div>
+                <div class="mnote mnote-g">
+                  已確認的豆款與頻率保留在原方案，恢復時不用重填
+                </div>
+              </div>
+            </div>
+            <p class="scn-rule">
+              <b>偏好保留</b
+              >：已確認的豆款與配送頻率<strong>保存在原訂閱方案</strong>，暫停後恢復時直接沿用。
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="dq"
+          data-decision
+          data-id="d6"
+          id="d6"
+          data-title="第 6 題 · 配送窗口什麼時候收到變更"
+        >
+          <div class="dq-head">
+            <span class="dq-no"
+              ><span class="q-no">6</span
+              ><span class="zh">第 6 題（共 6 題）· 情境 F</span></span
+            >
+            <h4>配送窗口什麼時候收到變更？</h4>
+          </div>
+          <p class="dq-why">
+            截止前的內容還可能再改；太早交接，配送窗口容易拿到舊版本。
+          </p>
+          <p class="dq-aff">影響情境 F 的備貨依據。</p>
+          <p class="dq-rec">
+            <b>我的建議</b
+            >在本期截止那一刻交接本期有效清單；截止後的預約變更留到下一期再交。
+          </p>
+          <div class="dq-opts" role="radiogroup" aria-label="第 6 題的選擇">
+            <label class="dq-opt"
+              ><input type="radio" name="d6" value="採用建議" />採用建議</label
+            >
+            <label class="dq-opt"
+              ><input
+                type="radio"
+                name="d6"
+                value="改成別的做法"
+              />改成別的做法</label
+            >
+          </div>
+          <textarea
+            class="cmt"
+            data-comment-for="d6"
+            rows="1"
+            placeholder="補充（選填）：要改成什麼、或附帶條件"
+          ></textarea>
+        </div>
+      </article>
+    </section>
+
+    <!-- 03 建置範圍 -->
+    <section id="scope" class="chap">
+      <div class="eyebrow">03 · <span class="zh">建置範圍</span></div>
+      <h2>
+        <span class="ph">什麼已經有、</span><span class="ph">什麼要做</span>
+      </h2>
+      <div class="tbl-wrap">
+        <table class="scope">
+          <thead>
+            <tr>
+              <th>情境</th>
+              <th>狀態</th>
+              <th>要做的事</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>A</b>截止前變更</td>
+              <td><span class="tag t-have">部分既有</span></td>
+              <td>顯示換豆款差額與改頻率的生效期別</td>
+            </tr>
+            <tr>
+              <td><b>B</b>暫停一期</td>
+              <td><span class="tag t-new">新造</span></td>
+              <td>暫停本期配送與扣款，下期恢復原方案</td>
+            </tr>
+            <tr>
+              <td><b>C</b>下期預約</td>
+              <td><span class="tag t-change">複用</span></td>
+              <td>共用變更內容，把生效期別設為下期</td>
+            </tr>
+            <tr>
+              <td><b>D</b>7 天提醒</td>
+              <td><span class="tag t-new">新造</span></td>
+              <td>仿既有提醒機制加一封自動信，列出截止日與可調整項目</td>
+            </tr>
+            <tr>
+              <td><b>E</b>差額核對</td>
+              <td><span class="tag t-have">大致已做</span></td>
+              <td>帳單與價差試算完成；補收確認畫面待補</td>
+            </tr>
+            <tr>
+              <td><b>F</b>交接/偏好</td>
+              <td>
+                <span class="tag t-change">小改</span>
+                <span class="tag t-new">偏好保留</span>
+              </td>
+              <td>本期清單交接（小）；暫停後沿用訂閱偏好（新）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="good-news">
+        <svg
+          class="ic"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 6 9 17l-5-5" /></svg
+        ><span
+          >好消息：<strong>帳單與差額試算已經完成</strong>；方案變更裡的「暫停一期」是這一輪最主要的新工作。</span
+        >
       </p>
-    </div>
-  </section>
+      <details class="reveal">
+        <summary>
+          三種顏色的標籤怎麼讀：只標建置範圍，不代表優先序<span class="rv-kind"
+            >讀法</span
+          >
+        </summary>
+        <div class="reveal-body">
+          <p><span class="tag t-have">綠</span>系統已經有，可能只差收尾。</p>
+          <p>
+            <span class="tag t-change">赤陶</span>要改既有功能，或複用既有機制。
+          </p>
+          <p><span class="tag t-new">藍</span>要從零做的新功能。</p>
+          <p>先後順序看下一段「落地節奏」，不看標籤顏色。</p>
+        </div>
+      </details>
+    </section>
 
-  <!-- §5 落地 -->
-  <section id="rollout" style="margin-bottom: 2.4rem">
-    <h2
-      class="serif"
-      style="font-size: 1.7rem; font-weight: 700; margin: 0 0 1rem"
-    >
-      ⑤ 落地節奏
-    </h2>
-    <div class="card">
-      <div style="display: flex; gap: 0.7rem; margin-bottom: 0.9rem">
-        <span class="tag t-change" style="align-self: flex-start">本週</span>
-        <div style="font-size: 0.92rem">
-          <strong>先驗收帳單與差額試算</strong>：用示範訂閱核對 NT$ 690 與 NT$ 120；完成補收畫面與配送交接；提醒日期拍板後製作通知信。
+    <!-- 04 落地節奏 -->
+    <section id="rhythm" class="chap">
+      <div class="eyebrow">04 · <span class="zh">落地節奏</span></div>
+      <h2>
+        <span class="ph">本週先驗收做完的，</span
+        ><span class="ph">下週做變更主流程</span>
+      </h2>
+      <ol class="rhythm-track">
+        <li class="rh now">
+          <div class="rh-top">
+            <span class="rh-when">本週</span
+            ><span class="rh-gate free">大多不必等拍板</span>
+          </div>
+          <p>
+            <strong>先驗收帳單與差額試算</strong>：用示範訂閱核對 NT$ 690 與 NT$
+            120；完成補收畫面；提醒信（<a href="#d4">第 4 題</a
+            >拍了日期就能開工）；配送交接（<a href="#d6">第 6 題</a
+            >拍了交接時點就能做）。
+          </p>
+        </li>
+        <li class="rh">
+          <div class="rh-top">
+            <span class="rh-when">下週</span
+            ><span class="rh-gate wait">等第 1–3 題</span>
+          </div>
+          <p>
+            <strong>方案變更主流程</strong>：暫停一期（情境 B）＋下期預約（情境
+            C），等你拍完<a href="#d2">第 2 題</a>、<a href="#d3">第 3 題</a
+            >；換豆款與改頻率（情境 A）等<a href="#d1">第 1 題</a>。
+          </p>
+        </li>
+        <li class="rh">
+          <div class="rh-top">
+            <span class="rh-when">兩週後</span
+            ><span class="rh-gate later">另列後續需求</span>
+          </div>
+          <p>
+            驗證暫停後的偏好恢復；連續暫停與季節豆款優惠（<a href="#d5"
+              >第 5 題</a
+            >）另列後續需求。
+          </p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 05 回傳 -->
+    <section id="send" class="chap">
+      <div class="eyebrow">05 · <span class="zh">回傳</span></div>
+      <h2><span class="ph">選完了，</span><span class="ph">複製給 AI</span></h2>
+      <label class="send-label" for="global-note">整體備註</label>
+      <p class="send-hint">
+        哪個情境理解錯了、漏掉的、優先序。摘要只放你已選的題，沒選的可以之後再回。
+      </p>
+      <textarea
+        class="cmt"
+        id="global-note"
+        placeholder="哪個情境理解錯了、漏掉的、優先序…"
+      ></textarea>
+      <div style="margin-top: 16px">
+        <button
+          class="btn"
+          type="button"
+          onclick="document.getElementById('copy-btn').click()"
+        >
+          <svg
+            class="ic"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+            <path
+              d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+            />
+          </svg>
+          複製拍板摘要給 AI
+        </button>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <p>2026-09-01 · Brewly 虛構規格樣張 · 金額皆為示範值 · 待負責人確認</p>
+      <details class="reveal">
+        <summary>
+          這份規格怎麼整理出來的：只留最終規格、操作畫面和要拍板的題<span
+            class="rv-kind"
+            >來源</span
+          >
+        </summary>
+        <div class="reveal-body">
+          <p>
+            Brewly
+            是虛構品牌，情境、日期與金額都是示範值，用來展示「跟非技術負責人對齊規格」的頁面怎麼排。
+          </p>
+          <p>
+            分析推導過程與內部規格編號刻意不放進這份，這裡只留最終規格、操作畫面和要你拍板的
+            6 件事。
+          </p>
+        </div>
+      </details>
+    </footer>
+  </div>
+
+    <!-- 回傳列（base-template 原樣）：拍板頁的複製內容換成 buildSummary -->
+    <footer class="sticky-bar" data-tw-lock>
+      <div class="bar-in">
+        <div class="bar-row">
+          <div class="bar-txt">
+            <div class="bar-title">拍板回傳給 AI</div>
+            <div class="bar-status" id="bar-status" hidden></div>
+            <div class="bar-hint">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" /></svg>
+              <span class="long">反白任何一段文字就能留言</span><span class="short">反白可留言</span>
+              <button type="button" class="bar-count" id="bar-comments">已留 0 則</button>
+            </div>
+          </div>
+          <div class="bar-btns">
+            <button id="preview-btn" class="btn-secondary" type="button">預覽</button>
+            <button id="copy-btn" class="btn-primary" type="button">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /></svg>
+              <span class="cb-long">複製拍板摘要給 AI</span><span class="cb-short">複製摘要</span>
+            </button>
+          </div>
         </div>
       </div>
-      <div style="display: flex; gap: 0.7rem; margin-bottom: 0.9rem">
-        <span class="tag t-change" style="align-self: flex-start">下週</span>
-        <div style="font-size: 0.92rem">
-          <strong>方案變更主流程</strong>：完成暫停一期（B）與下期預約（C）；依決策 1–3 驗收截止日與已扣款情境，再確認換豆款與改頻率（A）。
+    </footer>
+    <!-- 預覽抽屜：放在列外面。列有 backdrop-filter，fixed 的子元素會被困在列的框裡 -->
+    <div id="preview-area" class="hidden" role="dialog" aria-label="複製給 AI 的內容" data-tw-lock>
+      <div class="drawer-in">
+        <div class="drawer-head">
+          <span>按「複製拍板摘要給 AI」會複製這段</span>
+          <span class="drawer-tools">
+            <button id="vt-clear-picks" class="vt-clear-picks" type="button" hidden>清除我的選擇</button>
+            <button id="preview-close" class="preview-close" type="button">關閉</button>
+          </span>
         </div>
-      </div>
-      <div style="display: flex; gap: 0.7rem">
-        <span class="tag t-change" style="align-self: flex-start">兩週後</span>
-        <div style="font-size: 0.92rem">
-          驗證偏好恢復與配送交接；連續暫停及季節豆款優惠另列後續需求。
-        </div>
+        <pre id="preview-content" class="preview"></pre>
+        <p class="drawer-note vt-note-warn" id="preview-note" hidden></p>
       </div>
     </div>
-  </section>
 
-  <section id="overall-notes" style="margin-bottom: 1.5rem">
-    <h2
-      class="serif"
-      style="font-size: 1.15rem; font-weight: 700; margin: 0 0 0.6rem"
-    >
-      整體備註
-    </h2>
-    <div class="card">
-    <textarea
-      class="cmt"
-      id="global-note"
-      style="min-height: 60px"
-      placeholder="哪個情境理解錯了、漏掉的、優先序…"
-    ></textarea>
-    <div style="margin-top: 1rem">
-      <button class="btn" onclick="openExport()">📋 複製拍板摘要給 AI</button>
-    </div>
-    </div>
-  </section>
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 共用複製工具 — file:// 下瀏覽器停用 navigator.clipboard，   -->
+    <!-- 一定會落到 execCommand 備援；備援也可能失敗，必須誠實回報   -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <script>
+      // 三段式：clipboard API → execCommand 備援 → 都失敗回 false（不假報成功）
+      window.vtCopyText = async function (text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(text);
+            return true;
+          } catch (err) {
+            // 落到 execCommand 備援
+          }
+        }
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.top = "-9999px";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        try {
+          ta.select();
+          ta.setSelectionRange(0, ta.value.length);
+          return document.execCommand("copy") === true;
+        } catch (err) {
+          return false;
+        } finally {
+          ta.remove();
+        }
+      };
 
-  <p
-    style="
-      font-size: 0.78rem;
-      color: var(--ink-soft);
-      border-top: 1px solid var(--line);
-      padding-top: 1rem;
-    "
-  >
-    2026-09-01 · Brewly 虛構規格樣張 · 金額皆為示範值 · 待負責人確認
-  </p>
-</div>
+      // 複製失敗時的出路：把文字放進可選取區域並全選，使用者按一次 Cmd+C 即可
+      // target 有給就用頁面既有的預覽區（wrap 為它的外層、會自動展開）；
+      // 沒有預覽區就建一個臨時可選取區（雙擊可關閉）。
+      window.vtSelectForManualCopy = function (text, target, wrap) {
+        let node = target;
+        if (node) {
+          node.textContent = text;
+          if (wrap) wrap.classList.remove("hidden");
+        } else {
+          node = document.getElementById("vt-manual-copy-box");
+          if (!node) {
+            node = document.createElement("pre");
+            node.id = "vt-manual-copy-box";
+            node.title = "雙擊關閉";
+            node.style.cssText =
+              "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;" +
+              "max-width:min(720px,92vw);max-height:40vh;overflow:auto;white-space:pre-wrap;" +
+              "background:#fff;color:#111;border:1.5px solid #999;border-radius:10px;" +
+              "padding:14px 16px;font-size:12.5px;line-height:1.6;" +
+              "box-shadow:0 12px 40px rgba(0,0,0,.28)";
+            node.addEventListener("dblclick", function () {
+              node.remove();
+            });
+            document.body.appendChild(node);
+          }
+          node.textContent = text;
+        }
+        node.scrollIntoView({ block: "nearest" });
+        const sel = window.getSelection();
+        if (sel) {
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+        return node;
+      };
+    </script>
 
-<div
-  class="modal-bg"
-  id="expbg"
-  onclick="if (event.target === this) this.classList.remove('on');"
->
-  <div class="modal">
-    <div
-      style="
+    <script>
+      // 拍板題＋回傳列：題目地圖進度、留言數同步、拍板進度、補充提示、拍板保存、預覽抽屜、複製。
+      // 各段用「// § 段名」標頭分開，標頭與 base-template 同名，照抄時搜標頭整段換
+      const CHANGE = "改成別的做法";
+      const QIDS = ["d1", "d2", "d3", "d4", "d5", "d6"];
+
+      function getValue(name) {
+        const radio = document.querySelector(
+          `input[type="radio"][name="${name}"]:checked`,
+        );
+        return radio ? radio.value : "";
+      }
+      function getComment(id) {
+        const ta = document.querySelector(`[data-comment-for="${id}"]`);
+        return ta && ta.value.trim() ? ta.value.trim() : "";
+      }
+
+      (function () {
+        var bar = document.querySelector(".sticky-bar");
+        document.body.classList.add("vt-has-bar");
+        var decs = [].slice.call(document.querySelectorAll("[data-decision]"));
+        var area = document.getElementById("preview-area");
+        var content = document.getElementById("preview-content");
+        var pnote = document.getElementById("preview-note");
+        var note = document.getElementById("global-note");
+        function titleOf(d) {
+          return d.dataset.title || (d.querySelector("h4") || d).textContent.trim();
+        }
+        function unpicked() {
+          return decs.filter(function (d) { return !d.querySelector('input[type="radio"]:checked'); });
+        }
+        // § 跳題落焦：捲到題卡後把焦點移到那題第一個選項，讀者接著按空白鍵或方向鍵就能選。
+        //   題卡頂到第一個選項比兩條列之間還高（手機上題目＋樣張常超過一屏）時，改成把選項格捲進兩條列之間。
+        //   只捲一次：頁面開了平滑捲動，連捲兩次時第二次會打斷第一次，題卡頂被捲出畫面
+        function jumpTo(d) {
+          return function (e) {
+            e.preventDefault();
+            area.classList.add("hidden");
+            var r = d.querySelector('input[type="radio"]');
+            var lab = r && r.closest("label");
+            var cs = getComputedStyle(document.documentElement);
+            // 本頁沒有頂端章節列，scroll-padding-top 是 auto，parseFloat 得 NaN：當 0 算，不然比較恆為 false、永遠捲題卡頂
+            var room = innerHeight - (parseFloat(cs.scrollPaddingTop) || 0) - (parseFloat(cs.scrollPaddingBottom) || 0);
+            if (lab && lab.getBoundingClientRect().bottom - d.getBoundingClientRect().top > room) lab.scrollIntoView({ block: "nearest" });
+            else d.scrollIntoView({ block: "start" });
+            if (r) r.focus({ preventScroll: true });
+          };
+        }
+
+        // § scroll-padding：Tab 落到的元素不被固定列蓋住。上＝頂端章節列高＋16，下＝回傳列高＋16。
+        //   用 ResizeObserver 盯兩條列：視窗變寬窄、進度那行換行、風格設定把字放大（不會發 resize 事件）都會重算。
+        //   本頁沒有頂端章節列，topnav 是 null，只設下緣
+        var topnav = document.querySelector(".topnav");
+        function padScroll() {
+          var s = document.documentElement.style;
+          s.scrollPaddingBottom = bar.getBoundingClientRect().height + 16 + "px";
+          if (topnav) s.scrollPaddingTop = topnav.getBoundingClientRect().height + 16 + "px";
+        }
+        var ro = new ResizeObserver(padScroll);
+        ro.observe(bar);
+        if (topnav) ro.observe(topnav);
+
+        // § buildFeedback 複製格式（唯一格式，見 interaction-patterns.md § 複製摘要格式）
+        //   # <標題> · 拍板摘要／時間：…／空行／- <題名>：<選項> — <補充>／還有 K 題沒選：…（之後再貼）／留言。
+        //   本頁多兩樣：選「改成別的做法」卻沒寫補充時標「（還沒寫要改成什麼）」；整體備註接在題目後面
+        function buildSummary() {
+          const rows = [
+            ["第 1 題（情境 A）換豆款與改頻率一起送出", getValue("d1"), getComment("d1")],
+            ["第 2 題（情境 B）已扣款的本期能否暫停", getValue("d2"), getComment("d2")],
+            ["第 3 題（情境 C）截止後的變更從哪一期生效", getValue("d3"), getComment("d3")],
+            ["第 4 題（情境 D）提醒信的計算日期", getValue("d4"), getComment("d4")],
+            ["第 5 題（情境 E）季節豆款差額套不套優惠", getValue("d5"), getComment("d5")],
+            ["第 6 題（情境 F）配送窗口收到變更的時點", getValue("d6"), getComment("d6")],
+          ];
+          var lb = (window.VT_SESSION || {}).label;
+          var t = document.title;
+          // 識別 snippet 會在分頁標題前加「<session> · 」；只拿掉那一段，標題自己的「 · 」保留
+          if (lb && t.indexOf(lb + " · ") === 0) t = t.slice(lb.length + 3);
+          const lines = ["# " + t + " · 拍板摘要", "時間：" + new Date().toLocaleString("zh-TW"), ""];
+          rows.forEach((r) => {
+            if (!r[1]) return;
+            let tail = r[2] ? ` — ${r[2]}` : "";
+            if (!r[2] && r[1] === CHANGE) tail = " — （還沒寫要改成什麼）";
+            lines.push(`- ${r[0]}：${r[1]}${tail}`);
+          });
+          var left = unpicked();
+          var miss = changeMissing();
+          lines.push(left.length ? "還有 " + left.length + " 題沒選：" + left.map(titleOf).join("、") + "（之後再貼）" : miss.length ? "全部 " + decs.length + " 題都選了，但第 " + numsOf(miss) + " 題還沒寫要改成什麼" : "全部 " + decs.length + " 題都選了");
+          if (note && note.value.trim()) lines.push("", "## 整體備註", note.value.trim());
+          // 末尾拼全頁評論（反白文字留的意見）
+          return lines.join("\n") + (window.vtCollectComments?.() || "");
+        }
+        window.vtBuildDecisionExport = buildSummary;
+
+        // § 補充提示：補充框寫了字、那題卻沒選 → 複製時這段會被丟掉（只含已選的題），在列上與抽屜底部講出來
+        function noteOrphans() {
+          return decs.filter(function (d) {
+            var ta = d.querySelector("[data-comment-for]");
+            return ta && ta.value.trim() && !d.querySelector('input[type="radio"]:checked');
+          });
+        }
+        // 反向的情形：選了「改成別的做法」、補充框卻空著 → 讀者以為選完了，AI 收到的只有「改成別的做法」。
+        //   這種題不算「都選了」，提示點了直接把游標放進那題的補充框
+        function changeMissing() {
+          return decs.filter(function (d) {
+            return getValue(d.dataset.id) === CHANGE && !getComment(d.dataset.id);
+          });
+        }
+        function numsOf(list) {
+          return list.map(function (d) { return decs.indexOf(d) + 1; }).join("、");
+        }
+        function focusNote(d) {
+          return function (e) {
+            e.preventDefault();
+            area.classList.add("hidden");
+            var ta = d.querySelector("[data-comment-for]");
+            ta.scrollIntoView({ block: "center" });
+            ta.focus({ preventScroll: true });
+          };
+        }
+        function noteLink(target, longText, shortText, withShort, onClick) {
+          var a = document.createElement("a");
+          a.href = "#" + target.id;
+          a.textContent = longText;
+          if (withShort) {
+            a.innerHTML = '<span class="long"></span><span class="short"></span>';
+            a.firstChild.textContent = longText;
+            a.lastChild.textContent = shortText;
+          }
+          a.addEventListener("click", onClick);
+          return a;
+        }
+        //   列上那份另帶短版（手機只剩一行）：有這種題時手機整行只顯示「第 N 題補充還沒選 →」，蓋過進度與下一題
+        function renderNote(el, withShort) {
+          var o = noteOrphans();
+          var m = changeMissing();
+          el.hidden = !o.length && !m.length;
+          el.textContent = "";
+          if (o.length) {
+            var ns = numsOf(o);
+            el.appendChild(noteLink(o[0], "第 " + ns + " 題寫了補充但還沒選，這段不會複製", "第 " + ns + " 題補充還沒選 →", withShort, jumpTo(o[0])));
+          }
+          if (m.length) {
+            var ms = numsOf(m);
+            if (o.length) el.appendChild(document.createTextNode(" · "));
+            el.appendChild(noteLink(m[0], "第 " + ms + " 題選了改成別的做法，還沒寫要改成什麼 →", "第 " + ms + " 題還沒寫改法 →", withShort, focusNote(m[0])));
+          }
+        }
+
+        // 拍板進度：題目地圖的狀態膠囊＋回傳列「已選 N / M · 還差：<題名>」，點題名跳到那題；後面接補充提示
+        var st = document.getElementById("bar-status");
+        function syncStatus() {
+          var left = unpicked();
+          var n = decs.length - left.length;
+          QIDS.forEach((id) => {
+            const v = getValue(id);
+            const qs = document.querySelector(`[data-qstate="${id}"]`);
+            if (qs) {
+              qs.textContent = !v ? "未選" : v === CHANGE ? "改做法" : "採用建議";
+              qs.classList.toggle("is-ok", !!v && v !== CHANGE);
+              qs.classList.toggle("is-change", v === CHANGE);
+            }
+          });
+          document.getElementById("qmap-count").textContent = `已選 ${n} / ${decs.length}`;
+          st.hidden = false;
+          st.textContent = "";
+          // 先清掉上一輪的 has-note：全選完會在下面提早 return，不清的話手機上進度會一直藏著
+          st.classList.remove("has-note");
+          // 進度與下一題包在 .vt-prog：手機上有補充提示時整段藏起來，讓出一行給提示
+          var pg = document.createElement("span");
+          pg.className = "vt-prog";
+          pg.textContent = "已選 ";
+          st.appendChild(pg);
+          var num = document.createElement("strong");
+          num.textContent = n + " / " + decs.length;
+          pg.appendChild(num);
+          var nt = document.createElement("span");
+          if (!left.length) {
+            // 「改成別的做法」還沒寫內容的題不算都選了：有這種題時改顯示下面的提示
+            if (!changeMissing().length) {
+              pg.appendChild(document.createTextNode(" · 都選了，按「複製拍板摘要給 AI」貼回"));
+              return;
+            }
+          } else {
+            pg.appendChild(document.createTextNode(" · "));
+            var a = document.createElement("a");
+            a.href = "#" + left[0].id;
+            a.innerHTML = '<span class="long"></span><span class="short">下一題 →</span>';
+            a.firstChild.textContent = "還差：" + titleOf(left[0]);
+            a.addEventListener("click", jumpTo(left[0]));
+            pg.appendChild(a);
+          }
+          nt.className = "vt-note-warn";
+          renderNote(nt, true);
+          st.classList.toggle("has-note", !nt.hidden);
+          if (!nt.hidden) {
+            var sep = document.createElement("span");
+            sep.className = "sep";
+            sep.textContent = " · ";
+            nt.insertBefore(sep, nt.firstChild);
+            st.appendChild(nt);
+          }
+        }
+
+        // § 拍板保存（localStorage）：選項與補充存在「vt-decisions-<路徑>-<版本>」，裡面以題目 id 分開；
+        //   載入時還原讀者自己選過的值（沒選的題只還原補充）。「清除我的選擇」在預覽抽屜。
+        //   本頁的整體備註也存在同一個物件裡（鍵 _note），跟著版本走
+        //   版本：每張拍板卡的題名、題目標題、各選項 value 與文字串起來的雜湊（FNV-1a 32 位元轉 36 進位）。
+        //   AI 覆寫同一檔名的頁時題目常沿用 q1、A／B，任何一處變了版本就變，舊答案不會勾到沒看過的新題上
+        function pageVersion() {
+          var s = decs.map(function (d) {
+            var hd = d.querySelector("h2, h3, h4");
+            return [d.dataset.id, titleOf(d), hd ? hd.textContent.trim() : ""].concat(
+              [].slice.call(d.querySelectorAll('input[type="radio"]')).map(function (i) {
+                return i.value + "=" + i.closest("label").textContent.trim();
+              })
+            ).join("\u0001");
+          }).join("\u0002");
+          var x = 0x811c9dc5;
+          for (var i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); }
+          return (x >>> 0).toString(36);
+        }
+        var SK0 = "vt-decisions-" + location.pathname;
+        var SK = SK0 + "-" + pageVersion();
+        // 同路徑的舊版本鍵（含沒帶版本的舊格式）順手刪掉，避免累積
+        for (var k = localStorage.length - 1; k >= 0; k--) {
+          var key = localStorage.key(k);
+          if (key !== SK && (key === SK0 || /^-[0-9a-z]+$/.test(key.slice(SK0.length)) && key.indexOf(SK0) === 0)) localStorage.removeItem(key);
+        }
+        function savePicks() {
+          var o = {};
+          decs.forEach(function (d) {
+            var ta = d.querySelector("[data-comment-for]");
+            o[d.dataset.id] = { v: getValue(d.dataset.id), note: ta ? ta.value : "" };
+          });
+          if (note) o._note = note.value;
+          localStorage.setItem(SK, JSON.stringify(o));
+        }
+        var saved = JSON.parse(localStorage.getItem(SK) || "{}");
+        decs.forEach(function (d) {
+          var x = saved[d.dataset.id];
+          if (!x) return;
+          var r = [].slice.call(d.querySelectorAll('input[type="radio"]')).find(function (i) { return i.value === x.v; });
+          if (r) r.checked = true;
+          var ta = d.querySelector("[data-comment-for]");
+          if (ta) ta.value = x.note;
+        });
+        if (note && typeof saved._note === "string") note.value = saved._note;
+        var clr = document.getElementById("vt-clear-picks");
+        if (clr && decs.length) {
+          clr.hidden = false;
+          clr.addEventListener("click", function () {
+            if (!confirm("清除這頁所有的選擇與補充？")) return;
+            decs.forEach(function (d) {
+              d.querySelectorAll('input[type="radio"]').forEach(function (i) { i.checked = false; });
+              var ta = d.querySelector("[data-comment-for]");
+              if (ta) ta.value = "";
+            });
+            if (note) note.value = "";
+            localStorage.removeItem(SK);
+            syncStatus();
+            if (!area.classList.contains("hidden")) openPreview(buildSummary());
+          });
+        }
+        // input 事件 radio 換選項與補充框打字都會發
+        decs.forEach(function (d) {
+          d.addEventListener("input", function () { savePicks(); syncStatus(); });
+        });
+        if (note) note.addEventListener("input", savePicks);
+        // 選「改成別的做法」時直接把游標放進補充框，寫要改成什麼
+        document.querySelectorAll('.dq input[type="radio"]').forEach((r) => {
+          r.addEventListener("change", () => {
+            if (r.checked && r.value === CHANGE) {
+              const ta = document.querySelector(`[data-comment-for="${r.name}"]`);
+              if (ta) ta.focus();
+            }
+          });
+        });
+
+        var cnt = document.getElementById("bar-comments");
+        function syncCount() {
+          var src = document.getElementById("vt-count");
+          cnt.textContent = "已留 " + (src ? src.textContent.trim() || "0" : "0") + " 則";
+        }
+        // 評論系統的計數元素在本段之後才出現，等整頁解析完再接上
+        document.addEventListener("DOMContentLoaded", function () {
+          var src = document.getElementById("vt-count");
+          if (src && window.MutationObserver) new MutationObserver(syncCount).observe(src, { childList: true, characterData: true, subtree: true });
+          syncCount();
+        });
+        cnt.addEventListener("click", function () {
+          var pill = document.getElementById("vt-comment-pill");
+          if (pill) pill.click();
+        });
+
+        // 預覽抽屜：停在回傳列上方，複製鈕不被蓋住；按「關閉」或再按一次「預覽」收起。底部接補充提示
+        function openPreview(text) {
+          content.textContent = text;
+          if (pnote) renderNote(pnote);
+          area.style.bottom = bar.getBoundingClientRect().height + "px";
+          area.classList.remove("hidden");
+          // 評論清單也浮在右下，開著會蓋住抽屜的關閉鈕：開預覽時先收起
+          var cl = document.getElementById("vt-comment-list");
+          if (cl) cl.classList.remove("is-open");
+        }
+        syncStatus();
+        function closePreview() { area.classList.add("hidden"); }
+        document.getElementById("preview-btn").addEventListener("click", function () {
+          if (area.classList.contains("hidden")) openPreview(buildSummary());
+          else closePreview();
+        });
+        document.getElementById("preview-close").addEventListener("click", closePreview);
+        var cb = document.getElementById("copy-btn");
+        cb.addEventListener("click", async function () {
+          var text = buildSummary();
+          var orig = cb.innerHTML;
+          var ok = await window.vtCopyText(text);
+          if (ok) {
+            cb.textContent = "已複製";
+          } else {
+            // 複製不到就不假報成功：攤開預覽並全選，使用者按 Cmd+C 即可
+            openPreview(text);
+            window.vtSelectForManualCopy(text, content, area);
+            cb.textContent = "已選取，請按 Cmd+C";
+          }
+          setTimeout(function () { cb.innerHTML = orig; }, ok ? 2000 : 6000);
+        });
+      })();
+
+      // 列印、存 PDF 時把收合區打開
+      window.addEventListener("beforeprint", () => {
+        document
+          .querySelectorAll("details.reveal")
+          .forEach((d) => (d.open = true));
+      });
+    </script>
+
+    <!-- vt-comment:start（全頁評論系統整段，範例頁用腳本從這行替換到 vt-comment:end）-->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 全頁評論系統 — 預設內建、可手動移除                       -->
+    <!-- 完整 snippet 見 references/interaction-patterns.md       -->
+    <!-- § 全頁評論系統（page-wide commenting，預設內建）         -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <style>
+      .vt-comment-trigger {
+        position: fixed;
+        z-index: 9998;
+        background: var(--paper);
+        border: 1.5px solid var(--clay);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+        color: var(--clay-ink, #a64b2e);
+        font-family: var(--mono);
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(20, 20, 19, 0.12);
+        display: none;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
+      }
+      .vt-comment-trigger:hover {
+        background: var(--clay-d, #b85c3e);
+        color: var(--paper);
+      }
+      .vt-comment-popup {
+        position: fixed;
+        z-index: 9999;
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(20, 20, 19, 0.15);
+        padding: 14px 16px;
+        width: 340px;
+        display: none;
+      }
+      .vt-comment-popup .quote {
+        background: var(--g100);
+        border-left: 3px solid var(--clay);
+        padding: 8px 10px;
+        font-size: 12.5px;
+        color: var(--g700);
+        line-height: 1.45;
+        margin-bottom: 10px;
+        max-height: 80px;
+        overflow-y: auto;
+      }
+      .vt-comment-popup textarea {
+        width: 100%;
+        border: 1.5px solid var(--g300);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        font-family: var(--sans);
+        resize: vertical;
+        min-height: 60px;
+        color: var(--slate);
+        box-sizing: border-box;
+      }
+      .vt-comment-popup textarea:focus {
+        outline: none;
+        border-color: var(--clay);
+      }
+      .vt-comment-popup .actions {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.8rem;
-      "
-    >
-      <strong>拍板摘要</strong
-      ><button
-        onclick="document.getElementById('expbg').classList.remove('on')"
-        style="border: 0; background: none; font-size: 1.3rem; cursor: pointer"
-      >
-        ×
-      </button>
-    </div>
-    <pre class="exp" id="exptext"></pre>
-    <div style="margin-top: 0.9rem; display: flex; gap: 0.6rem">
-      <button class="btn" onclick="doCopy()">複製</button
-      ><span
-        id="copied"
-        style="
-          align-self: center;
-          font-size: 0.85rem;
-          color: var(--green);
-          display: none;
-        "
-        >已複製 ✓</span
-      >
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- 共用複製工具 — file:// 下瀏覽器停用 navigator.clipboard，   -->
-<!-- 一定會落到 execCommand 備援；備援也可能失敗，必須誠實回報   -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<script>
-  // 三段式：clipboard API → execCommand 備援 → 都失敗回 false（不假報成功）
-  window.vtCopyText = async function (text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      try {
-        await navigator.clipboard.writeText(text);
-        return true;
-      } catch (err) {
-        // 落到 execCommand 備援
+        margin-top: 10px;
+        font-size: 12px;
       }
-    }
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.setAttribute("readonly", "");
-    ta.style.position = "fixed";
-    ta.style.top = "-9999px";
-    ta.style.left = "-9999px";
-    document.body.appendChild(ta);
-    try {
-      ta.select();
-      ta.setSelectionRange(0, ta.value.length);
-      return document.execCommand("copy") === true;
-    } catch (err) {
-      return false;
-    } finally {
-      ta.remove();
-    }
-  };
+      .vt-comment-popup .hint {
+        color: var(--text-soft);
+        font-family: var(--mono);
+      }
+      .vt-comment-popup button.send {
+        background: var(--clay-d, #b85c3e);
+        color: var(--paper);
+        border: none;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .vt-comment-popup button.send:hover {
+        background: var(--clay-ink, #a64b2e);
+      }
+      .vt-comment-popup button.cancel {
+        background: transparent;
+        border: 1px solid var(--g300);
+        color: var(--text-soft);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12.5px;
+        cursor: pointer;
+        margin-right: 8px;
+      }
+      mark.vt-comment-mark {
+        background: var(--oat);
+        padding: 0 2px;
+        border-radius: 2px;
+        cursor: pointer;
+      }
+      mark.vt-comment-mark:hover {
+        background: #d5c4a8;
+      }
+      /* 從清單點過來時短暫亮一下，讀者知道是哪一段 */
+      mark.vt-comment-mark.is-flash {
+        background: #f7d9a0;
+        box-shadow: 0 0 0 3px #f7d9a0;
+      }
+      .vt-comment-pill {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 9990;
+        background: var(--paper);
+        border: 1.5px solid var(--clay);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--clay-ink, #a64b2e);
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(20, 20, 19, 0.1);
+        display: none;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
+      }
+      .vt-comment-pill.is-active {
+        display: inline-flex;
+      }
+      .vt-comment-pill:hover {
+        background: var(--clay-d, #b85c3e);
+        color: var(--paper);
+      }
+      .vt-comment-pill strong {
+        font-weight: 600;
+      }
+      .vt-comment-list {
+        position: fixed;
+        right: 16px;
+        bottom: 60px;
+        width: 360px;
+        max-height: 60vh;
+        z-index: 9991;
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-radius: 14px;
+        box-shadow: 0 12px 32px rgba(20, 20, 19, 0.15);
+        display: none;
+        flex-direction: column;
+      }
+      .vt-comment-list.is-open {
+        display: flex;
+      }
+      .vt-comment-list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        background: var(--paper);
+        border-bottom: 1.5px solid var(--g200);
+        padding: 12px 16px;
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-soft);
+        font-weight: 600;
+        border-radius: 14px 14px 0 0;
+      }
+      .vt-list-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        margin: -8px -8px -8px 0;
+        padding: 0;
+        background: none;
+        border: 0;
+        border-radius: 8px;
+        color: var(--g700);
+        cursor: pointer;
+      }
+      .vt-list-close:hover {
+        background: var(--g100);
+        color: var(--slate);
+      }
+      .vt-comment-list-items {
+        overflow-y: auto;
+        flex: 1;
+      }
+      .vt-comment-item {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--g200);
+      }
+      .vt-comment-item:last-child {
+        border-bottom: none;
+      }
+      /* 引文：正體、12px、墨色。找得回原文的是按鈕（點了捲過去），找不回的標「原文已變動」 */
+      .vt-comment-item .item-quote {
+        display: block;
+        width: 100%;
+        text-align: left;
+        font: inherit;
+        font-size: 12px;
+        color: var(--text-soft);
+        font-style: normal;
+        background: none;
+        border: 0;
+        border-left: 2px solid var(--oat);
+        padding: 0 0 0 8px;
+        line-height: 1.45;
+        margin-bottom: 6px;
+      }
+      button.item-quote {
+        cursor: pointer;
+      }
+      button.item-quote:hover {
+        color: var(--slate);
+        border-left-color: var(--clay);
+      }
+      .vt-comment-item .item-lost {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 0 7px;
+        font-size: 12px;
+        color: var(--yellow-ink);
+        background: var(--yellow-soft);
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+      .vt-comment-item .item-body {
+        font-size: 13px;
+        color: var(--slate);
+        line-height: 1.5;
+      }
+      .vt-comment-item .item-del {
+        font-size: 12px;
+        color: var(--text-soft);
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin-top: 4px;
+        padding: 0;
+        font-family: inherit;
+      }
+      .vt-comment-item .item-del:hover {
+        color: var(--red);
+      }
+      .vt-comment-list-footer {
+        border-top: 1.5px solid var(--g200);
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        border-radius: 0 0 14px 14px;
+        background: var(--g100);
+      }
+      .vt-comment-list-footer button {
+        background: transparent;
+        border: 1.5px solid var(--g300);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        color: var(--g700);
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .vt-comment-list-footer button:hover {
+        border-color: var(--slate);
+        color: var(--slate);
+      }
+      .vt-comment-list-footer button.copy {
+        background: var(--clay-d, #b85c3e);
+        color: var(--paper);
+        border-color: var(--clay-d, #b85c3e);
+      }
+      .vt-comment-list-footer button.copy:hover {
+        background: var(--clay-ink, #a64b2e);
+      }
+      body.vt-has-existing-export .vt-comment-list-footer button.copy {
+        display: none;
+      }
+    </style>
+    <button class="vt-comment-trigger" id="vt-comment-trigger"><svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-0.125em"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg> 留言</button>
+    <div class="vt-comment-popup" id="vt-comment-popup">
+      <div class="quote" id="vt-popup-quote"></div>
+      <textarea
+        id="vt-popup-textarea"
+        placeholder="對這段文字的留言：疑問、補充、不同意的地方…"
+      ></textarea>
+      <div class="actions">
+        <span class="hint">⌘ + Enter 送出 · Esc 取消</span>
+        <div>
+          <button class="cancel" id="vt-popup-cancel">取消</button
+          ><button class="send" id="vt-popup-send">送出</button>
+        </div>
+      </div>
+    </div>
+    <button class="vt-comment-pill" id="vt-comment-pill">
+      <svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-0.125em"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg> <strong id="vt-count">0</strong>
+    </button>
+    <div class="vt-comment-list" id="vt-comment-list">
+      <div class="vt-comment-list-header">
+        <span>我的留言</span>
+        <button type="button" class="vt-list-close" id="vt-list-close" aria-label="關閉留言清單"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button>
+      </div>
+      <div class="vt-comment-list-items" id="vt-comment-list-items"></div>
+      <div class="vt-comment-list-footer">
+        <button id="vt-clear-all">全部清除</button>
+        <button class="copy" id="vt-copy-fallback"><svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-0.125em"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg> 複製留言</button>
+      </div>
+    </div>
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 共用複製工具 — file:// 下瀏覽器停用 navigator.clipboard，   -->
+    <!-- 一定會落到 execCommand 備援；備援也可能失敗，必須誠實回報   -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <script>
+      // 三段式：clipboard API → execCommand 備援 → 都失敗回 false（不假報成功）
+      window.vtCopyText = async function (text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(text);
+            return true;
+          } catch (err) {
+            // 落到 execCommand 備援
+          }
+        }
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.top = "-9999px";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        try {
+          ta.select();
+          ta.setSelectionRange(0, ta.value.length);
+          return document.execCommand("copy") === true;
+        } catch (err) {
+          return false;
+        } finally {
+          ta.remove();
+        }
+      };
 
-  // 複製失敗時的出路：把文字放進可選取區域並全選，使用者按一次 Cmd+C 即可
-  // target 有給就用頁面既有的預覽區（wrap 為它的外層、會自動展開）；
-  // 沒有預覽區就建一個臨時可選取區（雙擊可關閉）。
-  window.vtSelectForManualCopy = function (text, target, wrap) {
-    let node = target;
-    if (node) {
-      node.textContent = text;
-      if (wrap) wrap.classList.remove("hidden");
-    } else {
-      node = document.getElementById("vt-manual-copy-box");
-      if (!node) {
-        node = document.createElement("pre");
-        node.id = "vt-manual-copy-box";
-        node.title = "雙擊關閉";
-        node.style.cssText =
-          "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;" +
-          "max-width:min(720px,92vw);max-height:40vh;overflow:auto;white-space:pre-wrap;" +
-          "background:#fff;color:#111;border:1.5px solid #999;border-radius:10px;" +
-          "padding:14px 16px;font-size:12.5px;line-height:1.6;" +
-          "box-shadow:0 12px 40px rgba(0,0,0,.28)";
-        node.addEventListener("dblclick", function () {
-          node.remove();
+      // 複製失敗時的出路：把文字放進可選取區域並全選，使用者按一次 Cmd+C 即可
+      // target 有給就用頁面既有的預覽區（wrap 為它的外層、會自動展開）；
+      // 沒有預覽區就建一個臨時可選取區（雙擊可關閉）。
+      window.vtSelectForManualCopy = function (text, target, wrap) {
+        let node = target;
+        if (node) {
+          node.textContent = text;
+          if (wrap) wrap.classList.remove("hidden");
+        } else {
+          node = document.getElementById("vt-manual-copy-box");
+          if (!node) {
+            node = document.createElement("pre");
+            node.id = "vt-manual-copy-box";
+            node.title = "雙擊關閉";
+            node.style.cssText =
+              "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;" +
+              "max-width:min(720px,92vw);max-height:40vh;overflow:auto;white-space:pre-wrap;" +
+              "background:#fff;color:#111;border:1.5px solid #999;border-radius:10px;" +
+              "padding:14px 16px;font-size:12.5px;line-height:1.6;" +
+              "box-shadow:0 12px 40px rgba(0,0,0,.28)";
+            node.addEventListener("dblclick", function () {
+              node.remove();
+            });
+            document.body.appendChild(node);
+          }
+          node.textContent = text;
+        }
+        node.scrollIntoView({ block: "nearest" });
+        const sel = window.getSelection();
+        if (sel) {
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+        return node;
+      };
+    </script>
+
+    <script>
+      (function () {
+        const S = "vt-comments-" + location.pathname,
+          L = 80;
+        let c = JSON.parse(localStorage.getItem(S) || "[]"),
+          sel = null;
+        const $ = (i) => document.getElementById(i),
+          tr = $("vt-comment-trigger"),
+          p = $("vt-comment-popup"),
+          pq = $("vt-popup-quote"),
+          pt = $("vt-popup-textarea"),
+          pi = $("vt-comment-pill"),
+          ce = $("vt-count"),
+          le = $("vt-comment-list"),
+          li = $("vt-comment-list-items");
+        window.vtCollectComments = function () {
+          if (!c.length) return "";
+          return (
+            "\n\n---\n\n" +
+            c
+              .map((x) => {
+                const q =
+                  x.quote.length > L ? x.quote.slice(0, L) + "…" : x.quote;
+                return `@評論「${q}」\n  → ${x.body}`;
+              })
+              .join("\n\n")
+          );
+        };
+        const UI = ".vt-comment-popup,.vt-comment-trigger,.vt-comment-pill,.vt-comment-list";
+        // 讀目前的選取：不到 2 個字、焦點在表單欄位裡、或選在留言介面裡就回 null
+        function rs() {
+          const s = getSelection(),
+            t = s.toString().trim();
+          if (!t || t.length < 2 || !s.rangeCount) return null;
+          // 在補充框、留言框裡選字（編輯自己打的字）不算：Chrome 的選取會回傳框內文字，錨點卻在框外
+          if (document.activeElement && document.activeElement.matches("input,textarea,select")) return null;
+          // 在留言清單或留言框裡選字不算：否則會對清單裡的引文再留一則言（第 4 輪複查補回）
+          const a = s.anchorNode,
+            ae = a && (a.nodeType === 1 ? a : a.parentElement);
+          if (ae && ae.closest(UI)) return null;
+          return { text: t, range: s.getRangeAt(0).cloneRange() };
+        }
+        function sh() {
+          const x = rs();
+          if (!x) {
+            tr.style.display = "none";
+            return;
+          }
+          sel = x;
+          const b = x.range.getBoundingClientRect();
+          tr.style.display = "inline-flex";
+          tr.style.top = Math.max(8, b.top - 38) + "px";
+          tr.style.left = Math.max(8, b.left + b.width / 2 - 40) + "px";
+        }
+        function hs(e) {
+          if (
+            e.target.closest(
+              ".vt-comment-popup,.vt-comment-trigger,.vt-comment-pill,.vt-comment-list,button,input,select,textarea",
+            )
+          )
+            return;
+          setTimeout(sh, 10);
+        }
+        document.addEventListener("mouseup", hs);
+        document.addEventListener("touchend", hs);
+        // § selectionchange：手機拖選取把手不一定送 touchend，選取一變就重算留言鈕（防抖 150ms）
+        let sw;
+        document.addEventListener("selectionchange", () => {
+          clearTimeout(sw);
+          // 留言框開著時不動：讀者在框外又選了別段，送出時要存的還是框上那段引文（第 4 輪複查補回）
+          sw = setTimeout(() => {
+            if (p.style.display !== "block") sh();
+          }, 150);
         });
-        document.body.appendChild(node);
-      }
-      node.textContent = text;
-    }
-    node.scrollIntoView({ block: "nearest" });
-    const sel = window.getSelection();
-    if (sel) {
-      const range = document.createRange();
-      range.selectNodeContents(node);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-    return node;
-  };
-</script>
-
-<script>
-  function getValue(id) {
-    return document.querySelector(`input[name="${id}"]:checked`).value;
-  }
-  function getComment(id) {
-    var el = document.querySelector(`[data-comment-for="${id}"]`);
-    return el && el.value.trim() ? el.value.trim() : "";
-  }
-  window.vtCollectComments = function () {
-    var out = [];
-    var d1 = getComment("d1");
-    if (d1) out.push("  [d1] " + d1);
-    var d2 = getComment("d2");
-    if (d2) out.push("  [d2] " + d2);
-    var d3 = getComment("d3");
-    if (d3) out.push("  [d3] " + d3);
-    var d4 = getComment("d4");
-    if (d4) out.push("  [d4] " + d4);
-    var d5 = getComment("d5");
-    if (d5) out.push("  [d5] " + d5);
-    var d6 = getComment("d6");
-    if (d6) out.push("  [d6] " + d6);
-    var g = document.getElementById("global-note");
-    if (g && g.value.trim()) out.push("  [整體] " + g.value.trim());
-    return out.length ? "\n\n# 我的意見\n" + out.join("\n") : "";
-  };
-  window.vtBuildDecisionExport = function () {
-    var L = [
-      "# Brewly 訂閱方案變更規格 — 拍板回覆",
-      "",
-      "6 個方案決策（未填＝採建議）：",
-    ];
-    L.push("- 決策1 提醒信以哪個日期計算？：" + getValue("d1"));
-    L.push("- 決策2 截止後的變更從哪一期生效？：" + getValue("d2"));
-    L.push("- 決策3 已扣款的本期可以暫停嗎？：" + getValue("d3"));
-    L.push("- 決策4 換豆款與改頻率能一起送出嗎？：" + getValue("d4"));
-    L.push("- 決策5 配送窗口什麼時候收到變更？：" + getValue("d5"));
-    L.push("- 決策6 季節豆款差額是否套用優惠？：" + getValue("d6"));
-    return L.join("\n") + (window.vtCollectComments?.() || "");
-  };
-  function openExport() {
-    document.getElementById("exptext").textContent =
-      window.vtBuildDecisionExport();
-    document.getElementById("expbg").classList.add("on");
-  }
-  async function doCopy() {
-    var text = document.getElementById("exptext").textContent;
-    var c = document.getElementById("copied");
-    var ok = await window.vtCopyText(text);
-    if (ok) {
-      c.textContent = "已複製 ✓";
-      c.style.display = "inline";
-      setTimeout(function () {
-        c.style.display = "none";
-      }, 1800);
-    } else {
-      // 複製不到就不假報成功：全選摘要，使用者按 Cmd+C 即可
-      window.vtSelectForManualCopy(text, document.getElementById("exptext"));
-      c.textContent = "已選取 → 請按 Cmd+C 複製";
-      c.style.display = "inline";
-      setTimeout(function () {
-        c.style.display = "none";
-        c.textContent = "已複製 ✓";
-      }, 6000);
-    }
-  }
-</script>
-
+        tr.addEventListener("click", op);
+        function op() {
+          // 按下當下重讀選取：防抖期間選取又改過時，以按下那一刻為準
+          const x = rs();
+          if (x) sel = x;
+          if (!sel) return;
+          const q = sel.text.length > L ? sel.text.slice(0, L) + "…" : sel.text;
+          pq.textContent = q;
+          pt.value = "";
+          const t = tr.getBoundingClientRect();
+          let l = t.left;
+          if (l + 340 > innerWidth - 16) l = innerWidth - 356;
+          let to = t.bottom + 6;
+          if (to + 220 > innerHeight) to = t.top - 230;
+          p.style.left = Math.max(8, l) + "px";
+          p.style.top = Math.max(8, to) + "px";
+          tr.style.display = "none";
+          p.style.display = "block";
+          setTimeout(() => pt.focus(), 50);
+        }
+        $("vt-popup-cancel").addEventListener("click", cp);
+        $("vt-popup-send").addEventListener("click", sc);
+        pt.addEventListener("keydown", (e) => {
+          if (e.isComposing || e.keyCode === 229) return;
+          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            e.stopPropagation();
+            sc();
+          }
+          if (e.key === "Escape") cp();
+        });
+        function cp() {
+          p.style.display = "none";
+          sel = null;
+        }
+        function sc() {
+          const b = pt.value.trim();
+          if (!b || !sel) return cp();
+          const id = "c-" + Date.now(),
+            q = sel.text,
+            x = { id, quote: q, body: b, ts: Date.now() };
+          try {
+            const m = document.createElement("mark");
+            m.className = "vt-comment-mark";
+            m.dataset.commentId = id;
+            sel.range.surroundContents(m);
+          } catch (e) {
+            // 選取跨了元素（粗體、徽章、連結）：surroundContents 包不了，改成逐個文字節點各包一段
+            if (!wr(sel.range, id)) x.nomark = 1; // 一段都包不了才不標；清單照列，但不能標成「原文已變動」
+          }
+          c.push(x);
+          ps();
+          rn();
+          cp();
+          getSelection().removeAllRanges();
+        }
+        function ps() {
+          localStorage.setItem(S, JSON.stringify(c));
+        }
+        const mk = (id) =>
+          document.querySelector(`mark.vt-comment-mark[data-comment-id="${id}"]`);
+        // § 跨元素標記：一則留言可以有好幾個 mark（同一個 data-comment-id），每個文字節點各包一段。
+        //   只有空白的片段不包（表格列之間的換行包了 mark 會讓表格結構出錯）
+        function wp(n, a, b, id) {
+          if (a >= b || !n.nodeValue.slice(a, b).trim()) return 0;
+          const r = document.createRange();
+          r.setStart(n, a);
+          r.setEnd(n, b);
+          const e = document.createElement("mark");
+          e.className = "vt-comment-mark";
+          e.dataset.commentId = id;
+          r.surroundContents(e);
+          return 1;
+        }
+        const tws = (root) =>
+          document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+            acceptNode: (n) =>
+              n.parentElement &&
+              !n.parentElement.closest(
+                "script,style,.vt-comment-popup,.vt-comment-trigger,.vt-comment-pill,.vt-comment-list",
+              )
+                ? NodeFilter.FILTER_ACCEPT
+                : NodeFilter.FILTER_REJECT,
+          });
+        // 把一個跨元素的選取範圍逐節點包起來；回傳包了幾段
+        function wr(range, id) {
+          const root = range.commonAncestorContainer,
+            ns = [];
+          if (root.nodeType === 3) ns.push(root);
+          else for (let n, w = tws(root); (n = w.nextNode()); ) if (range.intersectsNode(n)) ns.push(n);
+          let k = 0;
+          ns.forEach((n) => {
+            const a = n === range.startContainer ? range.startOffset : 0,
+              b = n === range.endContainer ? range.endOffset : n.nodeValue.length;
+            k += wp(n, a, b, id);
+          });
+          return k;
+        }
+        // 重新整理後標記會消失（只存了引文）：依引文在內文找回位置再包一次。
+        // 只找單一文字節點內的引文；空白不計較（原始碼換行縮排 vs 選取時的單一空格）
+        function ra(x) {
+          if (mk(x.id)) return;
+          const w = x.quote.trim().split(/\s+/).filter(Boolean);
+          if (!w.length) return;
+          const re = new RegExp(
+            w.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s+"),
+          );
+          const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+            acceptNode: (n) =>
+              n.parentElement &&
+              !n.parentElement.closest(
+                "script,style,.vt-comment-popup,.vt-comment-trigger,.vt-comment-pill,.vt-comment-list",
+              )
+                ? NodeFilter.FILTER_ACCEPT
+                : NodeFilter.FILTER_REJECT,
+          });
+          for (let n; (n = tw.nextNode()); ) {
+            const m = re.exec(n.nodeValue);
+            if (!m) continue;
+            const r = document.createRange();
+            r.setStart(n, m.index);
+            r.setEnd(n, m.index + m[0].length);
+            const e = document.createElement("mark");
+            e.className = "vt-comment-mark";
+            e.dataset.commentId = x.id;
+            r.surroundContents(e);
+            return;
+          }
+          // 單一文字節點找不到：把文字節點串起來再找（引文跨了粗體、徽章、連結），找到後逐段包回。
+          // 跨元素時選取文字在元素交界可能多一個換行、也可能沒有，所以詞與詞之間空白可有可無
+          const all = [];
+          let txt = "";
+          for (let n, w = tws(document.body); (n = w.nextNode()); ) {
+            all.push([n, txt.length]);
+            txt += n.nodeValue;
+          }
+          const re2 = new RegExp(
+            w.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s*"),
+          );
+          const m2 = re2.exec(txt);
+          if (!m2) return;
+          const st = m2.index,
+            en = st + m2[0].length;
+          all
+            .filter(([n, o]) => o < en && o + n.nodeValue.length > st)
+            .forEach(([n, o]) => wp(n, Math.max(0, st - o), Math.min(n.nodeValue.length, en - o), x.id));
+        }
+        function rn() {
+          ce.textContent = c.length;
+          pi.classList.toggle("is-active", c.length > 0);
+          if (!c.length) le.classList.remove("is-open");
+          li.innerHTML = c
+            .map((x) => {
+              const q =
+                x.quote.length > 60 ? x.quote.slice(0, 60) + "…" : x.quote;
+              const quote = mk(x.id)
+                ? `<button type="button" class="item-quote" data-jump="${eh(x.id)}" title="捲到這段">「${eh(q)}」</button>`
+                : `<div class="item-quote">「${eh(q)}」${x.nomark ? "" : '<span class="item-lost">原文已變動</span>'}</div>`;
+              return `<div class="vt-comment-item" data-id="${eh(x.id)}">${quote}<div class="item-body">${eh(x.body)}</div><button class="item-del" data-del="${eh(x.id)}">刪除</button></div>`;
+            })
+            .join("");
+          li.querySelectorAll("[data-del]").forEach((b) =>
+            b.addEventListener("click", () => dc(b.dataset.del)),
+          );
+          li.querySelectorAll("[data-jump]").forEach((b) =>
+            b.addEventListener("click", () => jp(b.dataset.jump)),
+          );
+        }
+        // 清單點引文：捲到那段、短暫高亮；手機上清單會蓋住內文，捲過去時順手收起
+        function jp(id) {
+          const m = mk(id);
+          if (!m) return;
+          m.scrollIntoView({ block: "center" });
+          const ms = document.querySelectorAll(`mark.vt-comment-mark[data-comment-id="${id}"]`);
+          ms.forEach((e) => e.classList.add("is-flash"));
+          setTimeout(() => ms.forEach((e) => e.classList.remove("is-flash")), 1600);
+          if (innerWidth <= 640) le.classList.remove("is-open");
+        }
+        function dc(id) {
+          c = c.filter((x) => x.id !== id);
+          document
+            .querySelectorAll(`mark.vt-comment-mark[data-comment-id="${id}"]`)
+            .forEach((m) => {
+              const pr = m.parentNode;
+              while (m.firstChild) pr.insertBefore(m.firstChild, m);
+              pr.removeChild(m);
+              pr.normalize();
+            });
+          ps();
+          rn();
+        }
+        function eh(s) {
+          return String(s).replace(
+            /[&<>"']/g,
+            (ch) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              })[ch],
+          );
+        }
+        pi.addEventListener("click", () => le.classList.toggle("is-open"));
+        // 清單關閉：右上關閉鈕、Esc
+        $("vt-list-close").addEventListener("click", () => le.classList.remove("is-open"));
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") le.classList.remove("is-open");
+        });
+        // 有回傳列時，清單底緣跟著列高（列在手機與拍板頁會變高），不要壓到列
+        const bar = document.querySelector(".sticky-bar");
+        if (bar) new ResizeObserver(() => (le.style.bottom = bar.getBoundingClientRect().height + 12 + "px")).observe(bar);
+        $("vt-clear-all").addEventListener("click", () => {
+          if (!c.length) return;
+          if (!confirm("確定清除全部 " + c.length + " 則留言？")) return;
+          document.querySelectorAll("mark.vt-comment-mark").forEach((m) => {
+            const pr = m.parentNode;
+            while (m.firstChild) pr.insertBefore(m.firstChild, m);
+            pr.removeChild(m);
+            pr.normalize();
+          });
+          c = [];
+          ps();
+          rn();
+        });
+        $("vt-copy-fallback").addEventListener("click", async (e) => {
+          if (!c.length) return;
+          const t = window.vtCollectComments().replace(/^\n\n---\n\n/, ""),
+            b = e.currentTarget,
+            o = b.innerHTML; // innerHTML：按鈕裡有 SVG 圖示，用 textContent 還原會把圖示弄丟
+          const ok = await window.vtCopyText(t);
+          if (ok) {
+            b.textContent = "已複製";
+          } else {
+            // 複製不到就不假報成功：把評論放進臨時區域並全選
+            window.vtSelectForManualCopy(t);
+            b.textContent = "已選取 → 請按 Cmd+C";
+          }
+          setTimeout(() => (b.innerHTML = o), ok ? 2000 : 6000);
+        });
+        setTimeout(() => {
+          if (typeof window.vtBuildDecisionExport === "function")
+            document.body.classList.add("vt-has-existing-export");
+        }, 100);
+        document.addEventListener("click", (e) => {
+          if (
+            p.style.display === "block" &&
+            !e.target.closest(".vt-comment-popup,.vt-comment-trigger")
+          )
+            cp();
+        });
+        c.forEach(ra);
+        rn();
+      })();
+    </script>
+    <!-- vt-comment:end -->
+  
     <!-- ═══════════════════════════════════════════════════════ -->
     <!-- Session 識別 — 多視窗並行時分辨這份是哪個 session 產的     -->
     <!-- 產出時把 scripts/session-label.sh 的結果填進下面兩個值      -->
@@ -1087,7 +3807,7 @@
         background: var(--vt-session-color, #666);
         color: #fff;
         font-family: var(--mono, ui-monospace, monospace);
-        font-size: 11.5px;
+        font-size: 12px; /* 標籤常含中文：不低於 12px */
         letter-spacing: 0.06em;
       }
       .vt-session-badge .dot {
@@ -1098,11 +3818,17 @@
         opacity: 0.85;
         flex-shrink: 0;
       }
+      /* 不換行：窄螢幕放不下就截斷標籤、短 id 照留 */
       .vt-session-badge .lb {
         font-weight: 700;
         text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
       }
       .vt-session-badge .id {
+        flex-shrink: 0;
         margin-left: auto;
         opacity: 0.75;
       }
@@ -1114,7 +3840,8 @@
         const seed = s.id || s.label;
         let hue = 7;
         for (const c of seed) hue = (hue * 31 + c.charCodeAt(0)) % 360;
-        const col = `hsl(${hue} 58% 42%)`;
+        // 56% / 30%：hue 0–359 每一度配白字都 ≥ 4.5:1（最差 hue 60，4.72:1）。舊值 58% / 42% 在黃綠段只有 2.5:1
+        const col = `hsl(${hue} 56% 30%)`;
         document.title = `${s.label} · ${document.title}`;
         try {
           const cv = document.createElement("canvas");
@@ -1150,3 +3877,5 @@
         host.insertBefore(b, host.firstChild);
       })();
     </script>
+  </body>
+</html>

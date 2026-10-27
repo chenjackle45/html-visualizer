@@ -1,204 +1,1908 @@
 <!doctype html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Brewly · 每月一份咖啡提案</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23d97757'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-size='42' fill='white'%3EB%3C/text%3E%3C/svg%3E">
-  <style>
-    :root {
-        --wrap-max: 1120px; /* 內容寬度：設定檔 tokens.layout.maxWidth 與「風格設定」改的就是它 */
-      --ivory: #faf9f5;
-      --clay: #d97757;
-      --ink: #141413;
-      --muted: #6b6962;
-      --line: #d1cfc5;
-      --paper: #ffffff;
-      --highlight: #f5e8df;
-      --serif: Georgia, "Noto Serif TC", serif;
-      --sans: system-ui, -apple-system, "Noto Sans TC", sans-serif;
-    }
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-synthesis: none;
-      margin: 0;
-      background: var(--ivory);
-      color: var(--ink);
-      font-family: var(--sans);
-      line-height: 1.75;
-    }
-    .sample-session {
-      padding: 6px 5vw;
-      background: var(--clay);
-      color: white;
-      font-size: 12px;
-      letter-spacing: .08em;
-    }
-    .sample-page {
-      width: min(90vw, var(--wrap-max, 1120px));
-      margin-inline: auto;
-    }
-    .sample-masthead {
-      padding-block: 64px 48px;
-      border-bottom: 1.5px solid var(--line);
-    }
-    .sample-eyebrow {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: var(--muted);
-      font: 12px ui-monospace, monospace;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
-    .sample-eyebrow::before {
-      content: "";
-      width: 28px;
-      height: 2px;
-      background: var(--clay);
-    }
-    h1, h2 {
-      font-family: var(--serif);
-      font-weight: 500;
-      line-height: 1.25;
-    }
-    h1 {
-      max-width: 16ch;
-      margin-block: 24px;
-      font-size: clamp(38px, 6vw, 66px);
-    }
-    /* 中文強調不用斜體——漢字沒有義大利體，瀏覽器只能機械傾斜、筆畫變形。改用換字重。 */
-    h1 em {
-      color: var(--clay);
-      font-style: normal;
-      font-weight: 700;
-    }
-    .sample-intro {
-      max-width: 54ch;
-      color: var(--muted);
-      font-size: 17px;
-    }
-    .sample-content {
-      display: grid;
-      gap: 28px;
-      padding-block: 42px;
-    }
-    .sample-link {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 24px;
-      padding: 28px;
-      border: 1.5px solid var(--line);
-      border-radius: 14px;
-      background: var(--paper);
-      color: inherit;
-      text-decoration: none;
-      transition: border-color .18s, transform .18s;
-    }
-    .sample-link:hover {
-      border-color: var(--ink);
-      transform: translateY(-3px);
-    }
-    .sample-link:focus-visible {
-      outline: 3px solid var(--clay);
-      outline-offset: 4px;
-    }
-    .sample-link h2 {
-      margin-block: 8px 12px;
-      font-size: 29px;
-    }
-    .sample-link p {
-      max-width: 52ch;
-      margin: 0;
-      color: var(--muted);
-    }
-    .sample-arrow {
-      align-self: center;
-      color: var(--clay);
-      font-size: 32px;
-    }
-    .highlight-box {
-      padding: 24px 28px;
-      border-left: 3px solid var(--clay);
-      border-radius: 0 12px 12px 0;
-      background: var(--highlight);
-    }
-    .highlight-box h2 {
-      margin-top: 0;
-      font-size: 26px;
-    }
-    .highlight-box p {
-      max-width: 58ch;
-      margin-bottom: 0;
-    }
-    .reveal {
-      padding: 18px 24px;
-      border: 1.5px solid var(--line);
-      border-radius: 12px;
-    }
-    .reveal summary {
-      cursor: pointer;
-      color: var(--muted);
-    }
-    .reveal p {
-      max-width: 58ch;
-    }
-    .sample-footer {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 16px;
-      padding-block: 30px 48px;
-      border-top: 1.5px solid var(--line);
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .sample-signature {
-      color: var(--clay);
-      font: italic 24px var(--serif);
-    }
-  </style>
-</head>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>html-visualizer 風格總覽：四份範例與共用設計系統</title>
+    <style>
+      /* 只含數字的字族，排在 --serif 最前面：Georgia 的數字是舊式字形（0 像小寫 o），而且不吃 lining-nums */
+      @font-face {
+        font-family: "VTDigits";
+        src: local("Times New Roman"), local("Times");
+        unicode-range: U+0030-0039, U+002C-002F, U+003A;
+      }
+      :root {
+        --wrap-max: 1760px; /* 內容寬度：設定檔 tokens.layout.maxWidth 與調整面板改的就是它 */
+        --ivory: #faf9f5;
+        --paper: #ffffff;
+        --slate: #141413;
+        --clay: #d97757;
+        --clay-d: #b85c3e;
+        --oat: #e3dacc;
+        --olive: #788c5d;
+        --g100: #f0eee6;
+        --g200: #e6e3da;
+        --g300: #d1cfc5;
+        --g500: #87867f;
+        --g700: #3d3d3a;
+        /* 小字用的墨色：在 ivory / paper / g100 / 各 soft 底上都 ≥ 4.5:1 */
+        --text-soft: #6c6b65;
+        --clay-ink: #a64b2e;
+        --green-ink: #566b40;
+        --yellow-ink: #7d6019;
+        --green: var(--green-ink);
+        --yellow: var(--yellow-ink);
+        --red: var(--clay-ink);
+        --clay-soft: #fbe9df;
+        --clay-border: #e8c4af;
+        --green-soft: #eff1e8;
+        --green-border: #c8d2b8;
+        --yellow-soft: #f8efd9;
+        --yellow-border: #e8d4a0;
+        /* 中文襯線要點名：只寫 ui-serif/Georgia 時，中文標題交給系統回退，換台機器就換字體 */
+        --serif:
+          "VTDigits", ui-serif, Georgia, "Songti TC", "Noto Serif TC",
+          "Source Han Serif TC", "Times New Roman", serif;
+        --sans:
+          system-ui, -apple-system, "Segoe UI", Roboto, "PingFang TC",
+          "Noto Sans TC", Helvetica, Arial, sans-serif;
+        --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--ivory);
+        color: var(--slate);
+        font-family: var(--sans);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        font-synthesis: none;
+      }
+      .wrap {
+        width: min(
+          94vw,
+          var(--wrap-max, 1760px)
+        ); /* --wrap-max：設定檔或調整面板的「內容寬度」 */
+        margin: 0 auto;
+        padding: 0 32px 120px;
+      }
+      @media (max-width: 640px) {
+        .wrap {
+          width: 100%;
+          padding: 0 18px 96px;
+        }
+      }
+      a {
+        color: var(--clay-ink);
+        text-decoration-color: var(--clay-border);
+        text-underline-offset: 3px;
+      }
+      a:hover {
+        text-decoration-color: var(--clay-ink);
+      }
+      code {
+        font-family: var(--mono);
+        font-size: 0.88em;
+        background: var(--g100);
+        padding: 1px 6px;
+        border-radius: 4px;
+      }
+      p,
+      li {
+        text-wrap: pretty;
+      }
+      /* 中文標題只在詞與詞之間換行；.ph 包住的語意片段不會被拆開 */
+      h1,
+      h2,
+      h3 {
+        word-break: keep-all;
+        overflow-wrap: anywhere;
+        text-wrap: balance;
+        font-variant-numeric: lining-nums tabular-nums;
+      }
+      .ph {
+        display: inline-block;
+      }
+      /* 中文不用斜體：強調一律換字重＋深赤陶（標題 24px 以上才用 --clay-d） */
+      h1 em,
+      h2 em,
+      h3 em {
+        font-style: normal;
+        font-weight: 700;
+        color: var(--clay-d);
+      }
+      em {
+        font-style: normal;
+        font-weight: 600;
+      }
+
+      /* ── masthead ─────────────────────────── */
+
+      header.masthead {
+        padding: 72px 0 44px;
+        border-bottom: 1.5px solid var(--g300);
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); /* minmax(0,…)：字級放大時左欄不被長字撐開 */
+        gap: 56px;
+        align-items: end;
+      }
+      @media (max-width: 880px) {
+        .hero-grid {
+          grid-template-columns: 1fr;
+          gap: 32px;
+        }
+      }
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-soft);
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 24px;
+        height: 1.5px;
+        background: var(--clay);
+        flex-shrink: 0;
+      }
+      h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(36px, 5vw, 60px);
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+        margin: 0;
+        max-width: 18ch;
+      }
+      .intro {
+        font-size: clamp(16px, 1.25vw, 18px);
+        line-height: 1.75;
+        color: var(--g700);
+        margin: 22px 0 0;
+        max-width: 60ch;
+      }
+
+      /* 首屏右側：這頁怎麼讀（三步） */
+      .howto {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border-top: 1.5px solid var(--slate);
+      }
+      .howto li {
+        display: grid;
+        grid-template-columns: 30px minmax(0, 1fr);
+        gap: 12px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--g300);
+        font-size: 14.5px;
+        line-height: 1.6;
+        color: var(--g700);
+      }
+      .howto .k {
+        font-family: var(--serif);
+        font-size: 26px;
+        line-height: 1.1;
+        color: var(--clay-d);
+      }
+      .howto li:last-child {
+        border-bottom: none;
+      }
+      .howto strong {
+        display: block;
+        color: var(--slate);
+        font-size: 15px;
+      }
+
+      /* ── toc pills ────────────────────────── */
+
+      nav.toc {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 28px 0 0;
+      }
+      nav.toc a {
+        font-size: 13px;
+        padding: 7px 14px;
+        border: 1.5px solid var(--g300);
+        border-radius: 999px;
+        text-decoration: none;
+        color: var(--g700);
+        background: var(--paper);
+        transition:
+          border-color 120ms,
+          color 120ms;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+      }
+      nav.toc a .n {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--text-soft);
+      }
+      nav.toc a:hover {
+        border-color: var(--slate);
+        color: var(--slate);
+      }
+      nav.toc a:hover .n {
+        color: var(--clay-ink);
+      }
+
+      /* ── 章節：eyebrow（01 · 章名）＋ serif h2；章節不加外框，用留白分段 ── */
+
+      section {
+        margin-top: 88px;
+        scroll-margin-top: 24px;
+      }
+      header.masthead + section {
+        margin-top: 56px;
+      }
+      @media (max-width: 640px) {
+        section {
+          margin-top: 64px;
+        }
+      }
+      .sec-head h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(26px, 2.4vw, 34px);
+        line-height: 1.25;
+        letter-spacing: -0.01em;
+        margin: 0;
+      }
+      .sec-intro {
+        font-size: 15.5px;
+        line-height: 1.75;
+        color: var(--g700);
+        max-width: 72ch;
+        margin: 12px 0 28px;
+      }
+
+      /* 小節：小方框 badge＋h3 */
+      .sub-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 40px 0 14px;
+      }
+      .sub-head h3 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 21px;
+        line-height: 1.3;
+        margin: 0;
+      }
+      .sub-no {
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--clay-ink);
+        background: var(--clay-soft);
+        border: 1px solid var(--clay-border);
+        border-radius: 5px;
+        padding: 2px 7px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .sub-note {
+        font-size: 14.5px;
+        line-height: 1.7;
+        color: var(--g700);
+        max-width: 72ch;
+        margin: 0 0 18px;
+      }
+
+      /* ── 01 範例卡 ────────────────────────── */
+
+      .ex-grid {
+        display: grid;
+        grid-template-columns: repeat(
+          auto-fit,
+          minmax(280px, 1fr)
+        ); /* auto-fit：卡少時撐滿整列，右側不留空格 */
+        gap: 20px;
+      }
+      a.ex-card {
+        display: flex;
+        flex-direction: column;
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-radius: 14px;
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        transition:
+          transform 150ms ease,
+          box-shadow 150ms ease,
+          border-color 150ms ease;
+      }
+      a.ex-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(20, 20, 19, 0.1);
+        border-color: var(--slate);
+      }
+      .thumb {
+        height: 124px;
+        background: var(--g100);
+        border-bottom: 1.5px solid var(--g200);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        transition: background 150ms ease;
+      }
+      a.ex-card:hover .thumb {
+        background: var(--oat);
+      }
+      .thumb svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+      .thumb svg .fl {
+        fill: var(--g300);
+      }
+      .thumb svg .cl {
+        fill: var(--clay);
+      }
+      .thumb svg .ol {
+        fill: var(--olive);
+      }
+      .thumb svg .oa {
+        fill: var(--oat);
+        stroke: var(--g500);
+        stroke-width: 2.5;
+      }
+      .thumb svg .sl {
+        fill: var(--slate);
+      }
+      .thumb svg .wh {
+        fill: var(--paper);
+        stroke: var(--g500);
+        stroke-width: 2.5;
+      }
+      .thumb svg .ln {
+        stroke: var(--g500);
+        stroke-width: 2.5;
+        fill: none;
+        stroke-linecap: round;
+      }
+      .thumb svg .lc {
+        stroke: var(--clay);
+        stroke-width: 2.5;
+        fill: none;
+        stroke-linecap: round;
+      }
+      .ex-body {
+        padding: 18px 20px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 1;
+      }
+      .ex-title {
+        font-family: var(--serif);
+        font-size: 21px;
+        font-weight: 500;
+        line-height: 1.25;
+        margin: 0;
+        word-break: keep-all;
+      }
+      .ex-row {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.65;
+        color: var(--g700);
+        max-width: 72ch;
+      }
+      .ex-row b {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        color: var(--clay-ink);
+        margin-bottom: 2px;
+      }
+      .ex-row.trait b {
+        color: var(--text-soft);
+      }
+      .ex-file {
+        margin-top: auto;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--text-soft);
+        border-top: 1px solid var(--g200);
+        padding-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .ex-file .go {
+        white-space: nowrap;
+        font-family: var(--sans);
+        font-weight: 600;
+        color: var(--clay-ink);
+      }
+      .ex-file .go span {
+        display: inline-block;
+        transition: transform 150ms ease;
+      }
+      a.ex-card:hover .ex-file .go span {
+        transform: translateX(3px);
+      }
+      .fallback {
+        margin: 22px 0 0;
+        font-size: 14.5px;
+        line-height: 1.7;
+        color: var(--g700);
+        max-width: 72ch;
+      }
+
+      /* ── 02 色彩 ──────────────────────────── */
+
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(8, minmax(0, 1fr)); /* 8 色固定 8／4／2 欄，不留單張孤兒列 */
+        gap: 16px;
+      }
+      @media (max-width: 1180px) {
+        .swatches {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 640px) {
+        .swatches {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      .sw .chip {
+        height: 72px;
+        border-radius: 10px;
+        border: 1px solid rgba(20, 20, 19, 0.1);
+      }
+      .sw .nm {
+        margin-top: 8px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--slate);
+        white-space: nowrap;
+      }
+      .sw .use {
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--text-soft);
+      }
+      .inks {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+      }
+      .ink {
+        background: var(--paper);
+        border-left: 4px solid currentColor;
+        border-radius: 0 10px 10px 0;
+        padding: 14px 16px;
+      }
+      .ink .say {
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.5;
+      }
+      .ink .meta {
+        margin-top: 6px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--g700);
+        white-space: nowrap;
+      }
+      .tbl-wrap {
+        overflow-x: auto;
+        border: 1.5px solid var(--g300);
+        border-radius: 12px;
+        background: var(--paper);
+      }
+      table.rules {
+        width: 100%;
+        min-width: 560px;
+        border-collapse: collapse;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      table.rules th,
+      table.rules td {
+        text-align: left;
+        vertical-align: top;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--g200);
+      }
+      table.rules tr:last-child td {
+        border-bottom: none;
+      }
+      table.rules th {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--g700);
+        background: var(--g100);
+        white-space: nowrap;
+      }
+      table.rules td:first-child {
+        white-space: nowrap;
+        font-family: var(--mono);
+        font-size: 12.5px;
+      }
+      /* 手機：三欄表改成一列一張卡，欄名由 data-label 補上 */
+      @media (max-width: 640px) {
+        table.rules {
+          min-width: 0;
+        }
+        table.rules thead {
+          display: none;
+        }
+        table.rules tr {
+          display: block;
+          padding: 14px 16px;
+          border-bottom: 1px solid var(--g200);
+        }
+        table.rules tr:last-child {
+          border-bottom: none;
+        }
+        table.rules td {
+          display: block;
+          padding: 2px 0;
+          border: none;
+        }
+        table.rules td[data-label]::before {
+          content: attr(data-label) "：";
+          font-weight: 600;
+          color: var(--g700);
+        }
+        table.rules td:first-child {
+          margin-bottom: 4px;
+        }
+      }
+      .dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 6px;
+        vertical-align: -1px;
+        border: 1px solid rgba(20, 20, 19, 0.15);
+      }
+
+      /* ── 03 字體 ──────────────────────────── */
+
+      .spec-list {
+        border-top: 1.5px solid var(--slate);
+      }
+      .spec-row {
+        display: grid;
+        grid-template-columns: 220px minmax(0, 1fr);
+        gap: 24px;
+        align-items: baseline;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--g300);
+      }
+      @media (max-width: 640px) {
+        .spec-row {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+      }
+      .spec-row .lbl {
+        font-family: var(--mono);
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--text-soft);
+      }
+      .spec-row .lbl b {
+        display: block;
+        font-family: var(--sans);
+        font-size: 13.5px;
+        color: var(--slate);
+      }
+      .s-h1 {
+        font-family: var(--serif);
+        font-size: clamp(34px, 4.4vw, 60px);
+        font-weight: 500;
+        line-height: 1.1;
+        word-break: keep-all;
+      }
+      .s-h2 {
+        font-family: var(--serif);
+        font-size: clamp(26px, 2.4vw, 34px);
+        font-weight: 500;
+        line-height: 1.25;
+      }
+      .s-h3 {
+        font-family: var(--serif);
+        font-size: 21px;
+        font-weight: 500;
+      }
+      .s-body {
+        font-size: 16px;
+        line-height: 1.75;
+        color: var(--g700);
+        max-width: 72ch;
+      }
+      .s-small {
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--text-soft);
+      }
+      .s-mono {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-soft);
+      }
+      .s-h1 em,
+      .s-h2 em {
+        font-style: normal;
+        font-weight: 700;
+        color: var(--clay-d);
+      }
+      .em-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+      }
+      .em-grid > div {
+        background: var(--g100);
+        border-radius: 12px;
+        padding: 18px 22px;
+      }
+      .em-grid .cap {
+        margin: 0 0 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--g700);
+      }
+      .hl {
+        background: linear-gradient(transparent 58%, #f7d9a0 58%);
+      }
+      .ph-demo .ph {
+        margin-right: 10px;
+        outline: 1.5px dashed var(--clay);
+        outline-offset: 3px;
+        border-radius: 3px;
+      }
+
+      /* ── 04 章節編號 ──────────────────────── */
+
+      .num-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+      .num-demo {
+        background: var(--g100);
+        border-radius: 12px;
+        padding: 22px 24px;
+      }
+      .num-demo .cap {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--g700);
+        margin: 0 0 16px;
+      }
+      .num-demo .eyebrow {
+        margin-bottom: 10px;
+      }
+      .num-demo .sub-head {
+        margin: 0;
+      }
+      .num-demo p {
+        font-size: 14px;
+        line-height: 1.7;
+        color: var(--g700);
+        margin: 14px 0 0;
+        max-width: 72ch;
+      }
+
+      /* ── 05 元件 ──────────────────────────── */
+
+      .comp-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        align-items: start;
+      }
+      .demo-card {
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-radius: 14px;
+        padding: 20px 22px;
+      }
+      .demo-card .t {
+        font-family: var(--serif);
+        font-size: 19px;
+        font-weight: 500;
+        line-height: 1.3;
+        margin: 0 0 8px;
+      }
+      .demo-card p {
+        font-size: 14px;
+        line-height: 1.7;
+        color: var(--g700);
+        margin: 0;
+        max-width: 72ch;
+      }
+      .demo-card .inner {
+        margin-top: 14px;
+        background: var(--g100);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--g700);
+      }
+      .note-box {
+        border-radius: 12px;
+        padding: 14px 18px;
+        border: 1.5px solid;
+        font-size: 14px;
+        line-height: 1.7;
+        color: var(--slate);
+      }
+      .note-box + .note-box {
+        margin-top: 12px;
+      }
+      .note-box > span {
+        display: block;
+        max-width: 72ch;
+      }
+      .note-box b {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 2px;
+      }
+      .note-box.tip {
+        background: var(--clay-soft);
+        border-color: var(--clay-border);
+      }
+      .note-box.tip b {
+        color: var(--clay-ink);
+      }
+      .note-box.warn {
+        background: var(--yellow-soft);
+        border-color: #c49845;
+      }
+      .note-box.warn b {
+        color: var(--yellow-ink);
+      }
+      .note-box.ok {
+        background: var(--green-soft);
+        border-color: var(--green-border);
+      }
+      .note-box.ok b {
+        color: var(--green-ink);
+      }
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        font-size: 12.5px;
+        font-weight: 600;
+        border-radius: 999px;
+        border: 1px solid;
+        white-space: nowrap;
+      }
+      .tag.green {
+        background: var(--green-soft);
+        color: var(--green-ink);
+        border-color: var(--green-border);
+      }
+      .tag.yellow {
+        background: var(--yellow-soft);
+        color: var(--yellow-ink);
+        border-color: var(--yellow-border);
+      }
+      .tag.clay {
+        background: var(--clay-soft);
+        color: var(--clay-ink);
+        border-color: var(--clay-border);
+      }
+      .tag.oat {
+        background: var(--oat);
+        color: var(--g700);
+        border-color: var(--g300);
+      }
+      .demo-note {
+        margin: 12px 0 0;
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--text-soft);
+        max-width: 72ch;
+      }
+
+      /* ── 05 收合區塊 ──────────────────────── */
+
+      details.reveal {
+        border: 1.5px solid var(--g300);
+        border-radius: 12px;
+        background: var(--paper);
+        overflow: hidden;
+      }
+      details.reveal > summary {
+        cursor: pointer;
+        padding: 16px 20px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--slate);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        list-style: none;
+      }
+      details.reveal > summary::-webkit-details-marker {
+        display: none;
+      }
+      /* 展開箭頭與 base 同款：8px 赤陶折角，收合朝右、展開朝下 */
+      details.reveal > summary::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid var(--clay-d);
+        border-bottom: 2px solid var(--clay-d);
+        transform: rotate(-45deg);
+        transition: transform 0.18s;
+        flex-shrink: 0;
+      }
+      details.reveal[open] > summary::before {
+        transform: rotate(45deg);
+      }
+      details.reveal > summary:hover {
+        background: var(--g100);
+      }
+      .reveal-body {
+        padding: 6px 20px 22px;
+        border-top: 1px dashed var(--g300);
+      }
+      .reveal-body > p {
+        font-size: 14px;
+        line-height: 1.7;
+        color: var(--g700);
+        max-width: 72ch;
+      }
+
+      .credit {
+        margin-top: 72px;
+        padding-top: 20px;
+        border-top: 1.5px solid var(--g300);
+      }
+      .credit p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--text-soft);
+        max-width: 72ch;
+      }
+
+      /* ════════════════════════════════════════════ */
+      /* 回傳列：每頁都有。讀者在這裡看到「可以選字留言」、已留幾則（有拍板題時加進度），
+         一鍵複製給 AI。拍板頁沿用同一條、把複製內容換成拍板摘要（見 marathon 範本）。
+         風格設定鈕會自動停在「預覽」左邊，所以底部列一律用這條、不要自己另做 */
+      /* ════════════════════════════════════════════ */
+      .sticky-bar {
+        position: sticky;
+        bottom: 0;
+        z-index: 30;
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(12px);
+        border-top: 1.5px solid var(--clay);
+        box-shadow: 0 -8px 24px -10px rgba(20, 20, 19, 0.1);
+      }
+      .bar-in {
+        width: min(94vw, var(--wrap-max, 1760px));
+        margin: 0 auto;
+        padding: 12px 32px;
+      }
+      .bar-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+      .bar-txt {
+        min-width: 0;
+      }
+      .bar-title {
+        font-size: 14.5px;
+        font-weight: 600;
+      }
+      .bar-hint {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+        font-size: 13px;
+        color: var(--g700);
+        margin-top: 2px;
+      }
+      .bar-hint .ic {
+        width: 1em;
+        height: 1em;
+        color: var(--clay-d);
+      }
+      .bar-hint .short {
+        display: none;
+      }
+      .bar-count {
+        font: inherit;
+        color: var(--clay-ink);
+        background: none;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        text-decoration: underline;
+        text-decoration-color: var(--clay-border);
+        text-underline-offset: 3px;
+        white-space: nowrap;
+      }
+      .bar-btns {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      .btn-primary,
+      .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        min-height: 40px;
+      }
+      .btn-primary {
+        background: var(--clay-d);
+        color: #fff;
+        border: 1.5px solid var(--clay-d);
+      }
+      .btn-primary:hover {
+        background: var(--clay-ink);
+        border-color: var(--clay-ink);
+      }
+      .btn-secondary {
+        background: var(--paper);
+        color: var(--slate);
+        border: 1.5px solid var(--g300);
+        font-weight: 500;
+      }
+      .btn-secondary:hover {
+        border-color: var(--slate);
+      }
+      .btn-primary .ic,
+      .btn-secondary .ic {
+        width: 1.05em;
+        height: 1.05em;
+      }
+      /* 預覽：從底部升起的抽屜，停在回傳列上方（複製鈕不被蓋住），附關閉鈕；不在列內往上長 */
+      #preview-area {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50; /* 高過頂端章節列（40），手機上抽屜才不會被章節列切掉 */
+        background: var(--paper);
+        border-top: 1.5px solid var(--g300);
+        border-radius: 14px 14px 0 0;
+        box-shadow: 0 -16px 40px -16px rgba(20, 20, 19, 0.28);
+        animation: vt-drawer-up 0.2s ease-out;
+      }
+      #preview-area.hidden {
+        display: none;
+      }
+      @keyframes vt-drawer-up {
+        from {
+          transform: translateY(100%);
+        }
+      }
+      .drawer-in {
+        width: min(94vw, var(--wrap-max, 1760px));
+        margin: 0 auto;
+        padding: 12px 32px 16px;
+      }
+      .drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      pre.preview {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        background: var(--g100);
+        padding: 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--g300);
+        white-space: pre-wrap;
+        max-height: min(340px, 48vh);
+        overflow-y: auto;
+        line-height: 1.55;
+        margin: 0;
+      }
+      .preview-close {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--g700);
+        background: #fff;
+        border: 1.5px solid var(--g300);
+        border-radius: 8px;
+        padding: 6px 12px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .preview-close:hover {
+        border-color: var(--slate);
+      }
+      /* 有回傳列時：右下浮動的評論計數改由列上的「已留 N 則」承接，評論清單往上讓出列高 */
+      body.vt-has-bar .vt-comment-pill {
+        display: none !important;
+      }
+      body.vt-has-bar .vt-comment-list {
+        bottom: 92px;
+      }
+      /* 回傳列在手機上收短：藏標題、提示換短句、按鈕加高到 44px */
+      @media (max-width: 640px) {
+        .bar-in {
+          padding: 8px 12px;
+        }
+        .drawer-in {
+          width: 100%;
+          padding: 10px 12px 12px;
+        }
+        .bar-row {
+          gap: 8px;
+        }
+        .bar-title {
+          display: none;
+        }
+        .bar-hint {
+          font-size: 12.5px;
+        }
+        .bar-hint .long {
+          display: none;
+        }
+        .bar-hint .short {
+          display: inline;
+        }
+        .btn-primary,
+        .btn-secondary {
+          min-height: 44px;
+          padding: 0 12px;
+          font-size: 13px;
+        }
+      }
+      /* 05 段的回傳列樣張：靜態示意，不可點；實際的列固定在頁面底部 */
+      .bar-demo {
+        position: relative;
+        cursor: default;
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-top: 1.5px solid var(--clay);
+        border-radius: 12px;
+        box-shadow: 0 -8px 24px -10px rgba(20, 20, 19, 0.1);
+      }
+      .bar-demo .bar-in {
+        width: auto;
+        padding: 14px 20px;
+      }
+      .bar-demo .btn-primary,
+      .bar-demo .btn-secondary {
+        cursor: default;
+        pointer-events: none;
+      }
+      .bar-demo .demo-tag {
+        position: absolute;
+        top: -10px;
+        left: 16px;
+        z-index: 1;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: var(--g700);
+        color: #fff;
+        font-size: 12px;
+        line-height: 18px;
+      }
+
+      /* ── 無障礙與列印 ─────────────────────── */
+
+      :focus-visible {
+        outline: 2px solid var(--clay-d);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+      @media print {
+        .sticky-bar,
+        .vt-comment-trigger,
+        .vt-comment-pill,
+        .vt-comment-list,
+        .vt-comment-popup,
+        #preview-area {
+          display: none !important;
+        }
+        details.reveal {
+          display: block;
+        }
+        a.ex-card {
+          break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
 <body>
-  <div class="sample-session">Brewly · 風格樣張 · fictional-sample</div>
-  <div class="sample-page">
-    <header class="sample-masthead">
-      <div class="sample-eyebrow">Brewly / Coffee subscription / 01</div>
-      <h1>下一杯，留給<br><em>新的豆香。</em></h1>
-      <p class="sample-intro">從官網選一份喜歡的豆款，每月收到一份咖啡提案。這是一個虛構的訂閱服務，也是暖白、赤陶與襯線字體的原創風格樣張。</p>
+  <div class="wrap">
+    <header class="masthead">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow">html-visualizer · 風格總覽</div>
+          <h1>
+            <span class="ph">一頁看懂</span
+            ><span class="ph"><em>這套風格</em></span>
+          </h1>
+          <p class="intro">
+            這頁不是範本，不要複製它當起手。要做頁面時，先從下面四份範例挑一份最接近的起手；版面細節再回來對照共用設計系統的樣張：色彩、字體、章節編號、卡片與提示框。
+          </p>
+          <nav class="toc" aria-label="本頁章節">
+            <a href="#examples">起手範例 <span class="n">01</span></a>
+            <a href="#color">色彩與墨色 <span class="n">02</span></a>
+            <a href="#type">字體層級 <span class="n">03</span></a>
+            <a href="#numbering">章節編號 <span class="n">04</span></a>
+            <a href="#components">卡片與提示框 <span class="n">05</span></a>
+          </nav>
+        </div>
+        <ol class="howto" aria-label="這頁怎麼用">
+          <li>
+            <span class="k">1</span>
+            <span
+              ><strong>挑範例起手</strong>依你要做的事選一份，複製它的
+              index.html 改內容。</span
+            >
+          </li>
+          <li>
+            <span class="k">2</span>
+            <span
+              ><strong>對照樣張</strong>不確定顏色、字級、編號怎麼用時，看 02 到
+              05 段。</span
+            >
+          </li>
+          <li>
+            <span class="k">3</span>
+            <span
+              ><strong>留意見</strong
+              >反白頁面上任一段文字就能留言；寫完按底部回傳列的「複製給
+              AI」，貼回對話就送出。</span
+            >
+          </li>
+        </ol>
+      </div>
     </header>
-    <main class="sample-content">
-      <section id="subscription">
-        <a class="card sample-link" href="../spec-alignment/index.html">
-          <div>
-            <div class="sample-eyebrow">訂閱提案 / 月費 NT$ 690</div>
-            <h2>讓方案跟著生活調整</h2>
-            <p>想換季節豆款、拉長配送間隔，或暫停一期？看 Brewly 的方案變更示例，了解每一步何時生效。</p>
+
+    <!-- ============================== 01 起手範例 ============================== -->
+    <section id="examples">
+      <div class="sec-head">
+        <div class="eyebrow">01 · 起手範例</div>
+        <h2>
+          <span class="ph">先挑一份</span
+          ><span class="ph"><em>真的範例</em>起手</span>
+        </h2>
+      </div>
+      <p class="sec-intro">
+        這四份都是完整、能直接打開的頁面，各自內建該情境需要的互動。依你要做的事選一份；拍板題數是第一個分岔，有沒有拍板題、幾題，決定該用哪一份。
+      </p>
+      <div class="ex-grid">
+        <a class="ex-card" href="../editorial-report/index.html">
+          <div class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 120 80">
+              <rect class="wh" x="4" y="6" width="112" height="68" rx="5" />
+              <rect class="sl" x="12" y="15" width="30" height="16" rx="2" />
+              <line class="ln" x1="50" y1="18" x2="104" y2="18" />
+              <line class="ln" x1="50" y1="27" x2="88" y2="27" />
+              <rect class="ol" x="14" y="52" width="10" height="14" rx="1" />
+              <rect class="cl" x="28" y="42" width="10" height="24" rx="1" />
+              <rect class="oa" x="42" y="47" width="10" height="19" rx="1" />
+              <line class="lc" x1="64" y1="46" x2="104" y2="46" />
+              <line class="ln" x1="64" y1="56" x2="96" y2="56" />
+              <line class="ln" x1="64" y1="64" x2="100" y2="64" />
+            </svg>
           </div>
-          <span class="sample-arrow" aria-hidden="true">↗</span>
+          <div class="ex-body">
+            <h3 class="ex-title">編輯風報告</h3>
+            <p class="ex-row">
+              <b>何時用</b>報告、盤點、健檢結論、研究結果。主體是報告、順帶 1–4
+              題拍板時照原樣用；沒有拍板題，照它的 README
+              把拍板相關的四樣一起刪。
+            </p>
+            <p class="ex-row trait">
+              <b>特徵</b>結論數字
+              hero、頂端固定章節列、淡色大章節號開場、主張引言帶。
+            </p>
+            <div class="ex-file">
+              <span>../editorial-report/</span
+              ><span class="go">開啟 <span>→</span></span>
+            </div>
+          </div>
         </a>
-      </section>
-      <section id="care" class="highlight-box">
-        <h2>每一次提問，都能幫到下一次。</h2>
-        <p>內部 AI 助理把客服對話整理成知識草稿，由客服主管確認後收入知識庫。配送窗口能找到一致的說明，工程師也能看清哪些步驟需要改善。</p>
-      </section>
+
+        <a class="ex-card" href="../explainer/index.html">
+          <div class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 120 80">
+              <rect class="wh" x="20" y="4" width="80" height="18" rx="4" />
+              <rect class="oa" x="20" y="31" width="80" height="18" rx="4" />
+              <rect class="fl" x="20" y="58" width="80" height="18" rx="4" />
+              <line class="lc" x1="60" y1="22" x2="60" y2="31" />
+              <line class="lc" x1="60" y1="49" x2="60" y2="58" />
+              <line class="ln" x1="30" y1="13" x2="70" y2="13" />
+              <line class="ln" x1="30" y1="40" x2="62" y2="40" />
+              <circle class="cl" cx="88" cy="40" r="4" />
+            </svg>
+          </div>
+          <div class="ex-body">
+            <h3 class="ex-title">解釋型</h3>
+            <p class="ex-row">
+              <b>何時用</b
+              >教學、概念解釋、機制說明，沒有待拍板。報告類的內容順序（骨架
+              B）也在這份的 README。
+            </p>
+            <p class="ex-row trait">
+              <b>特徵</b>骨架 A 七段：一句話 → 類比 → 核心模型 → 走一遍 → 誤解 →
+              邊界 → 收合深入。
+            </p>
+            <div class="ex-file">
+              <span>../explainer/</span
+              ><span class="go">開啟 <span>→</span></span>
+            </div>
+          </div>
+        </a>
+
+        <a class="ex-card" href="../marathon-decision-sheet/index.html">
+          <div class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 120 80">
+              <rect class="fl" x="4" y="6" width="26" height="62" rx="4" />
+              <rect class="wh" x="36" y="6" width="80" height="18" rx="4" />
+              <rect class="wh" x="36" y="28" width="80" height="18" rx="4" />
+              <circle class="cl" cx="47" cy="15" r="4" />
+              <circle class="wh" cx="47" cy="37" r="4" />
+              <line class="ln" x1="58" y1="15" x2="104" y2="15" />
+              <line class="ln" x1="58" y1="37" x2="96" y2="37" />
+              <rect class="sl" x="4" y="58" width="112" height="16" rx="4" />
+              <rect class="cl" x="92" y="62" width="18" height="8" rx="2" />
+            </svg>
+          </div>
+          <div class="ex-body">
+            <h3 class="ex-title">收尾追認簡報</h3>
+            <p class="ex-row">
+              <b>何時用</b>大型工作收尾、決策追認，而且要拍板的題目有 5
+              題以上。不到 5 題改用上面的編輯風報告或基底範本。
+            </p>
+            <p class="ex-row trait">
+              <b>特徵</b>題目地圖、每題就地拍板、底部固定列一鍵複製決策摘要。
+            </p>
+            <div class="ex-file">
+              <span>../marathon-decision-sheet/</span
+              ><span class="go">開啟 <span>→</span></span>
+            </div>
+          </div>
+        </a>
+
+        <a class="ex-card" href="../spec-alignment/index.html">
+          <div class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 120 80">
+              <rect class="wh" x="12" y="4" width="38" height="72" rx="6" />
+              <rect class="oa" x="70" y="4" width="38" height="72" rx="6" />
+              <line class="ln" x1="19" y1="18" x2="43" y2="18" />
+              <line class="ln" x1="19" y1="27" x2="37" y2="27" />
+              <rect class="cl" x="19" y="58" width="24" height="9" rx="3" />
+              <line class="ln" x1="77" y1="18" x2="101" y2="18" />
+              <line class="ln" x1="77" y1="27" x2="95" y2="27" />
+              <rect class="ol" x="77" y="58" width="24" height="9" rx="3" />
+              <line class="lc" x1="53" y1="40" x2="67" y2="40" />
+            </svg>
+          </div>
+          <div class="ex-body">
+            <h3 class="ex-title">規格對齊</h3>
+            <p class="ex-row">
+              <b>何時用</b>要跟老闆、業務這類非技術的 stakeholder
+              對齊規格、設計或方向，請對方確認。
+            </p>
+            <p class="ex-row trait">
+              <b>特徵</b>由上而下：一句話 → 一張圖 →
+              使用者操作情境，每個情境配角色視角的畫面樣張。
+            </p>
+            <div class="ex-file">
+              <span>../spec-alignment/</span
+              ><span class="go">開啟 <span>→</span></span>
+            </div>
+          </div>
+        </a>
+      </div>
+      <p class="fallback">
+        四份都不合（例如給開發者看的技術規格、工程儀表板）：從
+        <code>assets/base-template.html</code>
+        起手，自己組元件。它和這頁用同一套色彩與字體。
+      </p>
+    </section>
+
+    <!-- ============================== 02 色彩 ============================== -->
+    <section id="color">
+      <div class="sec-head">
+        <div class="eyebrow">02 · 色彩與墨色</div>
+        <h2>
+          <span class="ph">品牌色拿來填色，</span
+          ><span class="ph">小字改用<em>墨色</em></span>
+        </h2>
+      </div>
+      <p class="sec-intro">
+        赤陶、橄欖這些品牌色在米白底上不夠深，當小字會看不清。規則只有一條：24px
+        以下的字一律用加深過的墨色，品牌色留給色塊、邊線、圖示和大字。
+      </p>
+
+      <div class="sub-head">
+        <span class="sub-no">2.1</span>
+        <h3>底色與填色</h3>
+      </div>
+      <div class="swatches">
+        <div class="sw">
+          <div class="chip" style="background: #faf9f5"></div>
+          <div class="nm">--ivory #faf9f5</div>
+          <div class="use">頁面底色</div>
+        </div>
+        <div class="sw">
+          <div class="chip" style="background: #ffffff"></div>
+          <div class="nm">--paper #ffffff</div>
+          <div class="use">卡片、表格底</div>
+        </div>
+        <div class="sw">
+          <div class="chip" style="background: #f0eee6"></div>
+          <div class="nm">--g100 #f0eee6</div>
+          <div class="use">卡內子區塊底</div>
+        </div>
+        <div class="sw">
+          <div class="chip" style="background: #e3dacc"></div>
+          <div class="nm">--oat #e3dacc</div>
+          <div class="use">強調底、hover 底</div>
+        </div>
+        <div class="sw">
+          <div class="chip" style="background: #141413"></div>
+          <div class="nm">--slate #141413</div>
+          <div class="use">主文字、粗分隔線</div>
+        </div>
+        <div class="sw">
+          <div class="chip" style="background: #d97757"></div>
+          <div class="nm">--clay #d97757</div>
+          <div class="use">品牌色：線、圖示</div>
+        </div>
+        <div class="sw">
+          <div class="chip" style="background: #b85c3e"></div>
+          <div class="nm">--clay-d #b85c3e</div>
+          <div class="use">主要按鈕底、大標強調</div>
+        </div>
+        <div class="sw">
+          <div class="chip" style="background: #788c5d"></div>
+          <div class="nm">--olive #788c5d</div>
+          <div class="use">第二品牌色：填色、圖示</div>
+        </div>
+      </div>
+
+      <div class="sub-head">
+        <span class="sub-no">2.2</span>
+        <h3>小字用的四種墨色</h3>
+      </div>
+      <p class="sub-note">
+        每種墨色在頁面底、白卡、淺灰底和各色淡底上都至少
+        4.5:1。下面的對比數字是米白底上的值，用 WCAG 公式算出。
+      </p>
+      <div class="inks">
+        <div class="ink" style="color: #6c6b65">
+          <div class="say">次要說明、註腳、時間</div>
+          <div class="meta">--text-soft · 5.07:1</div>
+        </div>
+        <div class="ink" style="color: #a64b2e">
+          <div class="say">連結、小節編號、強調詞</div>
+          <div class="meta">--clay-ink · 5.44:1</div>
+        </div>
+        <div class="ink" style="color: #566b40">
+          <div class="say">完成、通過這類狀態字</div>
+          <div class="meta">--green-ink · 5.58:1</div>
+        </div>
+        <div class="ink" style="color: #7d6019">
+          <div class="say">警示、待確認這類提醒字</div>
+          <div class="meta">--yellow-ink · 5.60:1</div>
+        </div>
+      </div>
+
+      <div class="sub-head">
+        <span class="sub-no">2.3</span>
+        <h3>哪個顏色能用在哪</h3>
+      </div>
+      <div class="tbl-wrap">
+        <table class="rules">
+          <thead>
+            <tr>
+              <th>顏色</th>
+              <th>可以</th>
+              <th>不可以</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="dot" style="background: #d97757"></span
+                >--clay、--olive、--g500
+              </td>
+              <td data-label="可以">
+                填色、邊框、圖示、進度條、24px 以上的展示字
+              </td>
+              <td data-label="不可以">
+                24px 以下的字（米白底上只有 2.96 到 3.47:1）
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span class="dot" style="background: #b85c3e"></span>--clay-d
+              </td>
+              <td data-label="可以">
+                標題強調詞（24px 以上）、主要按鈕底色（白字 4.53:1）
+              </td>
+              <td data-label="不可以">小字（米白底 4.3:1，不到 4.5）</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="dot" style="background: #a64b2e"></span>四種墨色
+              </td>
+              <td data-label="可以">任何 24px 以下的字</td>
+              <td data-label="不可以">—</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="dot" style="background: #e3dacc"></span>--oat 底
+              </td>
+              <td data-label="可以">底上的小字只用 --slate 或 --g700</td>
+              <td data-label="不可以">--text-soft（在 oat 上只有 3.86:1）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================== 03 字體 ============================== -->
+    <section id="type">
+      <div class="sec-head">
+        <div class="eyebrow">03 · 字體層級</div>
+        <h2>
+          <span class="ph">標題用襯線，</span
+          ><span class="ph">內文用無襯線</span>
+        </h2>
+      </div>
+      <p class="sec-intro">
+        襯線字只給標題和大數字，讀起來像一份刊物；內文、表格、按鈕都用系統無襯線字，掃讀比較快。中文襯線要在字族裡點名（Songti
+        TC、Noto Serif
+        TC），不然換一台電腦標題字體就變了。下面的示例句借用虛構的咖啡豆訂閱服務
+        Brewly。
+      </p>
+      <div class="spec-list">
+        <div class="spec-row">
+          <div class="lbl"><b>頁面大標</b>serif · 500 · 36–60px</div>
+          <div class="s-h1">下一杯，留給<em>新的豆香</em></div>
+        </div>
+        <div class="spec-row">
+          <div class="lbl"><b>章節標題</b>serif · 500 · 26–34px</div>
+          <div class="s-h2">讓方案跟著<em>生活</em>調整</div>
+        </div>
+        <div class="spec-row">
+          <div class="lbl"><b>小節標題</b>serif · 500 · 21px</div>
+          <div class="s-h3">每月一份咖啡提案</div>
+        </div>
+        <div class="spec-row">
+          <div class="lbl"><b>內文</b>sans · 16px · 行高 1.75 · 最寬 72ch</div>
+          <div class="s-body">
+            內文一行最多 72
+            個字寬。容器可以滿版，色塊和邊框照樣撐開，但裡面的文字要限行長，眼睛換行時才找得到下一行的開頭。
+          </div>
+        </div>
+        <div class="spec-row">
+          <div class="lbl"><b>小字</b>sans · 13px · --text-soft</div>
+          <div class="s-small">
+            註腳、資料來源、更新時間。中文字最小 12px，再小筆畫會糊。
+          </div>
+        </div>
+        <div class="spec-row">
+          <div class="lbl"><b>標籤</b>mono · 12px · 大寫 · 字距 0.12em</div>
+          <div class="s-mono">01 · Eyebrow 標籤</div>
+        </div>
+      </div>
+
+      <div class="sub-head">
+        <span class="sub-no">3.1</span>
+        <h3>強調詞：換字重，不用斜體</h3>
+      </div>
+      <p class="sub-note">
+        漢字沒有斜體的傳統，瀏覽器硬斜會很難看。預設用「加粗＋深赤陶」，語氣安靜；要更重時用螢光筆底線，一頁最多一兩次。強調詞兩側不加半形空格。
+      </p>
+      <div class="em-grid">
+        <div>
+          <p class="cap">預設：換字重</p>
+          <div class="s-h2">配送間隔改成<em>六週</em>一次</div>
+        </div>
+        <div>
+          <p class="cap">加重：螢光筆</p>
+          <div class="s-h2">配送間隔改成<span class="hl">六週</span>一次</div>
+        </div>
+      </div>
+
+      <div class="sub-head">
+        <span class="sub-no">3.2</span>
+        <h3>中文標題不從詞中間斷開</h3>
+      </div>
+      <p class="sub-note">
+        把標題的語意片段各用
+        <code>&lt;span class="ph"&gt;</code>
+        包起來，窄螢幕只會在片段之間換行。下面虛線框就是兩個片段：
+      </p>
+      <div class="s-h2 ph-demo">
+        <span class="ph">為什麼暫停訂閱</span
+        ><span class="ph">要提前五天設定</span>
+      </div>
+    </section>
+
+    <!-- ============================== 04 章節編號 ============================== -->
+    <section id="numbering">
+      <div class="sec-head">
+        <div class="eyebrow">04 · 章節編號</div>
+        <h2>
+          <span class="ph">編號只有兩種：</span
+          ><span class="ph">章節與小節</span>
+        </h2>
+      </div>
+      <p class="sec-intro">
+        同一頁混用圈字、裸數字、大浮水印，讀者分不出哪個是大段、哪個是小段。現在全部收斂成兩種，這頁本身就是照這兩種排的。
+      </p>
+      <div class="num-grid">
+        <div class="num-demo">
+          <p class="cap">章節：mono 小字 eyebrow＋襯線標題</p>
+          <div class="eyebrow">02 · 色彩與墨色</div>
+          <div class="s-h2">品牌色拿來填色</div>
+          <p>
+            eyebrow 前面一條 24px
+            赤陶短線。報告類可以另加淡色大浮水印數字，但那時 eyebrow
+            就不再寫數字，兩者只留一個。
+          </p>
+        </div>
+        <div class="num-demo">
+          <p class="cap">小節：小方框編號＋小標題</p>
+          <div class="sub-head">
+            <span class="sub-no">2.1</span><span class="s-h3">底色與填色</span>
+          </div>
+          <p>
+            方框用墨色字、淡赤陶底、淺赤陶邊。不再用 ①②③
+            圈字，也不再用沒有框的赤陶數字。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== 05 元件 ============================== -->
+    <section id="components">
+      <div class="sec-head">
+        <div class="eyebrow">05 · 卡片與提示框</div>
+        <h2>
+          <span class="ph">一個層級</span><span class="ph">最多一層框</span>
+        </h2>
+      </div>
+      <p class="sec-intro">
+        章節外面不加卡框，用留白分段；卡片裡要再分區時改用底色，不再套一張白卡。框越少，讀者越容易看出哪些內容屬於同一層。
+      </p>
+      <div class="comp-grid">
+        <div>
+          <div class="sub-head">
+            <span class="sub-no">5.1</span>
+            <h3>卡片</h3>
+          </div>
+          <div class="demo-card">
+            <div class="t">讓方案跟著生活調整</div>
+            <p>
+              想換季節豆款、拉長配送間隔，或暫停一期，都在同一張方案卡裡改。
+            </p>
+            <div class="inner">
+              月費 NT$ 690 ·
+              每月一份咖啡提案。卡內的子區塊用淺灰底，不再套白卡框。
+            </div>
+          </div>
+          <p class="demo-note">
+            白底、1.5px 暖灰邊、14px 圓角；卡片內文同樣限 72ch。
+          </p>
+        </div>
+        <div>
+          <div class="sub-head">
+            <span class="sub-no">5.2</span>
+            <h3>提示框</h3>
+          </div>
+          <div class="note-box tip">
+            <span><b>提示</b>想先試喝再決定？第一期可以只選半磅。</span>
+          </div>
+          <div class="note-box warn">
+            <span
+              ><b>注意</b
+              >暫停要在下一期出貨前五天設定，晚了這一期照常寄出。</span
+            >
+          </div>
+          <div class="note-box ok">
+            <span><b>已完成</b>配送間隔改成六週一次，從下一期生效。</span>
+          </div>
+          <p class="demo-note">
+            外框滿版，裡面的文字限行長；注意框的邊線用金黃，標題字用加深的黃色墨色。
+          </p>
+        </div>
+        <div>
+          <div class="sub-head">
+            <span class="sub-no">5.3</span>
+            <h3>狀態標籤</h3>
+          </div>
+          <div class="tags">
+            <span class="tag green">已出貨</span>
+            <span class="tag yellow">待確認</span>
+            <span class="tag clay">本月新豆</span>
+            <span class="tag oat">季節限定</span>
+          </div>
+          <p class="demo-note">
+            標籤、計數、時間膠囊一律不換行，手機上才不會斷成「待確／認」。
+          </p>
+        </div>
+      </div>
+
+      <div class="sub-head">
+        <span class="sub-no">5.4</span>
+        <h3>收合區塊</h3>
+      </div>
+      <p class="sub-note">
+        細節收進可展開的區塊，主線讀起來不被打斷。摘要寫成一句問題，讀者看一眼就知道裡面在講什麼；列印時自動展開。
+      </p>
       <details class="reveal">
-        <summary>這份樣張的色彩與文字如何分工？</summary>
-        <p>Ivory 留出閱讀空間，clay 標示入口與重點。Serif 標題放慢閱讀節奏，italic 只強調一句中的關鍵詞；內文用清楚的無襯線字體。</p>
-        <p>公司、情境與 NT$ 690 月費皆為虛構。此頁展示視覺風格，並非可下單的商業網站。</p>
+        <summary>這份樣張的色彩與文字怎麼分工？</summary>
+        <div class="reveal-body">
+          <p>
+            米白底留出閱讀空間，赤陶標示入口與重點。襯線標題放慢閱讀節奏，強調詞換字重、不用斜體；內文用清楚的無襯線字體。
+          </p>
+          <p>
+            Brewly 是虛構的咖啡豆訂閱服務，公司、情境與 NT$ 690
+            月費皆為虛構。這頁展示的是視覺風格，不是可下單的商業網站。
+          </p>
+        </div>
       </details>
-    </main>
-    <footer class="sample-footer">
-      <span class="sample-signature">Brewly, a little pause.</span>
-      <span>原創樣張 · 2026-09-01 · 內容確認：負責人</span>
-    </footer>
+
+      <div class="sub-head">
+        <span class="sub-no">5.5</span>
+        <h3>回傳列</h3>
+      </div>
+      <p class="sub-note">
+        每頁底部固定一條回傳列，讀者不用找就知道怎麼回饋：左邊告訴他「反白文字就能留言」和已留幾則，右邊一鍵把留言整理好複製給
+        AI。沒有拍板題的頁複製「頁面標題＋全部留言」；有拍板題的頁換成拍板摘要與進度。
+      </p>
+      <div class="bar-demo" aria-hidden="true">
+        <span class="demo-tag">樣張</span>
+        <div class="bar-in">
+          <div class="bar-row">
+            <div class="bar-txt">
+              <div class="bar-title">回饋給 AI</div>
+              <div class="bar-hint">
+                <svg
+                  class="ic"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"
+                  />
+                </svg>
+                <span class="long">反白任何一段文字就能留言</span
+                ><span class="short">反白文字可留言</span>
+                <span class="bar-count">已留 0 則</span>
+              </div>
+            </div>
+            <div class="bar-btns">
+              <span class="btn-secondary">預覽</span>
+              <span class="btn-primary"
+                ><svg
+                  class="ic"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                  <path
+                    d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+                  /></svg
+                >複製給 AI</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="demo-note">
+        這是靜態樣張。這頁真正的回傳列在畫面最底下，可以直接試：反白一句話、留言，再按「預覽」看會複製出什麼。
+      </p>
+    </section>
+
+    <div class="credit">
+      <p>
+        版面風格參考
+        <a href="https://thariqs.github.io/html-effectiveness/"
+          >https://thariqs.github.io/html-effectiveness/</a
+        >，僅參考風格、未複製內容。頁內示例文字用的是虛構的咖啡豆訂閱服務
+        Brewly。
+      </p>
+    </div>
   </div>
-  <script>
-    window.VT_SESSION = { label: "Brewly", id: "fictional-sample", project: "Brewly" };
-  </script>
-<!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 回傳列：每頁都有。沒有拍板題時複製的是「頁面標題＋全部留言」；有拍板題時照 marathon 範本換成拍板摘要 -->
+    <footer class="sticky-bar" data-tw-lock>
+      <div class="bar-in">
+        <div class="bar-row">
+          <div class="bar-txt">
+            <div class="bar-title" data-en="Send feedback to AI">回饋給 AI</div>
+            <div class="bar-hint">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" /></svg>
+              <span class="long">反白任何一段文字就能留言</span><span class="short">反白文字可留言</span>
+              <button type="button" class="bar-count" id="bar-comments">已留 0 則</button>
+            </div>
+          </div>
+          <div class="bar-btns">
+            <button id="preview-btn" class="btn-secondary" type="button" data-en="Preview">預覽</button>
+            <button id="copy-btn" class="btn-primary" type="button">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /></svg>
+              <span data-en="Copy for AI">複製給 AI</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- 預覽抽屜：放在列外面。列有 backdrop-filter，fixed 的子元素會被困在列的框裡 -->
+    <div id="preview-area" class="hidden" role="dialog" aria-label="複製給 AI 的內容" data-tw-lock>
+      <div class="drawer-in">
+        <div class="drawer-head">
+          <span>按「複製給 AI」會複製這段</span>
+          <button id="preview-close" class="preview-close" type="button">關閉</button>
+        </div>
+        <pre id="preview-content" class="preview"></pre>
+      </div>
+    </div>
+
+    <script>
+      // 回傳列：留言數同步、預覽、複製。拍板頁把 buildFeedback 換成 marathon 範本的 buildSummary
+      (function () {
+        var bar = document.querySelector(".sticky-bar");
+        if (!bar) return;
+        document.body.classList.add("vt-has-bar");
+
+        // § scroll-padding：Tab 落到的元素不被固定列蓋住。上＝頂端章節列高＋16，下＝回傳列高＋16。
+        //   用 ResizeObserver 盯兩條列：視窗變寬窄、進度那行換行、風格設定把字放大（不會發 resize 事件）都會重算
+        var topnav = document.querySelector(".topnav");
+        function padScroll() {
+          var s = document.documentElement.style;
+          s.scrollPaddingBottom = bar.getBoundingClientRect().height + 16 + "px";
+          if (topnav) s.scrollPaddingTop = topnav.getBoundingClientRect().height + 16 + "px";
+        }
+        var ro = new ResizeObserver(padScroll);
+        ro.observe(bar);
+        if (topnav) ro.observe(topnav);
+
+        function buildFeedback() {
+          var lb = (window.VT_SESSION || {}).label;
+          var t = document.title;
+          // 識別 snippet 會在分頁標題前加「<session> · 」；只拿掉那一段，標題自己的「 · 」保留
+          if (lb && t.indexOf(lb + " · ") === 0) t = t.slice(lb.length + 3);
+          var head = "# " + t + " · 回饋";
+          var body = (window.vtCollectComments && window.vtCollectComments()) || "";
+          return head + "\n時間：" + new Date().toLocaleString("zh-TW") + (body || "\n\n（還沒有留言：反白頁面上任一段文字就能留言）");
+        }
+        window.vtBuildDecisionExport = buildFeedback;
+        var cnt = document.getElementById("bar-comments");
+        function syncCount() {
+          var src = document.getElementById("vt-count");
+          if (cnt) cnt.textContent = "已留 " + (src ? src.textContent.trim() || "0" : "0") + " 則";
+        }
+        // 評論系統的計數元素在本段之後才出現，等整頁解析完再接上
+        document.addEventListener("DOMContentLoaded", function () {
+          var src = document.getElementById("vt-count");
+          if (src && window.MutationObserver) new MutationObserver(syncCount).observe(src, { childList: true, characterData: true, subtree: true });
+          syncCount();
+        });
+        if (cnt) cnt.addEventListener("click", function () {
+          var pill = document.getElementById("vt-comment-pill");
+          if (pill) pill.click();
+        });
+        // 預覽抽屜：停在回傳列上方，複製鈕不被蓋住；按「關閉」或再按一次「預覽」收起
+        var area = document.getElementById("preview-area");
+        var content = document.getElementById("preview-content");
+        function openPreview(text) {
+          content.textContent = text;
+          area.style.bottom = bar.getBoundingClientRect().height + "px";
+          area.classList.remove("hidden");
+          // 評論清單也浮在右下，開著會蓋住抽屜的關閉鈕：開預覽時先收起
+          var cl = document.getElementById("vt-comment-list");
+          if (cl) cl.classList.remove("is-open");
+        }
+        function closePreview() { area.classList.add("hidden"); }
+        var pv = document.getElementById("preview-btn");
+        if (pv) pv.addEventListener("click", function () {
+          if (area.classList.contains("hidden")) openPreview(buildFeedback());
+          else closePreview();
+        });
+        var pc = document.getElementById("preview-close");
+        if (pc) pc.addEventListener("click", closePreview);
+        var cb = document.getElementById("copy-btn");
+        if (cb) cb.addEventListener("click", async function () {
+          var text = buildFeedback();
+          var orig = cb.innerHTML;
+          var ok = window.vtCopyText ? await window.vtCopyText(text) : false;
+          if (ok) {
+            cb.textContent = "已複製";
+          } else if (window.vtSelectForManualCopy) {
+            openPreview(text);
+            window.vtSelectForManualCopy(text, content, area);
+            cb.textContent = "已選取，請按 Cmd+C";
+          }
+          setTimeout(function () { cb.innerHTML = orig; }, ok ? 2000 : 6000);
+        });
+      })();
+    </script>
+
+    <!-- vt-comment:start（全頁評論系統整段，範例頁用腳本從這行替換到 vt-comment:end）-->
+    <!-- ═══════════════════════════════════════════════════════ -->
     <!-- 全頁評論系統 — 預設內建、可手動移除                       -->
     <!-- 完整 snippet 見 references/interaction-patterns.md       -->
     <!-- § 全頁評論系統（page-wide commenting，預設內建）         -->
@@ -212,7 +1916,7 @@
         border-radius: 999px;
         padding: 6px 12px;
         font-size: 12px;
-        color: var(--clay);
+        color: var(--clay-ink, #a64b2e);
         font-family: var(--mono);
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(20, 20, 19, 0.12);
@@ -222,7 +1926,7 @@
         transition: all 0.15s;
       }
       .vt-comment-trigger:hover {
-        background: var(--clay);
+        background: var(--clay-d, #b85c3e);
         color: var(--paper);
       }
       .vt-comment-popup {
@@ -268,14 +1972,14 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 10px;
-        font-size: 11.5px;
+        font-size: 12px;
       }
       .vt-comment-popup .hint {
-        color: var(--g500);
+        color: var(--text-soft);
         font-family: var(--mono);
       }
       .vt-comment-popup button.send {
-        background: var(--clay);
+        background: var(--clay-d, #b85c3e);
         color: var(--paper);
         border: none;
         border-radius: 8px;
@@ -285,12 +1989,12 @@
         cursor: pointer;
       }
       .vt-comment-popup button.send:hover {
-        background: var(--clay-d);
+        background: var(--clay-ink, #a64b2e);
       }
       .vt-comment-popup button.cancel {
         background: transparent;
         border: 1px solid var(--g300);
-        color: var(--g500);
+        color: var(--text-soft);
         border-radius: 8px;
         padding: 6px 12px;
         font-size: 12.5px;
@@ -306,6 +2010,11 @@
       mark.vt-comment-mark:hover {
         background: #d5c4a8;
       }
+      /* 從清單點過來時短暫亮一下，讀者知道是哪一段 */
+      mark.vt-comment-mark.is-flash {
+        background: #f7d9a0;
+        box-shadow: 0 0 0 3px #f7d9a0;
+      }
       .vt-comment-pill {
         position: fixed;
         right: 16px;
@@ -317,7 +2026,7 @@
         padding: 8px 14px;
         font-family: var(--mono);
         font-size: 12px;
-        color: var(--clay);
+        color: var(--clay-ink, #a64b2e);
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(20, 20, 19, 0.1);
         display: none;
@@ -329,7 +2038,7 @@
         display: inline-flex;
       }
       .vt-comment-pill:hover {
-        background: var(--clay);
+        background: var(--clay-d, #b85c3e);
         color: var(--paper);
       }
       .vt-comment-pill strong {
@@ -353,16 +2062,38 @@
         display: flex;
       }
       .vt-comment-list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
         background: var(--paper);
         border-bottom: 1.5px solid var(--g200);
         padding: 12px 16px;
         font-family: var(--mono);
-        font-size: 11px;
+        font-size: 12px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--g500);
+        color: var(--text-soft);
         font-weight: 600;
         border-radius: 14px 14px 0 0;
+      }
+      .vt-list-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        margin: -8px -8px -8px 0;
+        padding: 0;
+        background: none;
+        border: 0;
+        border-radius: 8px;
+        color: var(--g700);
+        cursor: pointer;
+      }
+      .vt-list-close:hover {
+        background: var(--g100);
+        color: var(--slate);
       }
       .vt-comment-list-items {
         overflow-y: auto;
@@ -375,14 +2106,38 @@
       .vt-comment-item:last-child {
         border-bottom: none;
       }
+      /* 引文：正體、12px、墨色。找得回原文的是按鈕（點了捲過去），找不回的標「原文已變動」 */
       .vt-comment-item .item-quote {
-        font-size: 11.5px;
-        color: var(--g500);
-        font-style: italic;
+        display: block;
+        width: 100%;
+        text-align: left;
+        font: inherit;
+        font-size: 12px;
+        color: var(--text-soft);
+        font-style: normal;
+        background: none;
+        border: 0;
         border-left: 2px solid var(--oat);
-        padding-left: 8px;
-        line-height: 1.4;
+        padding: 0 0 0 8px;
+        line-height: 1.45;
         margin-bottom: 6px;
+      }
+      button.item-quote {
+        cursor: pointer;
+      }
+      button.item-quote:hover {
+        color: var(--slate);
+        border-left-color: var(--clay);
+      }
+      .vt-comment-item .item-lost {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 0 7px;
+        font-size: 12px;
+        color: var(--yellow-ink);
+        background: var(--yellow-soft);
+        border-radius: 999px;
+        white-space: nowrap;
       }
       .vt-comment-item .item-body {
         font-size: 13px;
@@ -390,8 +2145,8 @@
         line-height: 1.5;
       }
       .vt-comment-item .item-del {
-        font-size: 11px;
-        color: var(--g500);
+        font-size: 12px;
+        color: var(--text-soft);
         background: none;
         border: none;
         cursor: pointer;
@@ -426,23 +2181,23 @@
         color: var(--slate);
       }
       .vt-comment-list-footer button.copy {
-        background: var(--clay);
+        background: var(--clay-d, #b85c3e);
         color: var(--paper);
-        border-color: var(--clay);
+        border-color: var(--clay-d, #b85c3e);
       }
       .vt-comment-list-footer button.copy:hover {
-        background: var(--clay-d);
+        background: var(--clay-ink, #a64b2e);
       }
       body.vt-has-existing-export .vt-comment-list-footer button.copy {
         display: none;
       }
     </style>
-    <button class="vt-comment-trigger" id="vt-comment-trigger">💬 評論</button>
+    <button class="vt-comment-trigger" id="vt-comment-trigger"><svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-0.125em"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg> 留言</button>
     <div class="vt-comment-popup" id="vt-comment-popup">
       <div class="quote" id="vt-popup-quote"></div>
       <textarea
         id="vt-popup-textarea"
-        placeholder="對這段文字的評論 / 疑問 / 補充..."
+        placeholder="對這段文字的留言：疑問、補充、不同意的地方…"
       ></textarea>
       <div class="actions">
         <span class="hint">⌘ + Enter 送出 · Esc 取消</span>
@@ -453,14 +2208,17 @@
       </div>
     </div>
     <button class="vt-comment-pill" id="vt-comment-pill">
-      💬 <strong id="vt-count">0</strong>
+      <svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-0.125em"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg> <strong id="vt-count">0</strong>
     </button>
     <div class="vt-comment-list" id="vt-comment-list">
-      <div class="vt-comment-list-header">— 我的評論</div>
+      <div class="vt-comment-list-header">
+        <span>我的留言</span>
+        <button type="button" class="vt-list-close" id="vt-list-close" aria-label="關閉留言清單"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button>
+      </div>
       <div class="vt-comment-list-items" id="vt-comment-list-items"></div>
       <div class="vt-comment-list-footer">
         <button id="vt-clear-all">全部清除</button>
-        <button class="copy" id="vt-copy-fallback">📋 複製評論</button>
+        <button class="copy" id="vt-copy-fallback"><svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-0.125em"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg> 複製留言</button>
       </div>
     </div>
     <!-- ═══════════════════════════════════════════════════════ -->
@@ -563,6 +2321,32 @@
               .join("\n\n")
           );
         };
+        const UI = ".vt-comment-popup,.vt-comment-trigger,.vt-comment-pill,.vt-comment-list";
+        // 讀目前的選取：不到 2 個字、焦點在表單欄位裡、或選在留言介面裡就回 null
+        function rs() {
+          const s = getSelection(),
+            t = s.toString().trim();
+          if (!t || t.length < 2 || !s.rangeCount) return null;
+          // 在補充框、留言框裡選字（編輯自己打的字）不算：Chrome 的選取會回傳框內文字，錨點卻在框外
+          if (document.activeElement && document.activeElement.matches("input,textarea,select")) return null;
+          // 在留言清單或留言框裡選字不算：否則會對清單裡的引文再留一則言（第 4 輪複查補回）
+          const a = s.anchorNode,
+            ae = a && (a.nodeType === 1 ? a : a.parentElement);
+          if (ae && ae.closest(UI)) return null;
+          return { text: t, range: s.getRangeAt(0).cloneRange() };
+        }
+        function sh() {
+          const x = rs();
+          if (!x) {
+            tr.style.display = "none";
+            return;
+          }
+          sel = x;
+          const b = x.range.getBoundingClientRect();
+          tr.style.display = "inline-flex";
+          tr.style.top = Math.max(8, b.top - 38) + "px";
+          tr.style.left = Math.max(8, b.left + b.width / 2 - 40) + "px";
+        }
         function hs(e) {
           if (
             e.target.closest(
@@ -570,25 +2354,24 @@
             )
           )
             return;
-          setTimeout(() => {
-            const s = getSelection(),
-              t = s.toString().trim();
-            if (!t || t.length < 2) {
-              tr.style.display = "none";
-              return;
-            }
-            const r = s.getRangeAt(0),
-              b = r.getBoundingClientRect();
-            sel = { text: t, range: r.cloneRange() };
-            tr.style.display = "inline-flex";
-            tr.style.top = Math.max(8, b.top - 38) + "px";
-            tr.style.left = Math.max(8, b.left + b.width / 2 - 40) + "px";
-          }, 10);
+          setTimeout(sh, 10);
         }
         document.addEventListener("mouseup", hs);
         document.addEventListener("touchend", hs);
+        // § selectionchange：手機拖選取把手不一定送 touchend，選取一變就重算留言鈕（防抖 150ms）
+        let sw;
+        document.addEventListener("selectionchange", () => {
+          clearTimeout(sw);
+          // 留言框開著時不動：讀者在框外又選了別段，送出時要存的還是框上那段引文（第 4 輪複查補回）
+          sw = setTimeout(() => {
+            if (p.style.display !== "block") sh();
+          }, 150);
+        });
         tr.addEventListener("click", op);
         function op() {
+          // 按下當下重讀選取：防抖期間選取又改過時，以按下那一刻為準
+          const x = rs();
+          if (x) sel = x;
           if (!sel) return;
           const q = sel.text.length > L ? sel.text.slice(0, L) + "…" : sel.text;
           pq.textContent = q;
@@ -623,14 +2406,18 @@
           const b = pt.value.trim();
           if (!b || !sel) return cp();
           const id = "c-" + Date.now(),
-            q = sel.text;
+            q = sel.text,
+            x = { id, quote: q, body: b, ts: Date.now() };
           try {
             const m = document.createElement("mark");
             m.className = "vt-comment-mark";
             m.dataset.commentId = id;
             sel.range.surroundContents(m);
-          } catch (e) {}
-          c.push({ id, quote: q, body: b, ts: Date.now() });
+          } catch (e) {
+            // 選取跨了元素（粗體、徽章、連結）：surroundContents 包不了，改成逐個文字節點各包一段
+            if (!wr(sel.range, id)) x.nomark = 1; // 一段都包不了才不標；清單照列，但不能標成「原文已變動」
+          }
+          c.push(x);
           ps();
           rn();
           cp();
@@ -638,6 +2425,94 @@
         }
         function ps() {
           localStorage.setItem(S, JSON.stringify(c));
+        }
+        const mk = (id) =>
+          document.querySelector(`mark.vt-comment-mark[data-comment-id="${id}"]`);
+        // § 跨元素標記：一則留言可以有好幾個 mark（同一個 data-comment-id），每個文字節點各包一段。
+        //   只有空白的片段不包（表格列之間的換行包了 mark 會讓表格結構出錯）
+        function wp(n, a, b, id) {
+          if (a >= b || !n.nodeValue.slice(a, b).trim()) return 0;
+          const r = document.createRange();
+          r.setStart(n, a);
+          r.setEnd(n, b);
+          const e = document.createElement("mark");
+          e.className = "vt-comment-mark";
+          e.dataset.commentId = id;
+          r.surroundContents(e);
+          return 1;
+        }
+        const tws = (root) =>
+          document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+            acceptNode: (n) =>
+              n.parentElement &&
+              !n.parentElement.closest(
+                "script,style,.vt-comment-popup,.vt-comment-trigger,.vt-comment-pill,.vt-comment-list",
+              )
+                ? NodeFilter.FILTER_ACCEPT
+                : NodeFilter.FILTER_REJECT,
+          });
+        // 把一個跨元素的選取範圍逐節點包起來；回傳包了幾段
+        function wr(range, id) {
+          const root = range.commonAncestorContainer,
+            ns = [];
+          if (root.nodeType === 3) ns.push(root);
+          else for (let n, w = tws(root); (n = w.nextNode()); ) if (range.intersectsNode(n)) ns.push(n);
+          let k = 0;
+          ns.forEach((n) => {
+            const a = n === range.startContainer ? range.startOffset : 0,
+              b = n === range.endContainer ? range.endOffset : n.nodeValue.length;
+            k += wp(n, a, b, id);
+          });
+          return k;
+        }
+        // 重新整理後標記會消失（只存了引文）：依引文在內文找回位置再包一次。
+        // 只找單一文字節點內的引文；空白不計較（原始碼換行縮排 vs 選取時的單一空格）
+        function ra(x) {
+          if (mk(x.id)) return;
+          const w = x.quote.trim().split(/\s+/).filter(Boolean);
+          if (!w.length) return;
+          const re = new RegExp(
+            w.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s+"),
+          );
+          const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+            acceptNode: (n) =>
+              n.parentElement &&
+              !n.parentElement.closest(
+                "script,style,.vt-comment-popup,.vt-comment-trigger,.vt-comment-pill,.vt-comment-list",
+              )
+                ? NodeFilter.FILTER_ACCEPT
+                : NodeFilter.FILTER_REJECT,
+          });
+          for (let n; (n = tw.nextNode()); ) {
+            const m = re.exec(n.nodeValue);
+            if (!m) continue;
+            const r = document.createRange();
+            r.setStart(n, m.index);
+            r.setEnd(n, m.index + m[0].length);
+            const e = document.createElement("mark");
+            e.className = "vt-comment-mark";
+            e.dataset.commentId = x.id;
+            r.surroundContents(e);
+            return;
+          }
+          // 單一文字節點找不到：把文字節點串起來再找（引文跨了粗體、徽章、連結），找到後逐段包回。
+          // 跨元素時選取文字在元素交界可能多一個換行、也可能沒有，所以詞與詞之間空白可有可無
+          const all = [];
+          let txt = "";
+          for (let n, w = tws(document.body); (n = w.nextNode()); ) {
+            all.push([n, txt.length]);
+            txt += n.nodeValue;
+          }
+          const re2 = new RegExp(
+            w.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s*"),
+          );
+          const m2 = re2.exec(txt);
+          if (!m2) return;
+          const st = m2.index,
+            en = st + m2[0].length;
+          all
+            .filter(([n, o]) => o < en && o + n.nodeValue.length > st)
+            .forEach(([n, o]) => wp(n, Math.max(0, st - o), Math.min(n.nodeValue.length, en - o), x.id));
         }
         function rn() {
           ce.textContent = c.length;
@@ -647,12 +2522,28 @@
             .map((x) => {
               const q =
                 x.quote.length > 60 ? x.quote.slice(0, 60) + "…" : x.quote;
-              return `<div class="vt-comment-item" data-id="${eh(x.id)}"><div class="item-quote">「${eh(q)}」</div><div class="item-body">${eh(x.body)}</div><button class="item-del" data-del="${eh(x.id)}">刪除</button></div>`;
+              const quote = mk(x.id)
+                ? `<button type="button" class="item-quote" data-jump="${eh(x.id)}" title="捲到這段">「${eh(q)}」</button>`
+                : `<div class="item-quote">「${eh(q)}」${x.nomark ? "" : '<span class="item-lost">原文已變動</span>'}</div>`;
+              return `<div class="vt-comment-item" data-id="${eh(x.id)}">${quote}<div class="item-body">${eh(x.body)}</div><button class="item-del" data-del="${eh(x.id)}">刪除</button></div>`;
             })
             .join("");
           li.querySelectorAll("[data-del]").forEach((b) =>
             b.addEventListener("click", () => dc(b.dataset.del)),
           );
+          li.querySelectorAll("[data-jump]").forEach((b) =>
+            b.addEventListener("click", () => jp(b.dataset.jump)),
+          );
+        }
+        // 清單點引文：捲到那段、短暫高亮；手機上清單會蓋住內文，捲過去時順手收起
+        function jp(id) {
+          const m = mk(id);
+          if (!m) return;
+          m.scrollIntoView({ block: "center" });
+          const ms = document.querySelectorAll(`mark.vt-comment-mark[data-comment-id="${id}"]`);
+          ms.forEach((e) => e.classList.add("is-flash"));
+          setTimeout(() => ms.forEach((e) => e.classList.remove("is-flash")), 1600);
+          if (innerWidth <= 640) le.classList.remove("is-open");
         }
         function dc(id) {
           c = c.filter((x) => x.id !== id);
@@ -681,9 +2572,17 @@
           );
         }
         pi.addEventListener("click", () => le.classList.toggle("is-open"));
+        // 清單關閉：右上關閉鈕、Esc
+        $("vt-list-close").addEventListener("click", () => le.classList.remove("is-open"));
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") le.classList.remove("is-open");
+        });
+        // 有回傳列時，清單底緣跟著列高（列在手機與拍板頁會變高），不要壓到列
+        const bar = document.querySelector(".sticky-bar");
+        if (bar) new ResizeObserver(() => (le.style.bottom = bar.getBoundingClientRect().height + 12 + "px")).observe(bar);
         $("vt-clear-all").addEventListener("click", () => {
           if (!c.length) return;
-          if (!confirm("確定清除全部 " + c.length + " 條評論？")) return;
+          if (!confirm("確定清除全部 " + c.length + " 則留言？")) return;
           document.querySelectorAll("mark.vt-comment-mark").forEach((m) => {
             const pr = m.parentNode;
             while (m.firstChild) pr.insertBefore(m.firstChild, m);
@@ -698,16 +2597,16 @@
           if (!c.length) return;
           const t = window.vtCollectComments().replace(/^\n\n---\n\n/, ""),
             b = e.currentTarget,
-            o = b.textContent;
+            o = b.innerHTML; // innerHTML：按鈕裡有 SVG 圖示，用 textContent 還原會把圖示弄丟
           const ok = await window.vtCopyText(t);
           if (ok) {
-            b.textContent = "✅ 已複製";
+            b.textContent = "已複製";
           } else {
             // 複製不到就不假報成功：把評論放進臨時區域並全選
             window.vtSelectForManualCopy(t);
             b.textContent = "已選取 → 請按 Cmd+C";
           }
-          setTimeout(() => (b.textContent = o), ok ? 2000 : 6000);
+          setTimeout(() => (b.innerHTML = o), ok ? 2000 : 6000);
         });
         setTimeout(() => {
           if (typeof window.vtBuildDecisionExport === "function")
@@ -720,10 +2619,10 @@
           )
             cp();
         });
+        c.forEach(ra);
         rn();
       })();
     </script>
-  
-    <!-- ═══════════════════════════════════════════════════════ -->
-    </body>
+    <!-- vt-comment:end -->
+  </body>
 </html>

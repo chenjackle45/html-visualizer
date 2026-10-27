@@ -362,7 +362,7 @@ Object.entries(stored).forEach(([id, val]) => {
 function copyToClipboard(text, btn) {
   navigator.clipboard.writeText(text).then(() => {
     const orig = btn.innerHTML;
-    btn.innerHTML = '✅ 已複製！';
+    btn.innerHTML = '已複製';
     setTimeout(() => btn.innerHTML = orig, 2000);
   }).catch(() => {
     // fallback
@@ -372,7 +372,7 @@ function copyToClipboard(text, btn) {
     ta.select();
     document.execCommand('copy');
     ta.remove();
-    btn.innerHTML = '✅ 已複製！';
+    btn.innerHTML = '已複製';
   });
 }
 
