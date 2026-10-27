@@ -13,7 +13,7 @@ claude.ai 網頁版與 Claude Cowork 不讀本機檔案系統，skill 要打包�
 | `name` | 小寫、數字、連字號；與資料夾同名 | 官方文件 |
 | zip 結構 | skill 資料夾本身是 zip 根目錄，一個 skill 一個 zip | 說明中心 |
 
-目前用量（2026-09-24 v0.2.0）：diagram-design **167 檔**、html-visualizer 31、chart 4。**diagram-design 離上限只剩 33 個檔**，往 `assets/` 或 `references/` 加東西前先算；要加超過就得先砍（已砍過 47 個 `example-*-dark.html`，下一刀候選是 `example-*-full.html`）。
+目前用量（2026-10-27 v0.3.0）：diagram-design **167 檔**、html-visualizer 33、chart 4。**diagram-design 離上限只剩 33 個檔**，往 `assets/` 或 `references/` 加東西前先算；要加超過就得先砍（已砍過 47 個 `example-*-dark.html`，下一刀候選是 `example-*-full.html`）。
 
 **每次改 `skills/**` 後、commit 前跑：**
 

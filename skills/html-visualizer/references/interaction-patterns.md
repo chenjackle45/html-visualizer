@@ -286,7 +286,7 @@ function saveState() { localStorage.setItem('kanban', JSON.stringify(getState())
 <div class="card comment-card" data-decision-id="d-1">
   <button class="comment-toggle"
           onclick="toggleComment('d-1')"
-          title="留註解">💬</button>
+          title="留註解"><svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-0.125em"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg></button>
   <h3>標題</h3>
   <!-- 內容 -->
 
